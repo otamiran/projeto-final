@@ -606,3 +606,130 @@
   border: 1px solid rgba(224, 80, 80, 0.3);
   color: var(--vermelho, #e05050);
 }
+
+/* ── Grupos por setor ──────────────────────────────────────────────────────── */
+
+.grupo-setor-prod {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 12px;
+}
+
+/* Cabeçalho do grupo (setor) — clicável */
+.grupo-setor-header {
+  align-items: center;
+  background: var(--cor-fundo-2);
+  border: 1px solid var(--cor-borda-2);
+  border-radius: var(--raio-g);
+  color: var(--cor-texto);
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  text-align: left;
+  transition: background 0.15s;
+  width: 100%;
+}
+
+.grupo-setor-header:hover {
+  background: var(--cor-fundo-3, #232b3a);
+}
+
+/* Quando o grupo está expandido, arredonda só o topo */
+.grupo-setor-header[aria-expanded="true"] {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: var(--cor-borda);
+}
+
+.grupo-setor-nome {
+  color: var(--ambar);
+  flex: 1;
+  font-family: var(--fonte-mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.grupo-setor-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tag-relatorio {
+  background: var(--cor-fundo-3, #232b3a);
+  border: 1px solid var(--cor-borda-2);
+  color: var(--cor-label);
+}
+
+/* Corpo do grupo (lista de relatórios) */
+.grupo-setor-corpo {
+  border: 1px solid var(--cor-borda-2);
+  border-top: none;
+  border-bottom-left-radius: var(--raio-g);
+  border-bottom-right-radius: var(--raio-g);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+}
+
+/* ── Cards de relatório colapsáveis ─────────────────────────────────────────── */
+
+.card-relatorio-prod {
+  border: none;
+  border-bottom: 1px solid var(--cor-borda);
+  border-radius: 0 !important;
+}
+
+.card-relatorio-prod:last-child {
+  border-bottom: none;
+}
+
+/* Cabeçalho do card (clicável) */
+.rel-prod-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  width: 100%;
+}
+
+.rel-prod-toggle:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Seta de colapso */
+.seta-collapse {
+  color: var(--cor-apagado);
+  display: inline-block;
+  flex-shrink: 0;
+  font-size: 11px;
+  transition: transform 0.2s;
+}
+
+.seta-collapse.aberta {
+  transform: rotate(180deg);
+}
+
+/* Conteúdo expandido de um relatório */
+.rel-prod-conteudo {
+  border-top: 1px solid var(--cor-borda);
+}
+
+/* Seção dentro do conteúdo (ocorrências ou atividades) */
+.rel-prod-secao {
+  border-top: 1px solid var(--cor-borda);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+}
+
+.rel-prod-secao:first-child {
+  border-top: none;
+}
