@@ -19,7 +19,7 @@ function BlocoOcorrencia({ item, indice, relatorioId, autor }) {
       <div className="oc-cabecalho">
         <span className="oc-badge">🔧</span>
         <div className="oc-titulo">
-          <strong>{item.equipamento || '(sem equipamento)'}</strong>
+          <strong>{item.equipamento || item.equip || '(sem equipamento)'}</strong>
           {item.autor && <span className="oc-autor"> · por {item.autor}</span>}
         </div>
         {/* Indicador de validação atual */}
@@ -34,7 +34,7 @@ function BlocoOcorrencia({ item, indice, relatorioId, autor }) {
       <div className="oc-detalhes">
         {item.sintoma   && <div><span className="oc-label">Sintoma:</span> {item.sintoma}</div>}
         {item.modo      && <div><span className="oc-label">Modo:</span> {item.modo} · {item.impacto}</div>}
-        {item.intervencao && <div><span className="oc-label">Intervenção:</span> {item.intervencao}</div>}
+        {(item.intervencao || item.tipo_int) && <div><span className="oc-label">Intervenção:</span> {item.intervencao || item.tipo_int}</div>}
         {item.solucao   && <div><span className="oc-label">Solução:</span> {item.solucao}</div>}
       </div>
 
@@ -115,8 +115,8 @@ export default function PaginaProducao({ sessao, abertos, status }) {
         ) : (
           abertos.map(r => {
             const df = r.data ? new Date(r.data + 'T12:00').toLocaleDateString('pt-BR') : '—'
-            const ocorrencias = (r.itens || []).filter(i => i.tipo === 'ocorrencia')
-            const atividades  = (r.itens || []).filter(i => i.tipo === 'atividade')
+            const ocorrencias = (r.itens || []).filter(i => i.tipo === 'ocorrencia' || i.tipo === 'occ')
+            const atividades  = (r.itens || []).filter(i => i.tipo === 'atividade'  || i.tipo === 'ativ')
 
             return (
               <div key={r.id} className="card card-relatorio-prod">
@@ -166,8 +166,8 @@ export default function PaginaProducao({ sessao, abertos, status }) {
                       <div key={idx} className="bloco-atividade-prod">
                         <span className="at-badge">📅</span>
                         <div>
-                          <strong>{item.equipamento || '—'}</strong>
-                          <span className="at-meta"> · {item.descricao || '—'} · {item.status || '—'}</span>
+                          <strong>{item.equipamento || item.equip || '—'}</strong>
+                          <span className="at-meta"> · {item.descricao || item.desc || item.desc || '—'} · {item.status || '—'}</span>
                         </div>
                       </div>
                     ))}

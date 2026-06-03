@@ -41,8 +41,8 @@ export async function gerarPDF(relatorio) {
     ? new Date(relatorio.data + 'T12:00').toLocaleDateString('pt-BR')
     : '—'
 
-  const ocorrencias = (relatorio.itens || []).filter(i => i.tipo === 'ocorrencia')
-  const atividades = (relatorio.itens || []).filter(i => i.tipo === 'atividade')
+  const ocorrencias = (relatorio.itens || []).filter(i => i.tipo === 'ocorrencia' || i.tipo === 'occ')
+  const atividades = (relatorio.itens || []).filter(i => i.tipo === 'atividade'  || i.tipo === 'ativ')
 
   // Converte cor hex (#rrggbb) para array [r, g, b]
   function hexRGB(hex) {

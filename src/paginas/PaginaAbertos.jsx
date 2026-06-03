@@ -51,8 +51,8 @@ export default function PaginaAbertos({ abertos, sessao, aoVer, pedir, mostrarAv
           const dataFormatada = r.data
             ? new Date(r.data + 'T12:00').toLocaleDateString('pt-BR')
             : 'Sem data'
-          const qtdOcorrencias = (r.itens || []).filter(i => i.tipo === 'ocorrencia').length
-          const qtdAtividades = (r.itens || []).filter(i => i.tipo === 'atividade').length
+          const qtdOcorrencias = (r.itens || []).filter(i => i.tipo === 'ocorrencia' || i.tipo === 'occ').length
+          const qtdAtividades = (r.itens || []).filter(i => i.tipo === 'atividade'  || i.tipo === 'ativ').length
 
           return (
             <div key={r.id} className="card-aberto">
@@ -85,13 +85,13 @@ export default function PaginaAbertos({ abertos, sessao, aoVer, pedir, mostrarAv
                       style={{ background: 'var(--cor-fundo-3)' }}
                     >
                       <span
-                        className={`badge-tipo ${item.tipo === 'ocorrencia' ? 'badge-ocorrencia' : 'badge-atividade'}`}
+                        className={`badge-tipo ${item.tipo === 'ocorrencia' || item.tipo === 'occ' ? 'badge-ocorrencia' : 'badge-atividade'}`}
                       >
-                        {item.tipo === 'ocorrencia' ? '🔧' : '📅'}
+                        {item.tipo === 'ocorrencia' || item.tipo === 'occ' ? '🔧' : '📅'}
                       </span>
                       <div className="item-texto">
-                        <strong>{item.equipamento || '—'}</strong>
-                        <span>{item.tipo === 'ocorrencia' ? item.sintoma : item.descricao}</span>
+                        <strong>{item.equipamento || item.equip || '—'}</strong>
+                        <span>{item.tipo === 'ocorrencia' || item.tipo === 'occ' ? item.sintoma : item.descricao}</span>
                       </div>
                     </div>
                   ))}

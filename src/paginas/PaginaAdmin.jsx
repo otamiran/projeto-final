@@ -162,8 +162,8 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
                   <div className="grupo-titulo-admin">👤 {usuario} — {rels.length} relatório(s)</div>
                   {rels.slice(0, 5).map(r => {
                     const df = r.data ? new Date(r.data + 'T12:00').toLocaleDateString('pt-BR') : '—'
-                    const oc = (r.itens || []).filter(i => i.tipo === 'ocorrencia').length
-                    const at = (r.itens || []).filter(i => i.tipo === 'atividade').length
+                    const oc = (r.itens || []).filter(i => i.tipo === 'ocorrencia' || i.tipo === 'occ').length
+                    const at = (r.itens || []).filter(i => i.tipo === 'atividade'  || i.tipo === 'ativ').length
                     return (
                       <div
                         key={r.id}

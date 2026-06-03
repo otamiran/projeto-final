@@ -33,7 +33,7 @@ export default function ModalVerRelatorio({
   const todasFotos = (relatorio.itens || []).flatMap(item =>
     (item.fotos || []).map(foto => ({
       url: foto.url,
-      label: `${item.tipo === 'ocorrencia' ? 'Ocorrência' : 'Atividade'} — ${item.equipamento || '—'}`,
+      label: `${item.tipo === 'ocorrencia' || item.tipo === 'occ' ? 'Ocorrência' : 'Atividade'} — ${item.equipamento || item.equip || '—'}`,
     }))
   )
 

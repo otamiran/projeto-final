@@ -3,7 +3,7 @@
 import { EMOJI_STATUS } from '../utilitarios/constantes'
 
 export default function LinhaItem({ item, indice, aoEditar, aoExcluir }) {
-  const ehOcorrencia = item.tipo === 'ocorrencia'
+  const ehOcorrencia = item.tipo === 'ocorrencia' || item.tipo === 'occ'
 
   // Cor do pontinho indicador de status
   const corPonto = ehOcorrencia
@@ -17,7 +17,7 @@ export default function LinhaItem({ item, indice, aoEditar, aoExcluir }) {
   // Subtexto descritivo da linha
   const subtexto = ehOcorrencia
     ? [item.modo, item.impacto, item.intervencao].filter(Boolean).join(' · ') || '—'
-    : `${item.descricao || '—'} · ${EMOJI_STATUS[item.status] || ''} ${item.status || '—'}`
+    : `${item.descricao || item.desc || item.desc || '—'} · ${EMOJI_STATUS[item.status] || ''} ${item.status || '—'}`
 
   const quantidadeFotos = (item.fotos || []).length
 
@@ -30,7 +30,7 @@ export default function LinhaItem({ item, indice, aoEditar, aoExcluir }) {
 
       {/* Texto principal */}
       <div className="item-texto">
-        <strong>{item.equipamento || '(sem equipamento)'}</strong>
+        <strong>{item.equipamento || item.equip || '(sem equipamento)'}</strong>
         <span>
           {subtexto}
           {item.autor && (

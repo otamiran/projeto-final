@@ -13,7 +13,7 @@ function cabecalho(relatorio) {
 // Monta o texto apenas das ocorrências
 export function textoOcorrencias(relatorio) {
   // Filtra só os itens do tipo 'ocorrencia'
-  const lista = (relatorio.itens || []).filter(i => i.tipo === 'ocorrencia')
+  const lista = (relatorio.itens || []).filter(i => i.tipo === 'ocorrencia' || i.tipo === 'occ')
 
   if (lista.length === 0) {
     return `📋 *OCORRÊNCIAS DO TURNO*\n${cabecalho(relatorio)}\n\nNenhuma ocorrência registrada.`
@@ -25,10 +25,10 @@ export function textoOcorrencias(relatorio) {
     linhas.push(
       '\n─────────────────────',
       `🔧 *OCORRÊNCIA ${indice + 1}*`,
-      `Equipamento: ${item.equipamento || '—'}`,
+      `Equipamento: ${item.equipamento || item.equip || '—'}`,
       `Sintoma: ${item.sintoma || '—'}`,
       `Modo de falha: ${item.modo || '—'}  |  Impacto: ${item.impacto || '—'}`,
-      `Intervenção: ${item.intervencao || '—'}`,
+      `Intervenção: ${item.intervencao || item.tipo_int || '—'}`,
       `Solução: ${item.solucao || '—'}`
     )
   })
@@ -40,7 +40,7 @@ export function textoOcorrencias(relatorio) {
 // Monta o texto apenas das atividades
 export function textoAtividades(relatorio) {
   // Filtra só os itens do tipo 'atividade'
-  const lista = (relatorio.itens || []).filter(i => i.tipo === 'atividade')
+  const lista = (relatorio.itens || []).filter(i => i.tipo === 'atividade'  || i.tipo === 'ativ')
 
   if (lista.length === 0) {
     return `📅 *ATIVIDADES PROGRAMADAS*\n${cabecalho(relatorio)}\n\nNenhuma atividade registrada.`
@@ -52,8 +52,8 @@ export function textoAtividades(relatorio) {
     linhas.push(
       '\n─────────────────────',
       `${EMOJI_STATUS[item.status] || '•'} *ATIVIDADE ${indice + 1}*`,
-      `Equipamento: ${item.equipamento || '—'}`,
-      `Atividade: ${item.descricao || '—'}`,
+      `Equipamento: ${item.equipamento || item.equip || '—'}`,
+      `Atividade: ${item.descricao || item.desc || item.desc || '—'}`,
       `Status: ${item.status || '—'}`
     )
   })

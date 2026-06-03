@@ -69,8 +69,8 @@ export default function PaginaHistorico({
           const dataFormatada = r.data
             ? new Date(r.data + 'T12:00').toLocaleDateString('pt-BR')
             : 'Sem data'
-          const qtdOcorrencias = (r.itens || []).filter(i => i.tipo === 'ocorrencia').length
-          const qtdAtividades = (r.itens || []).filter(i => i.tipo === 'atividade').length
+          const qtdOcorrencias = (r.itens || []).filter(i => i.tipo === 'ocorrencia' || i.tipo === 'occ').length
+          const qtdAtividades = (r.itens || []).filter(i => i.tipo === 'atividade'  || i.tipo === 'ativ').length
           const qtdFotos = (r.itens || []).reduce((total, i) => total + (i.fotos?.length || 0), 0)
 
           return (

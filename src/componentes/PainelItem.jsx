@@ -172,7 +172,7 @@ export default function PainelItem({
   // Se o painel não está aberto, não renderiza nada
   if (!aberto) return null
 
-  const ehOcorrencia = tipo === 'ocorrencia'
+  const ehOcorrencia = tipo === 'ocorrencia' || tipo === 'occ'
 
   return (
     // Fundo escuro — clique nele fecha o painel
