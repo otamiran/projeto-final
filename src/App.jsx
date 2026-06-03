@@ -127,7 +127,7 @@ export default function App() {
       {/* ── Navegação ── */}
       <nav className="nav">
         <div className="nav-logo">
-          <div className="hexagono" />
+          <div className="hexagono" src="/favicon.icon.png" />
           <span className="nav-nome">Passagem de Turno</span>
         </div>
 
