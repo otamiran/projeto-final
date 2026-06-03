@@ -182,7 +182,7 @@ export async function gerarPDF(relatorio) {
     pdf.setFontSize(8)
     pdf.setFont('helvetica', 'bold')
     pdf.setTextColor(160, 140, 200)
-    pdf.text('🏭  RETORNO DA PRODUÇÃO', MARGEM + 5, posY + 5)
+    pdf.text('RETORNO DA PRODUCAO', MARGEM + 5, posY + 5)
     posY += 10
 
     // Validação
