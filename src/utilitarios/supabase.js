@@ -5,7 +5,7 @@ const URL_PROJETO = 'https://tdpgaqiktinngiuptatq.supabase.co'
 
 // Chave pública anônima (segura para usar no front-end)
 const CHAVE_PUBLICA =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhYndrb3h2YWt5dHlhY2xpaG16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTU3OTIsImV4cCI6MjA5NTU3MTc5Mn0.utGP2Qem_zN_pX6cxaXvnzrxn2s8oEI2oqc7jaVqUkA'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkcGdhcWlrdGlubmdpdXB0YXRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjUwNjAsImV4cCI6MjA5NDEwMTA2MH0.a76Kgj9Flj6NkasYETC5BXMoIhXMBoCUM-w2BqJBlS4'
 
 // Cria o cliente — use 'bd' para qualquer consulta
 export const bd = createClient(URL_PROJETO, CHAVE_PUBLICA)
