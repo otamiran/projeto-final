@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
 // Endereço do projeto no Supabase (Settings > API > URL)
-const URL_PROJETO = 'https://yabwkoxvakytyaclihmz.supabase.co'
+const URL_PROJETO = 'https://tdpgaqiktinngiuptatq.supabase.co'
 
 // Chave pública anônima (segura para usar no front-end)
 const CHAVE_PUBLICA =
