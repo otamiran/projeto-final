@@ -484,3 +484,125 @@
 .botao-laranja:hover {
   background: rgba(240, 165, 0, 0.22) !important;
 }
+
+/* ── Estilos de validação no ModalVerRelatorio ─────────────────────────────── */
+
+/* Seção "Retorno da Produção" dentro do modal */
+.secao-validacoes {
+  background: var(--cor-fundo-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+}
+
+/* Item individual (nome do equipamento + validação + comentários) */
+.item-validacao-modal {
+  border-bottom: 1px solid var(--cor-borda);
+  padding-bottom: 10px;
+}
+.item-validacao-modal:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.item-validacao-titulo {
+  color: var(--cor-texto);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+/* Bloco completo de info da produção dentro do modal */
+.info-producao-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Badge de validação dentro do modal */
+.val-badge-modal {
+  border-radius: var(--raio);
+  font-family: var(--fonte-mono);
+  font-size: 11px;
+  padding: 5px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.val-badge-modal.val-aprovado {
+  background: rgba(46, 204, 113, 0.12);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+  color: var(--verde, #2ecc71);
+}
+.val-badge-modal.val-reprovado {
+  background: rgba(224, 80, 80, 0.12);
+  border: 1px solid rgba(224, 80, 80, 0.3);
+  color: var(--vermelho, #e05050);
+}
+.val-hora {
+  color: var(--cor-apagado);
+  font-weight: 400;
+}
+
+/* Bloco de comentários dentro do modal */
+.comentarios-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.comentarios-titulo {
+  color: var(--cor-label);
+  font-family: var(--fonte-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.comentario-modal {
+  background: var(--cor-fundo-3, #1e2330);
+  border-radius: var(--raio);
+  padding: 8px 10px;
+}
+.comentario-modal-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+.comentario-modal-header strong {
+  color: var(--ambar);
+}
+.comentario-modal-header span {
+  color: var(--cor-apagado);
+  font-family: var(--fonte-mono);
+}
+.comentario-modal p {
+  color: var(--cor-texto);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* ── Badge de validação na LinhaItem ──────────────────────────────────────── */
+.badge-validacao-linha {
+  border-radius: 3px;
+  display: inline-block;
+  font-family: var(--fonte-mono);
+  font-size: 9px;
+  font-weight: 600;
+  margin-left: 4px;
+  padding: 1px 6px;
+}
+.bv-aprovado {
+  background: rgba(46, 204, 113, 0.12);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+  color: var(--verde, #2ecc71);
+}
+.bv-reprovado {
+  background: rgba(224, 80, 80, 0.12);
+  border: 1px solid rgba(224, 80, 80, 0.3);
+  color: var(--vermelho, #e05050);
+}
