@@ -22,7 +22,25 @@ async function urlParaBase64(url) {
       leitor.readAsDataURL(blob)
     })
   } catch {
-    return null // retorna null se não conseguir carregar
+    return null
+  }
+}
+
+// Busca validações e comentários do relatório no Supabase
+async function buscarRetornoProducao(relatorioId) {
+  try {
+    const { bd, TABELA_VALIDACOES, TABELA_COMENTARIOS } = await import('./supabase')
+    const [resV, resC] = await Promise.all([
+      bd.from(TABELA_VALIDACOES).select('*').eq('relatorio_id', relatorioId),
+      bd.from(TABELA_COMENTARIOS).select('*').eq('relatorio_id', relatorioId)
+        .order('criado_em', { ascending: true }),
+    ])
+    return {
+      validacoes:  resV.data || [],
+      comentarios: resC.data || [],
+    }
+  } catch {
+    return { validacoes: [], comentarios: [] }
   }
 }
 
@@ -32,19 +50,35 @@ export async function gerarPDF(relatorio) {
 
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const LARGURA = 210
-  const MARGEM = 14
-  const UTIL = LARGURA - MARGEM * 2 // 182mm de largura útil
+  const MARGEM  = 14
+  const UTIL    = LARGURA - MARGEM * 2
   let posY = MARGEM
 
-  // Formata a data para exibição (ex: 19/05/2026)
   const dataFormatada = relatorio.data
     ? new Date(relatorio.data + 'T12:00').toLocaleDateString('pt-BR')
     : '—'
 
-  const ocorrencias = (relatorio.itens || []).filter(i => i.tipo === 'ocorrencia' || i.tipo === 'occ')
-  const atividades = (relatorio.itens || []).filter(i => i.tipo === 'atividade'  || i.tipo === 'ativ')
+  const itens      = relatorio.itens || []
+  const ocorrencias = itens.filter(i => i.tipo === 'ocorrencia' || i.tipo === 'occ')
+  const atividades  = itens.filter(i => i.tipo === 'atividade'  || i.tipo === 'ativ')
 
-  // Converte cor hex (#rrggbb) para array [r, g, b]
+  // Busca retorno da produção (validações + comentários) se o relatório tiver ID
+  const { validacoes, comentarios } = relatorio.id
+    ? await buscarRetornoProducao(relatorio.id)
+    : { validacoes: [], comentarios: [] }
+
+  // Retorna a validação de um item pelo seu índice no array itens
+  function validacaoDoItem(item) {
+    const indice = itens.indexOf(item)
+    return validacoes.find(v => v.item_indice === indice) || null
+  }
+
+  // Retorna os comentários de um item pelo seu índice
+  function comentariosDoItem(item) {
+    const indice = itens.indexOf(item)
+    return comentarios.filter(c => c.item_indice === indice)
+  }
+
   function hexRGB(hex) {
     hex = hex.replace('#', '')
     return [
@@ -54,7 +88,6 @@ export async function gerarPDF(relatorio) {
     ]
   }
 
-  // Verifica se cabe mais conteúdo; se não, cria nova página com fundo escuro
   function verificarEspaco(altura) {
     if (posY + altura > 284) {
       pdf.addPage()
@@ -64,74 +97,54 @@ export async function gerarPDF(relatorio) {
     }
   }
 
-  // Desenha o cabeçalho (repetido em cada página)
   function cabecalho() {
     pdf.setFillColor(24, 28, 37)
     pdf.rect(0, 0, 210, 20, 'F')
-    pdf.setFillColor(240, 165, 0) // linha âmbar
+    pdf.setFillColor(240, 165, 0)
     pdf.rect(0, 19, 210, 1.5, 'F')
-
-    // Título
     pdf.setFontSize(13)
     pdf.setFont('helvetica', 'bold')
     pdf.setTextColor(240, 165, 0)
     pdf.text('PASSAGEM DE TURNO — MANUTENÇÃO', MARGEM, 11)
-
-    // Subtítulo
     pdf.setFontSize(8.5)
     pdf.setFont('helvetica', 'normal')
     pdf.setTextColor(138, 149, 170)
     pdf.text(
       `${relatorio.setor || '—'}   |   ${dataFormatada}   |   Turno: ${relatorio.turno || '—'}`,
-      MARGEM,
-      17
+      MARGEM, 17
     )
     posY = 26
   }
 
-  // Tabela de resumo: Técnico | Responsável | Ocorrências | Atividades
   function tabelaResumo() {
     verificarEspaco(20)
-
     const colW = UTIL / 4
-
-    // Fundo da tabela
     pdf.setFillColor(24, 28, 37)
     pdf.roundedRect(MARGEM, posY, UTIL, 16, 1.5, 1.5, 'F')
-
     const celulas = [
-      { rotulo: 'Técnico', valor: relatorio.tecnico || '—' },
-      { rotulo: 'Responsável', valor: relatorio.responsavel || '—' },
-      { rotulo: 'Ocorrências', valor: String(ocorrencias.length) },
-      { rotulo: 'Atividades', valor: String(atividades.length) },
+      { rotulo: 'Técnico',      valor: relatorio.tecnico     || '—' },
+      { rotulo: 'Responsável',  valor: relatorio.responsavel || '—' },
+      { rotulo: 'Ocorrências',  valor: String(ocorrencias.length) },
+      { rotulo: 'Atividades',   valor: String(atividades.length) },
     ]
-
     celulas.forEach((cel, i) => {
       const x = MARGEM + i * colW
-
-      // Linha divisória entre células
       if (i > 0) {
         pdf.setDrawColor(42, 48, 64)
         pdf.line(x, posY + 2, x, posY + 14)
       }
-
-      // Rótulo cinza
       pdf.setFontSize(7)
       pdf.setFont('helvetica', 'normal')
       pdf.setTextColor(100, 110, 130)
       pdf.text(cel.rotulo, x + colW / 2, posY + 5.5, { align: 'center' })
-
-      // Valor branco em destaque
       pdf.setFontSize(10)
       pdf.setFont('helvetica', 'bold')
       pdf.setTextColor(212, 219, 232)
       pdf.text(cel.valor, x + colW / 2, posY + 12.5, { align: 'center' })
     })
-
     posY += 20
   }
 
-  // Faixa de título de seção
   function tituloSecao(texto, cor) {
     verificarEspaco(10)
     pdf.setFillColor(...hexRGB(cor))
@@ -143,115 +156,165 @@ export async function gerarPDF(relatorio) {
     posY += 12
   }
 
-  // Linha "Rótulo: Valor" dentro de um card de item
   function linhaInfo(rotulo, valor) {
     const linhas = pdf.splitTextToSize(String(valor || '—'), UTIL - 42)
     const altura = linhas.length * 5.5 + 3
     verificarEspaco(altura)
-
     pdf.setFontSize(8.5)
     pdf.setFont('helvetica', 'bold')
     pdf.setTextColor(100, 110, 130)
     pdf.text(rotulo + ':', MARGEM + 2, posY)
-
     pdf.setFont('helvetica', 'normal')
     pdf.setTextColor(200, 210, 225)
     pdf.text(linhas, MARGEM + 40, posY)
-
     posY += altura
   }
 
-  // Desenha fotos do item — 2 por linha, tamanho maior, qualidade FAST
+  // Desenha bloco de retorno da produção (validação + comentários)
+  function desenharRetornoProducao(val, comentsDoItem) {
+    if (!val && comentsDoItem.length === 0) return
+
+    verificarEspaco(10)
+
+    // Faixa de título "Retorno da Produção"
+    pdf.setFillColor(40, 44, 58)
+    pdf.roundedRect(MARGEM + 2, posY, UTIL - 4, 7, 1, 1, 'F')
+    pdf.setFontSize(8)
+    pdf.setFont('helvetica', 'bold')
+    pdf.setTextColor(160, 140, 200)
+    pdf.text('🏭  RETORNO DA PRODUÇÃO', MARGEM + 5, posY + 5)
+    posY += 10
+
+    // Validação
+    if (val) {
+      const aprovado   = val.tipo === 'aprovado'
+      const corVal     = aprovado ? [46, 204, 113] : [224, 80, 80]
+      const textoVal   = aprovado ? '✅ APROVADO' : '❌ REPROVADO'
+      const dataVal    = val.criado_em
+        ? new Date(val.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+        : ''
+
+      verificarEspaco(8)
+      pdf.setFillColor(...corVal.map(v => Math.round(v * 0.15)))
+      pdf.roundedRect(MARGEM + 2, posY, UTIL - 4, 7, 1, 1, 'F')
+      pdf.setFontSize(8.5)
+      pdf.setFont('helvetica', 'bold')
+      pdf.setTextColor(...corVal)
+      pdf.text(textoVal, MARGEM + 5, posY + 5)
+      pdf.setFont('helvetica', 'normal')
+      pdf.setTextColor(138, 149, 170)
+      pdf.text(`por ${val.autor}${dataVal ? '  ·  ' + dataVal : ''}`, MARGEM + 38, posY + 5)
+      posY += 10
+    }
+
+    // Comentários
+    if (comentsDoItem.length > 0) {
+      verificarEspaco(8)
+      pdf.setFontSize(8)
+      pdf.setFont('helvetica', 'bold')
+      pdf.setTextColor(100, 110, 130)
+      pdf.text('Comentários:', MARGEM + 5, posY)
+      posY += 5
+
+      for (const c of comentsDoItem) {
+        // Cabeçalho do comentário: autor + data
+        const dataC = c.criado_em
+          ? new Date(c.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+          : ''
+        verificarEspaco(7)
+        pdf.setFontSize(8)
+        pdf.setFont('helvetica', 'bold')
+        pdf.setTextColor(176, 127, 224) // roxo suave
+        pdf.text(`${c.autor}${dataC ? '  ·  ' + dataC : ''}`, MARGEM + 5, posY)
+        posY += 5
+
+        // Texto do comentário (pode quebrar em múltiplas linhas)
+        const linhasC = pdf.splitTextToSize(c.texto, UTIL - 12)
+        const alturaC = linhasC.length * 5 + 3
+        verificarEspaco(alturaC)
+        pdf.setFont('helvetica', 'normal')
+        pdf.setTextColor(200, 210, 225)
+        pdf.text(linhasC, MARGEM + 5, posY)
+        posY += alturaC
+      }
+    }
+
+    posY += 3
+  }
+
   async function desenharFotos(listaFotos) {
     if (!listaFotos?.length) return
-
     const larguraFoto = (UTIL - 6) / 2
-    const alturaFoto = larguraFoto * 0.68 // proporção aprox. 3:2
-
-    // Rótulo "Fotos:"
+    const alturaFoto  = larguraFoto * 0.68
     verificarEspaco(8)
     pdf.setFontSize(8.5)
     pdf.setFont('helvetica', 'bold')
     pdf.setTextColor(100, 110, 130)
     pdf.text('Fotos:', MARGEM + 2, posY)
     posY += 5
-
     let coluna = 0
-
     for (let i = 0; i < listaFotos.length; i++) {
       if (coluna === 0) verificarEspaco(alturaFoto + 8)
-
       const x = MARGEM + coluna * (larguraFoto + 6)
-
       const base64 = await urlParaBase64(listaFotos[i].url)
       if (base64) {
-        // FAST = sem compressão extra → melhor qualidade de imagem
         pdf.addImage(base64, 'JPEG', x, posY, larguraFoto, alturaFoto, undefined, 'FAST')
       } else {
-        // Placeholder cinza escuro se a foto não carregar
         pdf.setFillColor(30, 35, 48)
         pdf.roundedRect(x, posY, larguraFoto, alturaFoto, 1, 1, 'F')
         pdf.setFontSize(7.5)
         pdf.setTextColor(80, 90, 110)
-        pdf.text('Foto indisponível', x + larguraFoto / 2, posY + alturaFoto / 2, {
-          align: 'center',
-        })
+        pdf.text('Foto indisponível', x + larguraFoto / 2, posY + alturaFoto / 2, { align: 'center' })
       }
-
-      // Legenda abaixo da foto
       pdf.setFontSize(7)
       pdf.setFont('helvetica', 'normal')
       pdf.setTextColor(100, 110, 130)
       pdf.text(`Foto ${i + 1}`, x + larguraFoto / 2, posY + alturaFoto + 4, { align: 'center' })
-
       coluna++
-      if (coluna >= 2) {
-        coluna = 0
-        posY += alturaFoto + 8
-      }
+      if (coluna >= 2) { coluna = 0; posY += alturaFoto + 8 }
     }
     if (coluna > 0) posY += alturaFoto + 8
   }
 
   // ── MONTAGEM DO PDF ────────────────────────────────────────────────────────
 
-  // Fundo escuro na primeira página
   pdf.setFillColor(15, 17, 23)
   pdf.rect(0, 0, 210, 297, 'F')
-
   cabecalho()
   tabelaResumo()
 
-  // ── Seção: Ocorrências ────────────────────────────────────────────────────
+  // ── Ocorrências ───────────────────────────────────────────────────────────
   if (ocorrencias.length > 0) {
     tituloSecao('OCORRÊNCIAS DO TURNO', '#e05c2a')
 
     for (let i = 0; i < ocorrencias.length; i++) {
-      const o = ocorrencias[i]
+      const o   = ocorrencias[i]
+      const val = validacaoDoItem(o)
+      const cms = comentariosDoItem(o)
 
       verificarEspaco(14)
 
-      // Card do item com barra lateral laranja
       pdf.setFillColor(24, 28, 37)
       pdf.roundedRect(MARGEM, posY, UTIL, 10, 1, 1, 'F')
       pdf.setFillColor(224, 92, 42)
       pdf.rect(MARGEM, posY, 3.5, 10, 'F')
-
       pdf.setFontSize(10)
       pdf.setFont('helvetica', 'bold')
       pdf.setTextColor(212, 219, 232)
       pdf.text(`Ocorrência ${i + 1}${o.autor ? '  —  ' + o.autor : ''}`, MARGEM + 6, posY + 7)
       posY += 13
 
-      linhaInfo('Equipamento', o.equipamento)
-      linhaInfo('Sintoma', o.sintoma)
-      linhaInfo('Modo/Impacto', `${o.modo || '—'} / ${o.impacto || '—'}`)
-      linhaInfo('Intervenção', o.intervencao)
-      linhaInfo('Solução', o.solucao)
+      linhaInfo('Equipamento', o.equipamento || o.equip)
+      linhaInfo('Sintoma',     o.sintoma)
+      linhaInfo('Modo/Impacto',`${o.modo || '—'} / ${o.impacto || '—'}`)
+      linhaInfo('Intervenção', o.intervencao || o.tipo_int)
+      linhaInfo('Solução',     o.solucao)
 
       await desenharFotos(o.fotos)
 
-      // Divisória
+      // Retorno da produção (validação + comentários) — após as fotos
+      desenharRetornoProducao(val, cms)
+
       posY += 2
       pdf.setDrawColor(42, 48, 64)
       pdf.line(MARGEM, posY, MARGEM + UTIL, posY)
@@ -259,45 +322,40 @@ export async function gerarPDF(relatorio) {
     }
   }
 
-  // ── Seção: Atividades ─────────────────────────────────────────────────────
+  // ── Atividades ────────────────────────────────────────────────────────────
   if (atividades.length > 0) {
     posY += 2
     tituloSecao('ATIVIDADES PROGRAMADAS', '#4a90e2')
 
     const corStatus = {
-      Concluída: '#2ecc71',
-      'Em andamento': '#4a90e2',
-      Pendente: '#e05050',
+      Concluída:       '#2ecc71',
+      'Em andamento':  '#4a90e2',
+      Pendente:        '#e05050',
     }
 
     for (let i = 0; i < atividades.length; i++) {
-      const a = atividades[i]
+      const a   = atividades[i]
       const cor = corStatus[a.status] || '#5c6680'
 
       verificarEspaco(14)
 
-      // Card do item com barra lateral colorida pelo status
       pdf.setFillColor(24, 28, 37)
       pdf.roundedRect(MARGEM, posY, UTIL, 10, 1, 1, 'F')
       pdf.setFillColor(...hexRGB(cor))
       pdf.rect(MARGEM, posY, 3.5, 10, 'F')
-
       pdf.setFontSize(10)
       pdf.setFont('helvetica', 'bold')
       pdf.setTextColor(212, 219, 232)
       pdf.text(`Atividade ${i + 1}${a.autor ? '  —  ' + a.autor : ''}`, MARGEM + 6, posY + 7)
-
-      // Status no canto direito
       if (a.status) {
         pdf.setFontSize(8.5)
         pdf.setTextColor(...hexRGB(cor))
         pdf.text(a.status, MARGEM + UTIL - 2, posY + 7, { align: 'right' })
       }
-
       posY += 13
 
-      linhaInfo('Equipamento', a.equipamento)
-      linhaInfo('Descrição', a.descricao)
+      linhaInfo('Equipamento', a.equipamento || a.equip)
+      linhaInfo('Descrição',   a.descricao   || a.desc)
 
       await desenharFotos(a.fotos)
 
@@ -317,13 +375,10 @@ export async function gerarPDF(relatorio) {
     pdf.setTextColor(70, 80, 100)
     pdf.text(
       `Página ${i} de ${totalPaginas}  |  Gerado em ${new Date().toLocaleString('pt-BR')}`,
-      LARGURA / 2,
-      292,
-      { align: 'center' }
+      LARGURA / 2, 292, { align: 'center' }
     )
   }
 
-  // Salva e baixa o arquivo
   pdf.save(
     `turno_${(relatorio.setor || 'relatorio').replace(/\s+/g, '_')}_${relatorio.data || 'sem_data'}.pdf`
   )
