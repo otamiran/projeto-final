@@ -338,7 +338,7 @@ select option {
   width: 26px;
   height: 26px;
   background-image: url('./favicon.icon.png');
-  background: var(--ambar);
+  /* background: var(--ambar); */
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
   flex-shrink: 0;
 }
