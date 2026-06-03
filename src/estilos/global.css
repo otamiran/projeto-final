@@ -337,7 +337,7 @@ select option {
 .hexagono {
   width: 26px;
   height: 26px;
-  background: var(--ambar);
+  background: image-url('./favicon.icon.png');
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
   flex-shrink: 0;
 }
