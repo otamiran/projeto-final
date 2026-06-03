@@ -1,0 +1,295 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   almoxarifado.css — Estilos exclusivos do módulo Almoxarifado
+   Não duplica nada do global.css — só acrescenta o que é específico.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Layout da página ──────────────────────────────────────────────────── */
+.pagina-almox {
+  display:        flex;
+  margin:         0 auto;
+  justify-content: center;
+  flex-direction: column;
+  height:         calc(100vh - 54px); /* ocupa o resto abaixo da nav */
+  max-width:      900px;
+  overflow:       auto;
+}
+
+/* ── Barra de ferramentas (busca + botões) ─────────────────────────────── */
+.almox-toolbar {
+  align-items:    center;
+  background:     var(--cor-fundo-2);
+  border-bottom:  1px solid var(--cor-borda);
+  display:        flex;
+  flex-shrink:    0;
+  flex-wrap:      wrap;
+  gap:            10px;
+  padding:        10px 16px;
+}
+
+/* Campo de busca */
+.almox-busca-wrap {
+  flex:         1;
+  min-width:    200px;
+  position:     relative;
+}
+.almox-busca-icone {
+  color:          var(--cor-apagado);
+  font-size:      13px;
+  left:           11px;
+  pointer-events: none;
+  position:       absolute;
+  top:            50%;
+  transform:      translateY(-50%);
+}
+.almox-busca-input {
+  padding-left: 32px; /* espaço para o ícone */
+}
+.almox-busca-limpar {
+  background:     none;
+  border:         none;
+  color:          var(--cor-apagado);
+  cursor:         pointer;
+  font-size:      13px;
+  padding:        0 8px;
+  position:       absolute;
+  right:          0;
+  top:            50%;
+  transform:      translateY(-50%);
+  transition:     color .15s;
+  width:          auto;
+}
+.almox-busca-limpar:hover { color: var(--cor-texto); }
+
+/* Contador de resultados */
+.almox-contador {
+  color:          var(--cor-apagado);
+  font-family:    var(--fonte-mono);
+  font-size:      10px;
+  padding:        0 4px;
+  white-space:    nowrap;
+}
+
+/* Badge admin */
+.almox-badge-admin {
+  align-items:    center;
+  background:     rgba(240,165,0,.1);
+  border:         1px solid rgba(240,165,0,.3);
+  border-radius:  var(--raio);
+  color:          var(--ambar);
+  display:        flex;
+  font-family:    var(--fonte-mono);
+  font-size:      9px;
+  gap:            6px;
+  letter-spacing: .5px;
+  padding:        5px 10px;
+}
+
+/* ── Barra de progresso de importação ─────────────────────────────────── */
+.almox-progresso-faixa {
+  align-items:    center;
+  background:     var(--cor-fundo-2);
+  border-bottom:  1px solid var(--cor-borda);
+  color:          var(--ambar);
+  display:        flex;
+  flex-shrink:    0;
+  font-family:    var(--fonte-mono);
+  font-size:      11px;
+  gap:            12px;
+  padding:        8px 16px;
+}
+.almox-progresso-trilha {
+  background:     var(--cor-borda-2);
+  border-radius:  2px;
+  flex:           1;
+  height:         4px;
+  margin-left:    auto;
+  max-width:      200px;
+  overflow:       hidden;
+}
+.almox-progresso-barra {
+  background:     var(--ambar);
+  border-radius:  2px;
+  height:         100%;
+  transition:     width .3s ease;
+}
+
+/* ── Área rolável da tabela ───────────────────────────────────────────── */
+.almox-area-tabela {
+  flex:       1;
+  overflow:   auto;
+}
+
+/* ── Tabela ────────────────────────────────────────────────────────────── */
+.almox-tabela {
+  border-collapse: collapse;
+  font-size:       12.5px;
+  width:           100%;
+}
+
+/* Cabeçalho */
+.almox-th {
+  background:     var(--cor-fundo-3);
+  border-bottom:  2px solid var(--cor-borda-2);
+  color:          var(--cor-apagado);
+  font-family:    var(--fonte-mono);
+  font-size:      9px;
+  font-weight:    700;
+  letter-spacing: 1.5px;
+  padding:        9px 13px;
+  position:       sticky;
+  text-align:     left;
+  text-transform: uppercase;
+  top:            0;
+  user-select:    none;
+  white-space:    nowrap;
+  z-index:        2;
+}
+.almox-th--clicavel { cursor: pointer; transition: color .15s; }
+.almox-th--clicavel:hover { color: var(--ambar); }
+.almox-th--ativa    { color: var(--ambar); }
+.almox-th--obs      { min-width: 190px; 
+  text-align: center;
+}
+
+/* Linhas do corpo */
+.almox-tr {
+  border-bottom: 1px solid var(--cor-borda);
+  transition:    background .1s;
+  text-align:   end;
+}
+.almox-tr:hover { background: var(--cor-fundo-3); }
+
+.almox-td {
+  color:      var(--cor-texto);
+  max-width:  260px;
+  padding:    8px 13px;
+  word-break: break-word;
+}
+.almox-td--obs { min-width: 170px; }
+
+/* Destaque da busca */
+.almox-destaque {
+  background:    rgba(240,165,0,.18);
+  border-radius: 2px;
+  color:         var(--ambar);
+  font-weight:   600;
+}
+
+/* ── Botão de observação ─────────────────────────────────────────────── */
+.almox-botao-obs {
+  background:     none;
+  border:         1px dashed var(--cor-borda-2);
+  border-radius:  3px;
+  color:          var(--cor-apagado);
+  cursor:         pointer;
+  font-family:    var(--fonte-mono);
+  font-size:      9px;
+  line-height:    1.4;
+  padding:        3px 8px;
+  transition:     all .15s;
+  white-space:    nowrap;
+  width:          auto;
+}
+.almox-botao-obs:hover {
+  background:     rgba(240,165,0,.06);
+  border-color:   var(--ambar);
+  color:          var(--ambar);
+}
+.almox-botao-obs--com-obs {
+  background:     rgba(46,204,113,.07);
+  border-color:   rgba(46,204,113,.4);
+  border-style:   solid;
+  color:          var(--verde);
+}
+.almox-botao-obs--com-obs:hover { background: rgba(46,204,113,.14); }
+
+.almox-obs-autor {
+  color:       var(--cor-apagado);
+  font-style:  normal;
+  margin-left: 4px;
+}
+
+/* ── Estados vazios (sem dados / sem resultado de busca) ─────────────── */
+.almox-estado-vazio {
+  align-items:    center;
+  color:          var(--cor-apagado);
+  display:        flex;
+  flex-direction: column;
+  gap:            12px;
+  padding:        60px 20px;
+  text-align:     center;
+}
+.almox-estado-ico   { font-size: 40px; opacity: .6; }
+.almox-estado-titulo {
+  color:          var(--cor-label);
+  font-family:    var(--fonte-mono);
+  font-size:      12px;
+}
+.almox-estado-corpo {
+  font-family: var(--fonte-mono);
+  font-size:   11px;
+  line-height: 1.7;
+}
+.almox-estado-corpo strong { color: var(--cor-label); }
+
+/* ── Modal de observação ─────────────────────────────────────────────── */
+.almox-info-item {
+  background:    var(--cor-fundo-3);
+  border:        1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  color:         var(--cor-label);
+  font-family:   var(--fonte-mono);
+  font-size:     11px;
+  line-height:   1.5;
+  padding:       8px 11px;
+}
+.almox-ultima-edicao {
+  color:       var(--cor-apagado);
+  font-family: var(--fonte-mono);
+  font-size:   10px;
+}
+.almox-aviso-info {
+  background:    rgba(74,144,226,.08);
+  border:        1px solid rgba(74,144,226,.2);
+  border-radius: var(--raio);
+  color:         var(--azul);
+  font-family:   var(--fonte-mono);
+  font-size:     10px;
+  line-height:   1.5;
+  padding:       8px 11px;
+}
+.almox-aviso-info strong { color: var(--cor-label); }
+
+/* ── Classe auxiliar .campo (campo de formulário) ────────────────────── */
+/* Reutiliza o padrão do resto do app, que não tem uma classe global .campo */
+.campo              { display: flex; flex-direction: column; gap: 5px; }
+.campo-label {
+  color:          var(--cor-label);
+  font-family:    var(--fonte-mono);
+  font-size:      10px;
+  font-weight:    600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* ── Animação pulsante (spinner) ─────────────────────────────────────── */
+.pulsando {
+  animation:     pulsar 1.8s infinite;
+  background:    currentColor;
+  border-radius: 50%;
+  display:       inline-block;
+  flex-shrink:   0;
+  height:        8px;
+  width:         8px;
+}
+@keyframes pulsar {
+  0%, 100% { opacity: 1  }
+  50%       { opacity: .2 }
+}
+
+/* ── Responsivo ──────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .almox-toolbar    { flex-wrap: wrap; }
+  .almox-td         { font-size: 11px; padding: 7px 9px; }
+  .almox-th         { padding: 8px 9px; }
+}

@@ -1,0 +1,300 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   componentes.css — Estilos dos componentes reutilizáveis
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Barra de status de conexão ───────────────────────────────────────────*/
+.barra-status {
+  align-items:   center;
+  border-radius: var(--raio);
+  display:       flex;
+  font-family:   var(--fonte-mono);
+  font-size:     11px;
+  gap:           8px;
+  padding:       7px 11px;
+}
+.barra-status.ok         { background: rgba(46,204,113,.1);  border: 1px solid rgba(46,204,113,.3);  color: var(--verde); }
+.barra-status.erro       { background: rgba(224,80,80,.1);   border: 1px solid rgba(224,80,80,.3);   color: var(--vermelho); }
+.barra-status.carregando { background: rgba(240,165,0,.1);   border: 1px solid rgba(240,165,0,.3);   color: var(--ambar); }
+
+/* ── Banner do usuário logado ─────────────────────────────────────────────*/
+.banner-usuario {
+  align-items:   center;
+  background:    rgba(240,165,0,.08);
+  border:        1px solid rgba(240,165,0,.2);
+  border-radius: var(--raio);
+  color:         var(--ambar);
+  display:       flex;
+  font-family:   var(--fonte-mono);
+  font-size:     11px;
+  gap:           7px;
+  padding:       7px 11px;
+}
+.badge-admin {
+  background:    rgba(240,165,0,.2);
+  border:        1px solid rgba(240,165,0,.4);
+  border-radius: 3px;
+  font-size:     9px;
+  padding:       1px 6px;
+}
+
+/* ── Linha de item (ocorrência/atividade na lista) ─────────────────────── */
+.linha-item {
+  align-items:   center;
+  background:    var(--cor-fundo-2);
+  border:        1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  display:       flex;
+  gap:           9px;
+  padding:       10px 13px;
+  transition:    border-color .15s;
+}
+.linha-item:hover { border-color: var(--cor-borda-2); }
+/* Barra colorida lateral por tipo */
+.linha-item.tipo-ocorrencia { border-left: 3px solid var(--laranja); }
+.linha-item.tipo-atividade  { border-left: 3px solid var(--azul); }
+
+/* Badge tipo: 🔧 ou 📅 */
+.badge-tipo {
+  border-radius:  2px;
+  flex-shrink:    0;
+  font-family:    var(--fonte-mono);
+  font-size:      9px;
+  font-weight:    600;
+  letter-spacing: 1px;
+  padding:        2px 7px;
+}
+.badge-ocorrencia { background: rgba(224,92,42,.2);  border: 1px solid rgba(224,92,42,.3);  color: var(--laranja); }
+.badge-atividade  { background: rgba(74,144,226,.2); border: 1px solid rgba(74,144,226,.3); color: var(--azul); }
+
+/* Texto do item */
+.item-texto          { flex: 1; font-size: 12px; overflow: hidden; }
+.item-texto strong   { color: var(--cor-texto); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-texto span     { color: var(--cor-apagado); font-size: 10px; }
+
+/* Contador de fotos */
+.contador-fotos {
+  background:    rgba(240,165,0,.15);
+  border:        1px solid rgba(240,165,0,.3);
+  border-radius: 3px;
+  color:         var(--ambar);
+  display:       inline-block;
+  font-family:   var(--fonte-mono);
+  font-size:     9px;
+  margin-left:   4px;
+  padding:       1px 5px;
+}
+
+/* Ponto de status */
+.ponto-status  { border-radius: 50%; flex-shrink: 0; height: 8px; width: 8px; }
+.ponto-verde   { background: var(--verde); }
+.ponto-azul    { background: var(--azul); }
+.ponto-vermelho{ background: var(--vermelho); }
+.ponto-cinza   { background: var(--cor-apagado); }
+
+/* Botões editar/excluir do item */
+.botoes-item { display: flex; flex-shrink: 0; gap: 5px; }
+
+/* ── Upload de fotos ───────────────────────────────────────────────────────*/
+.area-upload {
+  align-items:   center;
+  border:        2px dashed var(--cor-borda-2);
+  border-radius: var(--raio-g);
+  cursor:        pointer;
+  display:       flex;
+  flex-direction: column;
+  gap:           7px;
+  padding:       20px 14px;
+  text-align:    center;
+  transition:    all .2s;
+}
+.area-upload:hover   { background: rgba(240,165,0,.04); border-color: var(--ambar); }
+.texto-upload        { color: var(--cor-texto); font-size: 13px; font-weight: 500; }
+.subtexto-upload     { color: var(--cor-apagado); font-family: var(--fonte-mono); font-size: 11px; }
+
+/* Grade de miniaturas */
+.grade-fotos {
+  display:               grid;
+  gap:                   8px;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  margin-top:            10px;
+}
+.miniatura-foto          { background: var(--cor-fundo-3); border-radius: var(--raio); overflow: hidden; position: relative; }
+.miniatura-foto img      { display: block; height: auto; max-height: 120px; object-fit: contain; width: 100%; }
+.botao-remover-foto {
+  align-items:   center;
+  background:    rgba(0,0,0,.7);
+  border:        none;
+  border-radius: 50%;
+  color:         #fff;
+  cursor:        pointer;
+  display:       flex;
+  font-size:     11px;
+  height:        22px;
+  justify-content: center;
+  position:      absolute;
+  right:         4px;
+  top:           4px;
+  transition:    background .15s;
+  width:         22px;
+}
+.botao-remover-foto:hover { background: var(--vermelho); }
+.badge-aguardando {
+  background:  rgba(0,0,0,.65);
+  bottom:      0;
+  color:       var(--ambar);
+  font-family: var(--fonte-mono);
+  font-size:   9px;
+  left:        0;
+  padding:     3px;
+  position:    absolute;
+  right:       0;
+  text-align:  center;
+}
+
+/* ── Painel de item (bottom sheet) ────────────────────────────────────────*/
+/* Fundo escuro semi-transparente */
+.fundo-painel {
+  align-items:  flex-end;          /* conteúdo fica na base */
+  background:   rgba(0,0,0,.65);
+  bottom:       0;
+  display:      flex;
+  justify-content: center;
+  left:         0;
+  position:     fixed;
+  right:        0;
+  top:          0;
+  z-index:      300;
+}
+/* Painel branco que sobe */
+.painel-item {
+  animation:      subirPainel .22s ease-out; /* animação de entrada */
+  background:     var(--cor-fundo-2);
+  border-radius:  16px 16px 0 0;            /* arredondado só no topo */
+  box-shadow:     0 -8px 40px rgba(0,0,0,.5);
+  display:        flex;
+  flex-direction: column;
+  max-height:     94vh;
+  max-width:      700px;
+  width:          100%;
+}
+@keyframes subirPainel {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.painel-cabecalho {
+  align-items:   center;
+  border-bottom: 1px solid var(--cor-borda);
+  display:       flex;
+  flex-shrink:   0;
+  gap:           10px;
+  padding:       14px 16px;
+}
+.painel-titulo    { flex: 1; font-family: var(--fonte-mono); font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; }
+.titulo-ocorrencia{ color: var(--laranja); }
+.titulo-atividade { color: var(--azul); }
+.botao-fechar-painel { background: none; border: none; color: var(--cor-apagado); cursor: pointer; font-size: 5px; line-height: 1; padding: 0 4px; }
+.botao-fechar-painel:hover { color: var(--cor-texto); }
+/* Área com scroll */
+.painel-conteudo { display: flex; flex: 1; flex-direction: column; gap: 14px; overflow-y: auto; padding: 16px; }
+/* Rodapé fixo com botões */
+.painel-rodape { background: var(--cor-fundo-2); border-top: 1px solid var(--cor-borda); display: flex; flex-shrink: 0; gap: 8px; padding: 12px 16px; }
+.painel-rodape .botao { flex: 1; justify-content: center; padding: 11px; }
+
+/* ── Modais genéricos ──────────────────────────────────────────────────────*/
+/* Fundo escuro centralizado */
+.fundo-modal {
+  align-items:    center;
+  background:     rgba(0,0,0,.65);
+  bottom:         0;
+  display:        flex;
+  justify-content: center;
+  left:           0;
+  padding:        16px;
+  position:       fixed;
+  right:          0;
+  top:            0;
+  z-index:        300;
+}
+/* Modal branco */
+.modal {
+  animation:     aparecer .18s ease-out; /* fade + scale */
+  background:    var(--cor-fundo-2);
+  border:        1px solid var(--cor-borda-2);
+  border-radius: var(--raio-g);
+  border-top:    2px solid var(--ambar);
+  max-height:    90vh;
+  overflow-y:    auto;
+  width:         100%;
+  max-width:     600px;
+}
+.modal-grande { max-width: 640px; }
+@keyframes aparecer {
+  from { opacity: 0; transform: scale(.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.modal-cabecalho {
+  align-items:   center;
+  border-bottom: 1px solid var(--cor-borda);
+  display:       flex;
+  gap:           10px;
+  padding:       11px 14px;
+}
+.modal-cabecalho h2 {
+  color:          var(--ambar);
+  flex:           1;
+  font-family:    var(--fonte-mono);
+  font-size:      11px;
+  font-weight:    600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.botao-fechar-modal { background: none; border: none; color: var(--cor-apagado); cursor: pointer; font-size: 18px; }
+.botao-fechar-modal:hover { color: var(--cor-texto); }
+.modal-corpo { display: flex; flex-direction: column; gap: 12px; padding: 14px; }
+
+/* Modal WhatsApp com borda verde */
+.modal-whatsapp { border-top-color: #25d366; max-width: 460px; }
+.cabecalho-whatsapp h2 { color: #25d366; }
+
+/* ── Galeria de fotos no modal ─────────────────────────────────────────────*/
+.grade-fotos-modal { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); margin-top: 4px; }
+.foto-modal        { display: flex; flex-direction: column; gap: 4px; }
+.foto-modal img    { border-radius: var(--raio); cursor: zoom-in; height: 90px; object-fit: cover; width: 100%; }
+.foto-modal span   { color: var(--cor-apagado); font-family: var(--fonte-mono); font-size: 9px; text-align: center; }
+
+/* ── Lightbox (foto em tela cheia) ────────────────────────────────────────*/
+.fundo-lightbox {
+  align-items:    center;
+  background:     rgba(0,0,0,.92);
+  bottom:         0;
+  display:        flex;
+  justify-content: center;
+  left:           0;
+  position:       fixed;
+  right:          0;
+  top:            0;
+  z-index:        400;
+}
+.fundo-lightbox img { border-radius: 6px; display: block; max-height: 88vh; max-width: 95vw; }
+.fundo-lightbox button {
+  align-items:   center;
+  background:    var(--cor-fundo-2);
+  border:        1px solid var(--cor-borda-2);
+  border-radius: 50%;
+  color:         var(--cor-texto);
+  cursor:        pointer;
+  display:       flex;
+  font-size:     16px;
+  height:        32px;
+  justify-content: center;
+  position:      absolute;
+  right:         16px;
+  top:           16px;
+  width:         32px;
+}
+
+/* ── Banner de usuário: responsável ao lado do técnico ───────────────────── */
+.banner-responsavel {
+  color: var(--cor-texto-fraco);
+  font-size: 0.88em;
+}

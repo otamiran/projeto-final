@@ -1,0 +1,486 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Estilos da tela de Produção (somente visualização + validação)
+───────────────────────────────────────────────────────────────────────────── */
+
+/* Aviso de modo somente leitura no topo da página */
+.aviso-producao {
+  align-items: center;
+  background: rgba(74, 144, 226, 0.1);
+  border: 1px solid rgba(74, 144, 226, 0.25);
+  border-radius: var(--raio);
+  color: var(--azul, #4a90e2);
+  display: flex;
+  font-family: var(--fonte-mono);
+  font-size: 11px;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+/* Card de relatório na visão da produção */
+.card-relatorio-prod {
+  border-left: 3px solid var(--azul, #4a90e2);
+}
+
+/* Cabeçalho do relatório */
+.rel-prod-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 12px 14px;
+}
+
+.rel-prod-setor {
+  color: var(--ambar);
+  font-family: var(--fonte-mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.rel-prod-meta {
+  color: var(--cor-apagado);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.rel-prod-tags {
+  display: flex;
+  flex-shrink: 0;
+  gap: 5px;
+}
+
+/* Seção de ocorrências e atividades */
+.rel-prod-ocorrencias,
+.rel-prod-atividades {
+  border-top: 1px solid var(--cor-borda);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+}
+
+.secao-titulo {
+  color: var(--cor-label);
+  font-family: var(--fonte-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+/* ── Bloco de ocorrência ── */
+.bloco-ocorrencia-prod {
+  background: var(--cor-fundo-3, #232b3a);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.oc-cabecalho {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.oc-badge {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.oc-titulo {
+  flex: 1;
+  font-size: 13px;
+}
+
+.oc-autor {
+  color: var(--cor-apagado);
+  font-size: 11px;
+}
+
+/* Badge de validação no cabeçalho da ocorrência */
+.val-badge {
+  border-radius: 4px;
+  font-family: var(--fonte-mono);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+}
+
+.val-aprovado {
+  background: rgba(46, 204, 113, 0.15);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+  color: var(--verde, #2ecc71);
+}
+
+.val-reprovado {
+  background: rgba(224, 80, 80, 0.15);
+  border: 1px solid rgba(224, 80, 80, 0.3);
+  color: var(--vermelho, #e05050);
+}
+
+/* Detalhes da ocorrência */
+.oc-detalhes {
+  color: var(--cor-texto);
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  gap: 3px;
+}
+
+.oc-label {
+  color: var(--cor-label);
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+/* Fotos em miniaturas */
+.oc-fotos-prod {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.foto-prod {
+  border-radius: var(--raio);
+  cursor: pointer;
+  height: 72px;
+  object-fit: cover;
+  transition: transform 0.15s;
+  width: 72px;
+}
+
+.foto-prod:hover {
+  transform: scale(1.06);
+}
+
+/* ── Ações da produção (validar / comentar) ── */
+.oc-acoes-prod {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Botão de validação (aprovar / reprovar) */
+.botao-validar {
+  background: var(--cor-fundo-2);
+  border: 1px solid var(--cor-borda-2);
+  border-radius: var(--raio);
+  color: var(--cor-label);
+  cursor: pointer;
+  font-family: var(--fonte-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+  transition: all 0.15s;
+}
+
+.botao-validar:hover {
+  border-color: var(--ambar);
+  color: var(--cor-texto);
+}
+
+/* Estado ativo — quando a validação já foi feita */
+.botao-validar.ativo-verde {
+  background: rgba(46, 204, 113, 0.15);
+  border-color: var(--verde, #2ecc71);
+  color: var(--verde, #2ecc71);
+}
+
+.botao-validar.ativo-vermelho {
+  background: rgba(224, 80, 80, 0.15);
+  border-color: var(--vermelho, #e05050);
+  color: var(--vermelho, #e05050);
+}
+
+/* Botão de comentários */
+.botao-comentar {
+  background: rgba(176, 127, 224, 0.1);
+  border: 1px solid rgba(176, 127, 224, 0.3);
+  border-radius: var(--raio);
+  color: #b07fe0;
+  cursor: pointer;
+  font-family: var(--fonte-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+  transition: all 0.15s;
+}
+
+.botao-comentar:hover {
+  background: rgba(176, 127, 224, 0.2);
+}
+
+/* ── Painel de comentários ── */
+.painel-comentarios {
+  background: var(--cor-fundo-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.sem-comentarios {
+  color: var(--cor-apagado);
+  font-size: 11px;
+  text-align: center;
+}
+
+.lista-comentarios {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.comentario {
+  background: var(--cor-fundo-3, #232b3a);
+  border-radius: var(--raio);
+  padding: 7px 10px;
+}
+
+.comentario-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+
+.comentario-header strong {
+  color: var(--ambar);
+  font-size: 11px;
+}
+
+.comentario-hora {
+  color: var(--cor-apagado);
+  font-family: var(--fonte-mono);
+  font-size: 10px;
+}
+
+.comentario-texto {
+  color: var(--cor-texto);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Área de novo comentário */
+.novo-comentario {
+  display: flex;
+  gap: 6px;
+}
+
+.input-comentario {
+  background: var(--cor-fundo-3, #232b3a);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  color: var(--cor-texto);
+  flex: 1;
+  font-family: var(--fonte-sans);
+  font-size: 12px;
+  outline: none;
+  padding: 7px 10px;
+  resize: none;
+  transition: border-color 0.15s;
+}
+
+.input-comentario:focus {
+  border-color: #b07fe0;
+}
+
+/* ── Bloco de atividade (somente leitura) ── */
+.bloco-atividade-prod {
+  align-items: flex-start;
+  background: var(--cor-fundo-3, #232b3a);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.at-badge {
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.at-meta {
+  color: var(--cor-apagado);
+  font-size: 11px;
+}
+
+/* ── Abas e seletor de grupo na tela de login ── */
+.abas-login {
+  border-bottom: 1px solid var(--cor-borda);
+  display: flex;
+  margin: -8px -4px 0;
+}
+
+.aba-login {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--cor-apagado);
+  cursor: pointer;
+  flex: 1;
+  font-family: var(--fonte-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: -1px;
+  padding: 10px;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+
+.aba-login.ativa {
+  border-bottom-color: var(--ambar);
+  color: var(--ambar);
+}
+
+/* Botões de seleção de grupo no cadastro */
+.grupo-botoes {
+  display: flex;
+  gap: 8px;
+}
+
+.botao-grupo {
+  background: var(--cor-fundo-3, #232b3a);
+  border: 1px solid var(--cor-borda-2);
+  border-radius: var(--raio);
+  color: var(--cor-apagado);
+  cursor: pointer;
+  flex: 1;
+  font-family: var(--fonte-mono);
+  font-size: 11px;
+  padding: 8px;
+  transition: all 0.15s;
+}
+
+.botao-grupo.ativo {
+  background: var(--ambar);
+  border-color: var(--ambar);
+  color: #000;
+  font-weight: 600;
+}
+
+/* Mensagem de sucesso no cadastro */
+.ok-login {
+  background: rgba(46, 204, 113, 0.1);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+  border-radius: var(--raio);
+  color: var(--verde, #2ecc71);
+  font-family: var(--fonte-mono);
+  font-size: 11px;
+  padding: 8px 12px;
+  text-align: center;
+}
+
+/* Aba Admin na nav — cor diferenciada */
+.nav-aba-admin {
+  color: var(--cor-apagado);
+}
+
+.nav-aba-admin.ativa {
+  border-bottom-color: #e05c2a !important;
+  color: #e05c2a !important;
+}
+
+/* Linhas de usuário no painel admin */
+.linha-usuario {
+  align-items: center;
+  border-bottom: 1px solid var(--cor-borda);
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 10px 0;
+}
+
+.linha-usuario:last-child {
+  border-bottom: none;
+}
+
+.usuario-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.usuario-nome {
+  color: var(--cor-texto);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.usuario-meta {
+  color: var(--cor-apagado);
+  font-family: var(--fonte-mono);
+  font-size: 10px;
+}
+
+.usuario-acoes {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+/* Grupos de relatórios por usuário no admin */
+.grupo-relatorio-admin {
+  border-bottom: 1px solid var(--cor-borda);
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+}
+
+.grupo-relatorio-admin:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.grupo-titulo-admin {
+  color: var(--ambar);
+  font-family: var(--fonte-mono);
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.linha-relatorio-admin {
+  background: var(--cor-fundo-3, #232b3a);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 4px;
+  padding: 7px 10px;
+}
+
+.rel-setor {
+  color: var(--cor-texto);
+  font-size: 12px;
+}
+
+.rel-meta {
+  color: var(--cor-apagado);
+  font-family: var(--fonte-mono);
+  font-size: 10px;
+}
+
+/* Botões extras necessários no admin */
+.botao-laranja {
+  background: rgba(240, 165, 0, 0.12);
+  border-color: var(--ambar) !important;
+  color: var(--ambar) !important;
+}
+
+.botao-laranja:hover {
+  background: rgba(240, 165, 0, 0.22) !important;
+}

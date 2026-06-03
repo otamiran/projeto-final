@@ -1,0 +1,286 @@
+/* ── Barra de navegação ───────────────────────────────────────────────────*/
+.nav {
+  align-items: stretch;
+  background: var(--cor-fundo-2);
+  border-bottom: 2px solid var(--ambar); /* linha âmbar característica */
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+
+/* Logo: hexágono + "Turno" */
+.nav-logo {
+  align-items: center;
+  border-right: 1px solid var(--cor-borda);
+  display: flex;
+  gap: 9px;
+  padding: 12px 14px;
+}
+.nav-nome {
+  color: var(--ambar);
+  font-family: var(--fonte-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Container das abas */
+.nav-abas {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+}
+
+/* Botão de aba */
+.nav-aba {
+  align-items: center;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent; /* borda invisível por padrão */
+  color: var(--cor-apagado);
+  cursor: pointer;
+  display: flex;
+  font-family: var(--fonte-mono);
+  font-size: 10px;
+  font-weight: 600;
+  gap: 5px;
+  letter-spacing: 1px;
+  margin-bottom: -2px; /* alinha com a borda inferior da nav */
+  padding: 0 14px;
+  text-transform: uppercase;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.nav-aba:hover {
+  color: var(--cor-texto);
+}
+/* Aba ativa: borda e texto âmbar */
+.nav-aba.ativa {
+  border-bottom-color: var(--ambar);
+  color: var(--ambar);
+}
+
+/* Badge de contagem nas abas */
+.nav-badge {
+  border-radius: 10px;
+  color: #fff;
+  font-size: 9px;
+  padding: 1px 6px;
+}
+.badge-azul {
+  background: var(--azul);
+}
+.badge-laranja {
+  background: var(--laranja);
+}
+
+/* Área do usuário logado */
+.nav-usuario {
+  align-items: center;
+  border-left: 1px solid var(--cor-borda);
+  color: var(--cor-apagado);
+  display: flex;
+  font-family: var(--fonte-mono);
+  font-size: 9px;
+  gap: 8px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+/* ── Layout base das páginas ──────────────────────────────────────────────*/
+.pagina {
+  display: block;
+}
+
+/* Container de conteúdo centralizado */
+.conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0 auto;
+  max-width: 740px;
+  padding: 18px 14px 100px; /* padding-bottom para não ficar atrás da barra fixa */
+}
+
+/* Texto de orientação no topo das páginas */
+.label-pagina {
+  color: var(--cor-apagado);
+  font-family: var(--fonte-mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ── Barra fixa no rodapé da página Novo ─────────────────────────────────*/
+.barra-rodape {
+  background: var(--cor-fundo-2);
+  border-top: 1px solid var(--cor-borda);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  left: 0;
+  padding: 9px 14px;
+  position: fixed;
+  right: 0;
+  z-index: 150;
+}
+
+/* ── Linha de seleção de setor ────────────────────────────────────────────*/
+.linha-setor {
+  align-items: flex-end;
+  display: flex;
+  gap: 8px;
+}
+.ou {
+  color: var(--cor-apagado);
+  font-size: 11px;
+  padding: 0 4px;
+}
+
+/* ── Botões de adicionar item ─────────────────────────────────────────────*/
+.grade-adicionar {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.botao-adicionar {
+  align-items: center;
+  border: 1px dashed var(--cor-borda-2);
+  border-radius: var(--raio-g);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--fonte-mono);
+  font-size: 10px;
+  gap: 5px;
+  letter-spacing: 1px;
+  padding: 14px;
+  text-align: center;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.botao-adicionar-ocorrencia {
+  border-color: rgba(224, 92, 42, 0.35);
+  color: var(--laranja);
+}
+.botao-adicionar-ocorrencia:hover {
+  background: rgba(224, 92, 42, 0.07);
+  border-color: var(--laranja);
+}
+.botao-adicionar-atividade {
+  border-color: rgba(74, 144, 226, 0.35);
+  color: var(--azul);
+}
+.botao-adicionar-atividade:hover {
+  background: rgba(74, 144, 226, 0.07);
+  border-color: var(--azul);
+}
+
+/* ── Prévia da mensagem ───────────────────────────────────────────────────*/
+/* Abas da prévia ficam encostadas na borda do card */
+.abas {
+  margin: -13px -13px 0;
+}
+
+/* ── Cards da página Abertos ──────────────────────────────────────────────*/
+.card-aberto {
+  background: var(--cor-fundo-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  overflow: hidden;
+}
+.card-aberto-cabecalho {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  padding: 12px 13px;
+}
+.card-aberto-setor {
+  color: var(--ambar);
+  font-family: var(--fonte-mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+.card-aberto-meta {
+  color: var(--cor-apagado);
+  font-size: 11px;
+  margin-top: 2px;
+}
+/* Preview dos itens — scroll se tiver muitos */
+.card-aberto-itens {
+  border-top: 1px solid var(--cor-borda);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 8px 13px;
+}
+/* Botões de ação */
+.card-aberto-acoes {
+  background: var(--cor-fundo-3);
+  border-top: 1px solid var(--cor-borda);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 9px 13px;
+}
+
+/* ── Cards do histórico ───────────────────────────────────────────────────*/
+.card-historico {
+  background: var(--cor-fundo-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  overflow: hidden;
+}
+.card-historico-cabecalho {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  padding: 11px 13px;
+  transition: background 0.15s;
+}
+.card-historico-cabecalho:hover {
+  background: var(--cor-fundo-3);
+}
+.card-historico-titulo {
+  color: var(--ambar);
+  font-family: var(--fonte-mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+.card-historico-meta {
+  color: var(--cor-apagado);
+  font-size: 11px;
+  margin-top: 2px;
+}
+.card-historico-acoes {
+  background: var(--cor-fundo-3);
+  border-top: 1px solid var(--cor-borda);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 8px 13px;
+}
+
+/* ── Responsividade mobile ────────────────────────────────────────────────*/
+@media (max-width: 480px) {
+  .nav-nome {
+    display: none;
+  } /* esconde o nome "Turno" */
+  .nav-aba {
+    padding: 0 10px;
+  } /* abas mais compactas */
+  .nav-usuario {
+    display: none;
+  } /* esconde na tela pequena */
+  .grade-adicionar {
+    grid-template-columns: 1fr;
+  } /* botões empilhados */
+}
