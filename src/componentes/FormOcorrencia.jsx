@@ -63,6 +63,39 @@ export default function FormOcorrencia({ formulario, aoMudar }) {
         />
       </div>
 
+      {/* Duração da intervenção */}
+      <div className="campo">
+        <label>Duração da intervenção</label>
+        <div className="duracao-campos">
+          {/* Horas */}
+          <div className="duracao-grupo">
+            <input
+              type="number"
+              min="0"
+              max="23"
+              placeholder="0"
+              value={formulario.duracao_h ?? ''}
+              onChange={e => aoMudar(f => ({ ...f, duracao_h: e.target.value === '' ? '' : Number(e.target.value) }))}
+              className="input-duracao"
+            />
+            <span className="duracao-label">h</span>
+          </div>
+          {/* Minutos */}
+          <div className="duracao-grupo">
+            <input
+              type="number"
+              min="0"
+              max="59"
+              placeholder="0"
+              value={formulario.duracao_m ?? ''}
+              onChange={e => aoMudar(f => ({ ...f, duracao_m: e.target.value === '' ? '' : Number(e.target.value) }))}
+              className="input-duracao"
+            />
+            <span className="duracao-label">min</span>
+          </div>
+        </div>
+      </div>
+
       {/* Solução */}
       <div className="campo">
         <label>Descrição da solução</label>

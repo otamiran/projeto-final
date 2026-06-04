@@ -307,8 +307,11 @@ export async function gerarPDF(relatorio) {
       linhaInfo('Equipamento', o.equipamento || o.equip)
       linhaInfo('Sintoma',     o.sintoma)
       linhaInfo('Modo/Impacto',`${o.modo || '—'} / ${o.impacto || '—'}`)
-      linhaInfo('Intervenção', o.intervencao || o.tipo_int)
-      linhaInfo('Solução',     o.solucao)
+      linhaInfo('Intervencao', o.intervencao || o.tipo_int)
+      const dh = Number(o.duracao_h) || 0
+      const dm = Number(o.duracao_m) || 0
+      if (dh || dm) linhaInfo('Duracao', [dh ? dh+'h' : '', dm ? dm+'min' : ''].filter(Boolean).join(' '))
+      linhaInfo('Solucao',     o.solucao)
 
       await desenharFotos(o.fotos)
 

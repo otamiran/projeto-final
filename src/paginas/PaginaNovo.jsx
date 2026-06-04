@@ -11,9 +11,10 @@ export default function PaginaNovo({
 }) {
 
   // ── Identificação do técnico (preenchida uma vez ao entrar) ───────────────
-  const [tecnico,     setTecnico]     = useState(sessao.tecnico     || '')
+  // Pré-preenche o nome do técnico com o login do usuário — pode ser alterado depois
+  const [tecnico,     setTecnico]     = useState(sessao.tecnico || sessao.login || sessao.nome || '')
   const [responsavel, setResponsavel] = useState(sessao.responsavel || '')
-  const [idSalvou,    setIdSalvou]    = useState(!!sessao.tecnico)  // true se já salvou
+  const [idSalvou,    setIdSalvou]    = useState(!!(sessao.tecnico || sessao.login))  // true se veio do login
 
   // ── Dados do relatório ────────────────────────────────────────────────────
   const [data,     setData]     = useState(() => new Date().toISOString().split('T')[0])

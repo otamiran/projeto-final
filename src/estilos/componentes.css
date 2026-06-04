@@ -298,3 +298,47 @@
   color: var(--cor-texto-fraco);
   font-size: 0.88em;
 }
+
+/* ── Campo de duração da intervenção ────────────────────────────────────────── */
+.duracao-campos {
+  display: flex;
+  gap: 10px;
+}
+
+.duracao-grupo {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  gap: 6px;
+}
+
+.input-duracao {
+  background: var(--cor-fundo-2);
+  border: 1px solid var(--cor-borda-2);
+  border-radius: var(--raio);
+  color: var(--cor-texto);
+  font-family: var(--fonte-mono);
+  font-size: 14px;
+  padding: 8px 10px;
+  text-align: center;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+
+.input-duracao:focus {
+  border-color: var(--ambar);
+  outline: none;
+}
+
+/* Remove setas do input number em Firefox e Chrome */
+.input-duracao::-webkit-inner-spin-button,
+.input-duracao::-webkit-outer-spin-button { -webkit-appearance: none; }
+.input-duracao[type=number] { -moz-appearance: textfield; }
+
+.duracao-label {
+  color: var(--cor-label);
+  flex-shrink: 0;
+  font-family: var(--fonte-mono);
+  font-size: 12px;
+  font-weight: 600;
+}

@@ -14,8 +14,18 @@ export default function LinhaItem({ item, indice, aoEditar, aoExcluir, validacao
         Pendente:        'ponto-vermelho',
       }[item.status] || 'ponto-cinza'
 
+  // Formata duração: "1h 30min", "45min", "2h" ou omite se não preenchida
+  function formatarDuracao(h, m) {
+    const hNum = Number(h) || 0
+    const mNum = Number(m) || 0
+    if (!hNum && !mNum) return null
+    return [hNum ? `${hNum}h` : '', mNum ? `${mNum}min` : ''].filter(Boolean).join(' ')
+  }
+
+  const duracao = ehOcorrencia ? formatarDuracao(item.duracao_h, item.duracao_m) : null
+
   const subtexto = ehOcorrencia
-    ? [item.modo, item.impacto, item.intervencao || item.tipo_int].filter(Boolean).join(' · ') || '—'
+    ? [item.modo, item.impacto, item.intervencao || item.tipo_int, duracao ? `⏱ ${duracao}` : null].filter(Boolean).join(' · ') || '—'
     : `${item.descricao || item.desc || '—'} · ${EMOJI_STATUS[item.status] || ''} ${item.status || '—'}`
 
   const quantidadeFotos = (item.fotos || []).length

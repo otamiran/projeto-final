@@ -52,7 +52,7 @@ export default function PaginaLogin({ aoEntrar, carregando }) {
     <div className="pagina-login">
       {/* ── Logo ── */}
       <div className="logo-login">
-        <div className="hexagono" />
+        <div className="hexagono"/> 
         <span className="nome-app">PASSAGEM DE TURNO</span>
       </div>
 
