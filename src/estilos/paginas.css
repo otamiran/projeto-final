@@ -271,9 +271,40 @@
 
 /* ── Responsividade mobile ────────────────────────────────────────────────*/
 @media (max-width: 480px) {
+  /* Esconde nome do app para dar espaço às abas */
   .nav-nome {
     display: none;
-  } /* esconde o nome "Turno" */
+  }
+
+  /* Logo mais compacto */
+  .nav-logo {
+    padding: 0 8px;
+  }
+
+  /* Abas mais compactas */
+  .nav-aba {
+    font-size: 9px;
+    padding: 0 8px;
+  }
+
+  /* Área do usuário: mostra só o botão Sair, sem nome */
+  .nav-usuario {
+    border-left: 1px solid var(--cor-borda);
+    display: flex;
+    flex-shrink: 0;
+    padding: 0 8px;
+  }
+
+  /* Esconde o texto com o nome do usuário, mantém só o botão */
+  .nav-usuario > span:first-child {
+    display: none;
+  }
+
+  /* Botões empilhados no formulário */
+  .grade-adicionar {
+    grid-template-columns: 1fr;
+  }
+} /* esconde o nome "Turno" */
   .nav-aba {
     padding: 0 10px;
   } /* abas mais compactas */
