@@ -27,10 +27,11 @@
   text-transform: uppercase;
 }
 
-/* Container das abas */
+/* Container das abas — flex: 1 mas com min-width 0 para não empurrar o botão Sair */
 .nav-abas {
   display: flex;
   flex: 1;
+  min-width: 0;       /* permite encolher abaixo do conteúdo natural */
   overflow-x: auto;
 }
 
@@ -83,6 +84,7 @@
   border-left: 1px solid var(--cor-borda);
   color: var(--cor-apagado);
   display: flex;
+  flex-shrink: 0;        /* nunca deixa o flex comprimir este bloco */
   font-family: var(--fonte-mono);
   font-size: 9px;
   gap: 8px;
@@ -271,10 +273,35 @@
 
 /* ── Responsividade mobile ────────────────────────────────────────────────*/
 @media (max-width: 480px) {
-  /* Esconde nome do app para dar espaço às abas */
-  .nav-nome {
-    display: none;
+  /* Esconde nome do app */
+  .nav-nome { display: none; }
+
+  /* Logo mais compacto */
+  .nav-logo { padding: 0 8px; }
+
+  /* Abas mais compactas */
+  .nav-aba { font-size: 9px; padding: 0 8px; }
+
+  /* Área do usuário: garante que fique visível e não encolha */
+  .nav-usuario {
+    flex-shrink: 0;
+    min-width: 0;
+    padding: 0 6px;
   }
+
+  /* Esconde só o texto do nome, mantém o botão Sair */
+  .nav-usuario > span:first-child { display: none; }
+
+  /* Botão Sair: tamanho mínimo garantido no mobile */
+  .nav-usuario .botao-pequeno {
+    font-size: 9px;
+    padding: 4px 10px;
+    white-space: nowrap;
+  }
+
+  /* Botões empilhados no formulário */
+  .grade-adicionar { grid-template-columns: 1fr; }
+}
 
   /* Logo mais compacto */
   .nav-logo {
