@@ -91,6 +91,7 @@ select option {
   color: var(--cor-label);
   font-weight: 600;
   font-family: var(--fonte-mono);
+  text-align: start;
 }
 .campo small {
   font-size: 10px;

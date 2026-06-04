@@ -303,13 +303,14 @@
 .duracao-campos {
   display: flex;
   gap: 10px;
+  max-width: fit-content;
 }
 
 .duracao-grupo {
   align-items: center;
   display: flex;
   flex: 1;
-  gap: 6px;
+  gap: 10px;
 }
 
 .input-duracao {
