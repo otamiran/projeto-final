@@ -279,60 +279,44 @@
 
 /* ── Responsividade mobile ────────────────────────────────────────────────*/
 
+
 /* ── Responsividade mobile ────────────────────────────────────────────────*/
 @media (max-width: 480px) {
 
-  /* Nav: logo fixo à esquerda | abas rolam | Sair fixo à direita */
+  /* Nav de uma linha só:
+     [hexágono] [aba1 aba2 aba3 → rola →] [Sair]   */
   .nav {
     flex-wrap: nowrap;
-    overflow: hidden;
   }
 
-  /* Logo compacto — só o hexágono */
-  .nav-logo {
-    flex-shrink: 0;
-    padding: 0 10px;
-  }
-  .nav-nome {
-    display: none;
-  }
+  /* Hexágono sem texto */
+  .nav-logo { flex-shrink: 0; padding: 0 10px; }
+  .nav-nome  { display: none; }
 
-  /* Abas rolam horizontalmente sem mostrar scrollbar */
+  /* Abas rolam sem scrollbar visível */
   .nav-abas {
     flex: 1;
     min-width: 0;
     overflow-x: auto;
     scrollbar-width: none;
   }
-  .nav-abas::-webkit-scrollbar {
-    display: none;
-  }
-  .nav-aba {
-    font-size: 9px;
-    padding: 0 10px;
-  }
+  .nav-abas::-webkit-scrollbar { display: none; }
+  .nav-aba { font-size: 9px; padding: 0 10px; }
 
-  /* Botão Sair: SEMPRE visível, fixo à direita */
+  /* ── BOTÃO SAIR: sempre visível no canto direito ──
+     flex-shrink:0 + display:flex garantem que nunca suma */
   .nav-usuario {
+    align-items: center;
     background: var(--cor-fundo-2);
     border-left: 1px solid var(--cor-borda);
-    display: flex !important;   /* garante visível mesmo com regras anteriores */
+    display: flex;
     flex-shrink: 0;
-    padding: 0 8px;
+    gap: 0;
+    padding: 0 6px;
   }
+  /* Esconde só o nome, não o botão */
+  .nav-usuario > span:first-child { display: none; }
 
-  /* Esconde só o nome do usuário — mantém o botão */
-  .nav-usuario > span:first-child {
-    display: none;
-  }
-
-  .nav-usuario .botao-pequeno {
-    font-size: 10px;
-    padding: 5px 10px;
-  }
-
-  /* Formulário: botões empilhados */
-  .grade-adicionar {
-    grid-template-columns: 1fr;
-  }
+  /* Formulário */
+  .grade-adicionar { grid-template-columns: 1fr; }
 }
