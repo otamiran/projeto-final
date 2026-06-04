@@ -278,41 +278,54 @@
 }
 
 /* ── Responsividade mobile ────────────────────────────────────────────────*/
+
+/* ── Responsividade mobile ────────────────────────────────────────────────*/
 @media (max-width: 480px) {
 
-  /* Nav: tudo numa linha — logo fixo | abas rolam | sair fixo */
+  /* Nav: logo fixo à esquerda | abas rolam | Sair fixo à direita */
   .nav {
     flex-wrap: nowrap;
+    overflow: hidden;
   }
 
-  /* Logo compacto à esquerda */
+  /* Logo compacto — só o hexágono */
   .nav-logo {
+    flex-shrink: 0;
     padding: 0 10px;
   }
   .nav-nome {
-    display: none;            /* esconde texto, fica só o hexágono */
+    display: none;
   }
 
-  /* Abas: rolam horizontalmente no meio */
+  /* Abas rolam horizontalmente sem mostrar scrollbar */
   .nav-abas {
     flex: 1;
     min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-abas::-webkit-scrollbar {
+    display: none;
   }
   .nav-aba {
     font-size: 9px;
     padding: 0 10px;
   }
 
-  /* Botão Sair: fixo à direita, sempre visível */
+  /* Botão Sair: SEMPRE visível, fixo à direita */
   .nav-usuario {
     background: var(--cor-fundo-2);
+    border-left: 1px solid var(--cor-borda);
+    display: flex !important;   /* garante visível mesmo com regras anteriores */
     flex-shrink: 0;
     padding: 0 8px;
   }
-  /* Esconde o nome do usuário, mostra só o botão */
+
+  /* Esconde só o nome do usuário — mantém o botão */
   .nav-usuario > span:first-child {
     display: none;
   }
+
   .nav-usuario .botao-pequeno {
     font-size: 10px;
     padding: 5px 10px;
@@ -322,44 +335,4 @@
   .grade-adicionar {
     grid-template-columns: 1fr;
   }
-}
-
-  /* Logo mais compacto */
-  .nav-logo {
-    padding: 0 8px;
-  }
-
-  /* Abas mais compactas */
-  .nav-aba {
-    font-size: 9px;
-    padding: 0 8px;
-  }
-
-  /* Área do usuário: mostra só o botão Sair, sem nome */
-  .nav-usuario {
-    border-left: 1px solid var(--cor-borda);
-    display: flex;
-    flex-shrink: 0;
-    padding: 0 8px;
-  }
-
-  /* Esconde o texto com o nome do usuário, mantém só o botão */
-  .nav-usuario > span:first-child {
-    display: none;
-  }
-
-  /* Botões empilhados no formulário */
-  .grade-adicionar {
-    grid-template-columns: 1fr;
-  }
-} /* esconde o nome "Turno" */
-  .nav-aba {
-    padding: 0 10px;
-  } /* abas mais compactas */
-  .nav-usuario {
-    display: none;
-  } /* esconde na tela pequena */
-  .grade-adicionar {
-    grid-template-columns: 1fr;
-  } /* botões empilhados */
 }

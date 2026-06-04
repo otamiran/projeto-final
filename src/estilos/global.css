@@ -179,6 +179,7 @@ select option {
 
 /* Tamanhos */
 .botao-pequeno {
+  
   padding: 3px 8px;
   font-size: 9px;
 }
