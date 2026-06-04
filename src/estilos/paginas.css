@@ -2,9 +2,10 @@
 .nav {
   align-items: stretch;
   background: var(--cor-fundo-2);
-  border-bottom: 2px solid var(--ambar); /* linha âmbar característica */
+  border-bottom: 2px solid var(--ambar);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
   display: flex;
+  overflow: hidden;          /* contém o scroll interno */
   position: sticky;
   top: 0;
   z-index: 200;
@@ -15,6 +16,7 @@
   align-items: center;
   border-right: 1px solid var(--cor-borda);
   display: flex;
+  flex-shrink: 0;             /* nunca encolhe */
   gap: 9px;
   padding: 12px 14px;
 }
@@ -27,12 +29,16 @@
   text-transform: uppercase;
 }
 
-/* Container das abas — flex: 1 mas com min-width 0 para não empurrar o botão Sair */
+/* Container das abas — rola horizontalmente, nunca expulsa o botão Sair */
 .nav-abas {
   display: flex;
   flex: 1;
-  min-width: 0;       /* permite encolher abaixo do conteúdo natural */
+  min-width: 0;              /* permite encolher abaixo do conteúdo natural */
   overflow-x: auto;
+  scrollbar-width: none;     /* esconde scrollbar (Firefox) */
+}
+.nav-abas::-webkit-scrollbar {
+  display: none;             /* esconde scrollbar (Chrome/Safari) */
 }
 
 /* Botão de aba */
@@ -84,7 +90,7 @@
   border-left: 1px solid var(--cor-borda);
   color: var(--cor-apagado);
   display: flex;
-  flex-shrink: 0;        /* nunca deixa o flex comprimir este bloco */
+  flex-shrink: 0;            /* NUNCA encolhe — fica sempre visível à direita */
   font-family: var(--fonte-mono);
   font-size: 9px;
   gap: 8px;
@@ -273,34 +279,49 @@
 
 /* ── Responsividade mobile ────────────────────────────────────────────────*/
 @media (max-width: 480px) {
-  /* Esconde nome do app */
-  .nav-nome { display: none; }
 
-  /* Logo mais compacto */
-  .nav-logo { padding: 0 8px; }
+  /* Nav: tudo numa linha — logo fixo | abas rolam | sair fixo */
+  .nav {
+    flex-wrap: nowrap;
+  }
 
-  /* Abas mais compactas */
-  .nav-aba { font-size: 9px; padding: 0 8px; }
+  /* Logo compacto à esquerda */
+  .nav-logo {
+    padding: 0 10px;
+  }
+  .nav-nome {
+    display: none;            /* esconde texto, fica só o hexágono */
+  }
 
-  /* Área do usuário: garante que fique visível e não encolha */
-  .nav-usuario {
-    flex-shrink: 0;
+  /* Abas: rolam horizontalmente no meio */
+  .nav-abas {
+    flex: 1;
     min-width: 0;
-    padding: 0 6px;
   }
-
-  /* Esconde só o texto do nome, mantém o botão Sair */
-  .nav-usuario > span:first-child { display: none; }
-
-  /* Botão Sair: tamanho mínimo garantido no mobile */
-  .nav-usuario .botao-pequeno {
+  .nav-aba {
     font-size: 9px;
-    padding: 4px 10px;
-    white-space: nowrap;
+    padding: 0 10px;
   }
 
-  /* Botões empilhados no formulário */
-  .grade-adicionar { grid-template-columns: 1fr; }
+  /* Botão Sair: fixo à direita, sempre visível */
+  .nav-usuario {
+    background: var(--cor-fundo-2);
+    flex-shrink: 0;
+    padding: 0 8px;
+  }
+  /* Esconde o nome do usuário, mostra só o botão */
+  .nav-usuario > span:first-child {
+    display: none;
+  }
+  .nav-usuario .botao-pequeno {
+    font-size: 10px;
+    padding: 5px 10px;
+  }
+
+  /* Formulário: botões empilhados */
+  .grade-adicionar {
+    grid-template-columns: 1fr;
+  }
 }
 
   /* Logo mais compacto */
