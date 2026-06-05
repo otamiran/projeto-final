@@ -1,9 +1,7 @@
 // Funções de autenticação via Supabase
-// Substitui a lista fixa de usuários do constantes.js
-
 import { bd, TABELA_USUARIOS } from './supabase'
 
-// Gera hash SHA-256 da senha (Web Crypto API — disponível em todos os browsers modernos)
+// Gera hash SHA-256 da senha
 async function gerarHash(texto) {
   const buffer = await crypto.subtle.digest(
     'SHA-256',
@@ -14,67 +12,77 @@ async function gerarHash(texto) {
     .join('')
 }
 
-// Tenta fazer login — retorna { ok, sessao } ou { ok: false, erro }
 export async function fazerLoginBD(username, senha) {
   try {
     const hash = await gerarHash(senha)
 
-    // Busca usuário com username e senha corretos
+    // Busca pelo username primeiro (sem filtrar senha)
     const { data, error } = await bd
       .from(TABELA_USUARIOS)
       .select('*')
       .eq('username', username.trim())
-      .eq('senha_hash', hash)
-      .single()
 
-    if (error || !data) {
-      return { ok: false, erro: 'Usuário ou senha incorretos.' }
+    if (error) {
+      console.error('Erro ao buscar usuário:', error)
+      return { ok: false, erro: 'Erro de conexão: ' + error.message }
     }
 
-    // Verifica se o cadastro foi aprovado pelo admin
-    if (data.status === 'pendente') {
+    // Nenhum usuário encontrado com esse username
+    if (!data || data.length === 0) {
+      return { ok: false, erro: 'Usuário não encontrado.' }
+    }
+
+    const usuario = data[0]
+
+    // Compara o hash manualmente
+    if (usuario.senha_hash !== hash) {
+      console.log('Hash esperado:', hash)
+      console.log('Hash no banco:', usuario.senha_hash)
+      return { ok: false, erro: 'Senha incorreta.' }
+    }
+
+    // Verifica status
+    if (usuario.status === 'pendente') {
       return { ok: false, erro: 'Cadastro aguardando aprovação do administrador.' }
     }
-    if (data.status === 'bloqueado') {
+    if (usuario.status === 'bloqueado') {
       return { ok: false, erro: 'Acesso bloqueado. Contate o administrador.' }
     }
 
-    // Atualiza timestamp do último acesso (sem aguardar)
+    // Atualiza último acesso
     bd.from(TABELA_USUARIOS)
       .update({ ultimo_acesso: Date.now() })
-      .eq('id', data.id)
+      .eq('id', usuario.id)
 
-    // Retorna sessão sem a senha
     return {
       ok: true,
       sessao: {
-        id: data.id,
-        login: data.username,
-        nome: data.username,
-        grupo: data.grupo,  // 'manutencao' | 'producao' | 'admin'
-        perfil: data.grupo === 'admin' ? 'admin' : 'usuario',
-        tecnico: '',        // preenchido depois na tela principal
+        id:          usuario.id,
+        login:       usuario.username,
+        nome:        usuario.username,
+        grupo:       usuario.grupo,
+        perfil:      usuario.grupo === 'admin' ? 'admin' : 'usuario',
+        tecnico:     '',
         responsavel: '',
       },
     }
   } catch (e) {
-    return { ok: false, erro: 'Erro de conexão. Tente novamente.' }
+    console.error('Erro no login:', e)
+    return { ok: false, erro: 'Erro inesperado: ' + String(e) }
   }
 }
 
-// Solicita cadastro de novo usuário — fica com status 'pendente' até admin aprovar
 export async function solicitarCadastro(username, senha, grupo) {
   try {
     const hash = await gerarHash(senha)
     const { error } = await bd.from(TABELA_USUARIOS).insert({
-      username: username.trim(),
+      username:   username.trim(),
       senha_hash: hash,
-      grupo,             // 'manutencao' | 'producao'
-      status: 'pendente',
-      criado_em: Date.now(),
+      grupo,
+      status:     'pendente',
+      criado_em:  Date.now(),
     })
     if (error) {
-      // Código 23505 = violação de unique (username já existe)
       if (error.code === '23505') return { ok: false, erro: 'Usuário já existe.' }
       return { ok: false, erro: 'Erro ao cadastrar: ' + error.message }
     }
@@ -84,12 +92,10 @@ export async function solicitarCadastro(username, senha, grupo) {
   }
 }
 
-// Remove a sessão do navegador
 export function fazerLogoutBD() {
   try { localStorage.removeItem('turno_sessao') } catch {}
 }
 
-// Lê sessão salva no navegador
 export function lerSessaoBD() {
   try {
     const salvo = localStorage.getItem('turno_sessao')

@@ -1,0 +1,110 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Estilos do módulo FCA
+───────────────────────────────────────────────────────────────────────────── */
+.card-fca { border-left: 3px solid var(--ambar); }
+
+.fca-header {
+  align-items: flex-start; display: flex; flex-wrap: wrap;
+  gap: 10px; justify-content: space-between; padding: 14px 16px 10px;
+}
+.fca-equipamento {
+  color: var(--ambar); font-family: var(--fonte-mono);
+  font-size: 14px; font-weight: 700; letter-spacing: 0.3px;
+}
+.fca-meta { color: var(--cor-apagado); font-size: 11px; margin-top: 3px; }
+
+.fca-badge-validacao {
+  border-radius: var(--raio); flex-shrink: 0;
+  font-family: var(--fonte-mono); font-size: 11px; padding: 4px 10px;
+}
+.fca-aprovado {
+  background: rgba(46,204,113,.12); border: 1px solid rgba(46,204,113,.3);
+  color: var(--verde, #2ecc71);
+}
+.fca-reprovado {
+  background: rgba(224,80,80,.12); border: 1px solid rgba(224,80,80,.3);
+  color: var(--vermelho, #e05050);
+}
+.fca-val-data { color: var(--cor-apagado); font-weight: 400; }
+
+.fca-corpo {
+  border-top: 1px solid var(--cor-borda);
+  display: flex; flex-direction: column; padding: 0 16px;
+}
+.fca-secao { border-bottom: 1px solid var(--cor-borda); padding: 10px 0; }
+.fca-secao:last-child { border-bottom: none; }
+
+.fca-secao-header {
+  align-items: center; color: var(--cor-label); display: flex;
+  font-family: var(--fonte-mono); font-size: 10px; font-weight: 700;
+  gap: 6px; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase;
+}
+.fca-texto { color: var(--cor-texto); font-size: 13px; line-height: 1.6; }
+
+.fca-lista { display: flex; flex-direction: column; gap: 4px; list-style: none; padding: 0; }
+.fca-lista li {
+  align-items: flex-start; color: var(--cor-texto);
+  display: flex; font-size: 13px; gap: 8px; line-height: 1.5;
+}
+.fca-lista li::before {
+  color: var(--ambar); content: "•"; flex-shrink: 0; font-weight: 700; margin-top: 1px;
+}
+
+.fca-rodape {
+  border-top: 1px solid var(--cor-borda);
+  display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px;
+}
+
+/* ── Formulário ──────────────────────────────────────────────────────────── */
+.form-fca { display: flex; flex-direction: column; gap: 12px; }
+
+.fca-secao-form {
+  background: var(--cor-fundo-3, #1e2330);
+  border: 1px solid var(--cor-borda); border-radius: var(--raio); padding: 10px 12px;
+}
+.fca-secao-titulo {
+  color: var(--cor-label); font-family: var(--fonte-mono); font-size: 10px;
+  font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase;
+}
+.fca-input-texto {
+  background: var(--cor-fundo-2); border: 1px solid var(--cor-borda-2);
+  border-radius: var(--raio); color: var(--cor-texto); font-family: var(--fonte-sans);
+  font-size: 13px; outline: none; padding: 8px 10px; transition: border-color .15s; width: 100%;
+}
+.fca-input-texto:focus { border-color: var(--ambar); }
+.fca-textarea {
+  background: var(--cor-fundo-2); border: 1px solid var(--cor-borda-2);
+  border-radius: var(--raio); color: var(--cor-texto); font-family: var(--fonte-sans);
+  font-size: 13px; line-height: 1.5; outline: none; padding: 8px 10px;
+  resize: vertical; transition: border-color .15s; width: 100%;
+}
+.fca-textarea:focus { border-color: var(--ambar); }
+
+.fca-item-row { align-items: center; display: flex; gap: 6px; margin-bottom: 5px; }
+.fca-bullet { color: var(--ambar); flex-shrink: 0; font-size: 14px; font-weight: 700; width: 14px; }
+
+.fca-input-item {
+  background: var(--cor-fundo-2); border: 1px solid var(--cor-borda);
+  border-radius: var(--raio); color: var(--cor-texto); flex: 1;
+  font-size: 12px; outline: none; padding: 5px 8px; transition: border-color .15s;
+}
+.fca-input-item:focus { border-color: var(--ambar); }
+.fca-input-novo { border-style: dashed; color: var(--cor-apagado); }
+.fca-input-novo:focus { border-color: var(--ambar); border-style: solid; color: var(--cor-texto); }
+
+.fca-btn-remover {
+  background: none; border: none; color: var(--cor-apagado);
+  cursor: pointer; flex-shrink: 0; font-size: 11px; padding: 2px 4px; transition: color .15s;
+}
+.fca-btn-remover:hover { color: var(--vermelho, #e05050); }
+
+.fca-btn-adicionar {
+  background: rgba(240,165,0,.1); border: 1px solid rgba(240,165,0,.3);
+  border-radius: var(--raio); color: var(--ambar); cursor: pointer;
+  flex-shrink: 0; font-size: 14px; font-weight: 700; padding: 3px 10px; transition: background .15s;
+}
+.fca-btn-adicionar:hover { background: rgba(240,165,0,.2); }
+
+.fca-form-botoes { display: flex; gap: 8px; justify-content: flex-end; padding-top: 4px; }
+
+.nav-aba-fca.ativa { border-bottom-color: var(--ambar) !important; color: var(--ambar) !important; }

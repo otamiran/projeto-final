@@ -1,45 +1,55 @@
 import { useState, useRef } from 'react'
 
-import { useAutenticacaoBD }  from './ganchos/useAutenticacaoBD'
-import { useRelatorios }       from './ganchos/useRelatorios'
-import { useAviso }            from './ganchos/useAviso'
-import { useConfirmacao }      from './ganchos/useConfirmacao'
+// Gancho de autenticação via banco (substitui useAutenticacao)
+import { useAutenticacaoBD } from './ganchos/useAutenticacaoBD'
+import { useRelatorios } from './ganchos/useRelatorios'
+import { useAviso } from './ganchos/useAviso'
+import { useConfirmacao } from './ganchos/useConfirmacao'
 
-import PaginaLogin         from './paginas/PaginaLogin'
-import PaginaNovo          from './paginas/PaginaNovo'
-import PaginaAbertos       from './paginas/PaginaAbertos'
-import PaginaHistorico     from './paginas/PaginaHistorico'
+// Páginas
+import PaginaLogin    from './paginas/PaginaLogin'
+import PaginaNovo     from './paginas/PaginaNovo'
+import PaginaAbertos  from './paginas/PaginaAbertos'
+import PaginaHistorico from './paginas/PaginaHistorico'
 import PaginaAdmin         from './paginas/PaginaAdmin'
 import PaginaProducao      from './paginas/PaginaProducao'
 import PaginaFCA           from './paginas/PaginaFCA'
 import PaginaFCAProducao   from './paginas/PaginaFCAProducao'
-import PaginaAlmoxarifado  from './paginas/PaginaAlmoxarifado'
 
-import PainelItem          from './componentes/PainelItem'
-import ModalVerRelatorio   from './componentes/ModalVerRelatorio'
-import ModalWhatsapp       from './componentes/ModalWhatsapp'
-import ModalConfirmacao    from './componentes/ModalConfirmacao'
-import Aviso               from './componentes/Aviso'
+// Componentes de modal
+import PainelItem       from './componentes/PainelItem'
+import ModalVerRelatorio from './componentes/ModalVerRelatorio'
+import ModalWhatsapp    from './componentes/ModalWhatsapp'
+import ModalConfirmacao from './componentes/ModalConfirmacao'
+import Aviso            from './componentes/Aviso'
 
+// Almoxarifado
+import PaginaAlmoxarifado from './paginas/PaginaAlmoxarifado'
+
+// Estilos
 import './estilos/global.css'
 import './estilos/login.css'
 import './estilos/componentes.css'
 import './estilos/paginas.css'
 import './estilos/producao.css'
-import './estilos/fca.css'
+import './estilos/fca.css'  // novo: estilos da tela de produção
 
 export default function App() {
+  // Aba ativa do app principal (manutenção e admin)
   const [aba, setAba] = useState('novo')
 
+  // Modais de visualização e WhatsApp
   const [relatorioVendo, setRelatorioVendo] = useState(null)
-  const [relatorioWa,    setRelatorioWa]    = useState(null)
+  const [relatorioWa, setRelatorioWa]       = useState(null)
 
-  const [painelAberto,     setPainelAberto]     = useState(false)
-  const [painelTipo,       setPainelTipo]       = useState('ocorrencia')
-  const [itemEditando,     setItemEditando]     = useState(null)
-  const [indiceEditando,   setIndiceEditando]   = useState(null)
+  // Estado do painel de item (bottom sheet)
+  const [painelAberto, setPainelAberto]   = useState(false)
+  const [painelTipo, setPainelTipo]       = useState('ocorrencia')
+  const [itemEditando, setItemEditando]   = useState(null)
+  const [indiceEditando, setIndiceEditando] = useState(null)
   const idRelatorioRef = useRef(null)
 
+  // ── Ganchos ────────────────────────────────────────────────────────────────
   const {
     sessao, estaLogado, carregando: carregandoAuth,
     entrar, sair, atualizarIdentificacao,
@@ -50,12 +60,18 @@ export default function App() {
   const { aviso, mostrar: mostrarAviso }            = useAviso()
   const { confirmacaoAberta, mensagemConfirmacao, pedir, confirmar, cancelar } = useConfirmacao()
 
+  // ── Controle do painel de item ─────────────────────────────────────────────
   const painel = {
     setIdRelatorio: id => { idRelatorioRef.current = id },
-    abrirNovo:    tipo         => { setPainelTipo(tipo); setItemEditando(null);  setIndiceEditando(null);  setPainelAberto(true) },
-    abrirEditar:  (item, idx)  => { setPainelTipo(item.tipo); setItemEditando(item); setIndiceEditando(idx); setPainelAberto(true) },
+    abrirNovo: tipo => {
+      setPainelTipo(tipo); setItemEditando(null); setIndiceEditando(null); setPainelAberto(true)
+    },
+    abrirEditar: (item, indice) => {
+      setPainelTipo(item.tipo); setItemEditando(item); setIndiceEditando(indice); setPainelAberto(true)
+    },
   }
 
+  // ── Gerador de PDF (importado dinamicamente) ───────────────────────────────
   async function gerarPDF(relatorio) {
     mostrarAviso('Gerando PDF, aguarde...')
     const { gerarPDF: gerar } = await import('./utilitarios/geradorPDF')
@@ -67,6 +83,7 @@ export default function App() {
     mostrarAviso('✓ PDF baixado!')
   }
 
+  // ── Excluir do histórico ───────────────────────────────────────────────────
   function excluirDoHistorico(id) {
     setRelatorioVendo(null)
     pedir('Excluir permanentemente este relatório?', async () => {
@@ -82,7 +99,8 @@ export default function App() {
     return <PaginaLogin aoEntrar={entrar} carregando={carregandoAuth} />
   }
 
-  // ── Tela de produção ───────────────────────────────────────────────────────
+  // ── Tela de produção (apenas visualização + validação) ─────────────────────
+  // Produção vê apenas os relatórios abertos, sem poder editar nada
   if (ehProducao) {
     return (
       <>
@@ -100,26 +118,30 @@ export default function App() {
             </button>
           </div>
           <div className="nav-usuario">
-            <span>{sessao.login} · 🏭</span>
+            <span>{sessao.login} · 🏭 Produção</span>
             <button className="botao botao-pequeno" onClick={sair}>Sair</button>
           </div>
         </nav>
-
         {aba === 'producao' && (
+          {(aba === 'producao' || !aba) && (
           <PaginaProducao sessao={sessao} abertos={abertos} status={status} />
         )}
         {aba === 'fca' && (
           <PaginaFCAProducao sessao={sessao} mostrarAviso={mostrarAviso} />
         )}
-
+        )}
+        {aba === 'fca' && (
+          <PaginaFCAProducao sessao={sessao} mostrarAviso={mostrarAviso} />
+        )}
         <Aviso aviso={aviso} />
       </>
     )
   }
 
-  // ── App manutenção + admin ─────────────────────────────────────────────────
+  // ── App de manutenção + admin ──────────────────────────────────────────────
   return (
     <>
+      {/* ── Navegação ── */}
       <nav className="nav">
         <div className="nav-logo">
           <div className="hexagono" />
@@ -139,7 +161,7 @@ export default function App() {
             {historico.length > 0 && <span className="nav-badge badge-laranja">{historico.length}</span>}
           </button>
           <button className={`nav-aba ${aba === 'almox' ? 'ativa' : ''}`} onClick={() => setAba('almox')}>
-            <h1>📦</h1> Almox
+            <h1>📦</h1> Almoxarifado
           </button>
           <button className={`nav-aba nav-aba-fca ${aba === 'fca' ? 'ativa' : ''}`} onClick={() => setAba('fca')}>
             <h1>📋</h1> FCA
@@ -152,28 +174,46 @@ export default function App() {
         </div>
 
         <div className="nav-usuario">
-          <span>{sessao.tecnico || sessao.nome}{ehAdmin && ' 👑'}</span>
+          <span>
+            {sessao.tecnico || sessao.nome}
+            {ehAdmin && ' 👑'}
+          </span>
           <button className="botao botao-pequeno" onClick={sair}>Sair</button>
         </div>
       </nav>
 
+      {/* ── Páginas ── */}
       {aba === 'novo' && (
         <PaginaNovo
-          sessao={sessao} abertos={abertos} status={status} painel={painel}
-          pedir={pedir} mostrarAviso={mostrarAviso} recarregar={recarregar}
-          aoAbrirWhatsapp={setRelatorioWa} atualizarIdentificacao={atualizarIdentificacao}
+          sessao={sessao}
+          abertos={abertos}
+          status={status}
+          painel={painel}
+          pedir={pedir}
+          mostrarAviso={mostrarAviso}
+          recarregar={recarregar}
+          aoAbrirWhatsapp={setRelatorioWa}
+          atualizarIdentificacao={atualizarIdentificacao}
         />
       )}
       {aba === 'abertos' && (
         <PaginaAbertos
-          abertos={abertos} sessao={sessao} aoVer={setRelatorioVendo}
-          pedir={pedir} mostrarAviso={mostrarAviso} recarregar={recarregar}
+          abertos={abertos}
+          sessao={sessao}
+          aoVer={setRelatorioVendo}
+          pedir={pedir}
+          mostrarAviso={mostrarAviso}
+          recarregar={recarregar}
         />
       )}
       {aba === 'historico' && (
         <PaginaHistorico
-          historico={historico} sessao={sessao} aoVer={setRelatorioVendo}
-          pedir={pedir} mostrarAviso={mostrarAviso} recarregar={recarregar}
+          historico={historico}
+          sessao={sessao}
+          aoVer={setRelatorioVendo}
+          pedir={pedir}
+          mostrarAviso={mostrarAviso}
+          recarregar={recarregar}
         />
       )}
       {aba === 'almox' && (
@@ -182,37 +222,59 @@ export default function App() {
       {aba === 'fca' && (
         <PaginaFCA sessao={sessao} pedir={pedir} mostrarAviso={mostrarAviso} />
       )}
+      {aba === 'fca' && (
+        <PaginaFCA sessao={sessao} pedir={pedir} mostrarAviso={mostrarAviso} />
+      )}
       {aba === 'admin' && ehAdmin && (
         <PaginaAdmin
-          sessao={sessao} historico={historico}
-          pedir={pedir} mostrarAviso={mostrarAviso} aoVerRelatorio={setRelatorioVendo}
+          sessao={sessao}
+          historico={historico}
+          pedir={pedir}
+          mostrarAviso={mostrarAviso}
+          aoVerRelatorio={setRelatorioVendo}
         />
       )}
 
+      {/* ── Painel de item (bottom sheet) ── */}
       <PainelItem
-        aberto={painelAberto} tipo={painelTipo}
-        itemEditando={itemEditando} indiceEditando={indiceEditando}
+        aberto={painelAberto}
+        tipo={painelTipo}
+        itemEditando={itemEditando}
+        indiceEditando={indiceEditando}
         idRelatorio={idRelatorioRef.current}
         nomeusuario={sessao.tecnico || sessao.nome}
-        aoSalvar={recarregar} aoFechar={() => setPainelAberto(false)}
+        aoSalvar={recarregar}
+        aoFechar={() => setPainelAberto(false)}
         mostrarAviso={mostrarAviso}
       />
 
+      {/* ── Modal: ver relatório ── */}
       <ModalVerRelatorio
-        relatorio={relatorioVendo} sessao={sessao} podeExcluir={true}
-        aoExcluir={excluirDoHistorico} aoFechar={() => setRelatorioVendo(null)}
-        aoGerarPDF={gerarPDF} mostrarAviso={mostrarAviso}
+        relatorio={relatorioVendo}
+        sessao={sessao}
+        podeExcluir={true}
+        aoExcluir={excluirDoHistorico}
+        aoFechar={() => setRelatorioVendo(null)}
+        aoGerarPDF={gerarPDF}
+        mostrarAviso={mostrarAviso}
       />
 
+      {/* ── Modal: WhatsApp ── */}
       <ModalWhatsapp
-        relatorio={relatorioWa} aoFechar={() => setRelatorioWa(null)} mostrarAviso={mostrarAviso}
+        relatorio={relatorioWa}
+        aoFechar={() => setRelatorioWa(null)}
+        mostrarAviso={mostrarAviso}
       />
 
+      {/* ── Modal: confirmação ── */}
       <ModalConfirmacao
-        aberto={confirmacaoAberta} mensagem={mensagemConfirmacao}
-        aoConfirmar={confirmar} aoCancelar={cancelar}
+        aberto={confirmacaoAberta}
+        mensagem={mensagemConfirmacao}
+        aoConfirmar={confirmar}
+        aoCancelar={cancelar}
       />
 
+      {/* ── Aviso temporário (toast) ── */}
       <Aviso aviso={aviso} />
     </>
   )
