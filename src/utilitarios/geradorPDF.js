@@ -48,6 +48,12 @@ export async function gerarPDF(relatorio) {
   await carregarJsPDF()
   const { jsPDF } = window.jspdf
 
+  // Carrega o favicon como base64 para embutir no PDF
+  let logoBase64 = null
+  try {
+    logoBase64 = await urlParaBase64('/favicon.icon.png')
+  } catch { /* ignora se não carregar */ }
+
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const LARGURA = 210
   const MARGEM  = 14
@@ -98,22 +104,35 @@ export async function gerarPDF(relatorio) {
   }
 
   function cabecalho() {
+    // Fundo do cabeçalho
     pdf.setFillColor(24, 28, 37)
-    pdf.rect(0, 0, 210, 20, 'F')
+    pdf.rect(0, 0, 210, 26, 'F')
+    // Linha âmbar divisória
     pdf.setFillColor(240, 165, 0)
-    pdf.rect(0, 19, 210, 1.5, 'F')
+    pdf.rect(0, 25, 210, 1.5, 'F')
+
+    // Logo centralizada verticalmente no cabeçalho
+    const logoSize = 16
+    const logoPosX = MARGEM
+    const logoPosY = 5
+    if (logoBase64) {
+      pdf.addImage(logoBase64, 'PNG', logoPosX, logoPosY, logoSize, logoSize)
+    }
+
+    // Textos ao lado da logo
+    const textoX = logoBase64 ? MARGEM + logoSize + 4 : MARGEM
     pdf.setFontSize(13)
     pdf.setFont('helvetica', 'bold')
     pdf.setTextColor(240, 165, 0)
-    pdf.text('PASSAGEM DE TURNO — MANUTENÇÃO', MARGEM, 11)
+    pdf.text('PASSAGEM DE TURNO — MANUTENÇÃO', textoX, 13)
     pdf.setFontSize(8.5)
     pdf.setFont('helvetica', 'normal')
     pdf.setTextColor(138, 149, 170)
     pdf.text(
       `${relatorio.setor || '—'}   |   ${dataFormatada}   |   Turno: ${relatorio.turno || '—'}`,
-      MARGEM, 17
+      textoX, 21
     )
-    posY = 26
+    posY = 32
   }
 
   function tabelaResumo() {

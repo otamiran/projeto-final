@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { bd, TABELA_ABERTOS, TABELA_HISTORICO } from '../utilitarios/supabase'
-import { gerarPDF } from '../utilitarios/geradorPDF'
 import BarraStatus      from '../componentes/BarraStatus'
 import LinhaItem        from '../componentes/LinhaItem'
 import PrevisaoMensagem from '../componentes/PrevisaoMensagem'
@@ -253,25 +252,31 @@ export default function PaginaNovo({
         <div className="card">
           <div className="card-cabecalho">
             <span className="label-secao">Informações do Relatório</span>
-            {/* Botão para gerar PDF em branco já com turno e nome preenchidos */}
+            {/* Botão para criar e selecionar um novo relatório em branco */}
             <button
-              className="botao botao-pdf"
+              className="botao botao-azul"
               style={{ fontSize: 11, padding: '4px 10px' }}
-              title="Gerar PDF em branco com turno e nome já preenchidos"
-              onClick={() => {
+              title="Cria um relatório em branco já com turno e nome preenchidos"
+              onClick={async () => {
                 if (!idSalvou) { mostrarAviso('Confirme sua identificação primeiro.', true); return }
-                if (!turno)    { mostrarAviso('Selecione o turno antes de abrir o PDF.', true); return }
-                gerarPDF({
-                  setor:       setor.trim() || relatorioAtivo?.setor || '(sem setor)',
-                  data,
-                  turno,
-                  tecnico,
-                  responsavel,
-                  itens: [],
-                })
+                if (!turno)    { mostrarAviso('Selecione o turno antes de criar o relatório.', true); return }
+                const setorFinal = setor.trim() || 'Sem setor'
+                const { data: novo, error } = await bd.from(TABELA_ABERTOS).insert({
+                  setor:      setorFinal,
+                  data:       data,
+                  turno:      turno,
+                  itens:      [],
+                  criado_em:  Date.now(),
+                  criado_por: tecnico || sessao.nome,
+                }).select().single()
+                if (error) { mostrarAviso('Erro ao criar relatório: ' + error.message, true); return }
+                recarregar()
+                setIdSel(novo.id)
+                setSetor('')
+                mostrarAviso('✓ Relatório em branco criado e selecionado!')
               }}
             >
-              📄 Abrir em Branco
+              📋 Novo em Branco
             </button>
           </div>
           <div className="card-corpo">
