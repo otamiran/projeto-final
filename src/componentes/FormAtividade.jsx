@@ -41,6 +41,24 @@ export default function FormAtividade({ formulario, aoMudar }) {
           getClasse={opcao => COR_STATUS[opcao] || ''}
         />
       </div>
+
+      <div className="divisor" />
+
+      {/* Executor — pode ser alterado após o preenchimento para o PDF */}
+      <div className="campo">
+        <label>
+          Executor da atividade
+          <span style={{ color: 'var(--cor-apagado)', fontWeight: 'normal', fontSize: 11, marginLeft: 6 }}>
+            (editável para o PDF)
+          </span>
+        </label>
+        <input
+          type="text"
+          placeholder="Nome de quem executou..."
+          value={formulario.executor ?? ''}
+          onChange={e => aoMudar(f => ({ ...f, executor: e.target.value }))}
+        />
+      </div>
     </>
   )
 }

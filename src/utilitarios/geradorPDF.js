@@ -334,7 +334,6 @@ export async function gerarPDF(relatorio) {
       const dm = Number(o.duracao_m) || 0
       if (inicio || fim) linhaInfo('Horario', `${inicio || '—'} → ${fim || '—'}${(dh||dm) ? '  (' + [dh?dh+'h':'', dm?dm+'min':''].filter(Boolean).join(' ') + ')' : ''}`)
       linhaInfo('Solucao',     o.solucao)
-      if (o.executor) linhaInfo('Executor',   o.executor)
 
       await desenharFotos(o.fotos)
 
@@ -372,7 +371,8 @@ export async function gerarPDF(relatorio) {
       pdf.setFontSize(10)
       pdf.setFont('helvetica', 'bold')
       pdf.setTextColor(212, 219, 232)
-      pdf.text(`Atividade ${i + 1}${a.autor ? '  —  ' + a.autor : ''}`, MARGEM + 6, posY + 7)
+      const nomeExecAtiv = a.executor || a.autor || ''
+      pdf.text(`Atividade ${i + 1}${nomeExecAtiv ? '  —  ' + nomeExecAtiv : ''}`, MARGEM + 6, posY + 7)
       if (a.status) {
         pdf.setFontSize(8.5)
         pdf.setTextColor(...hexRGB(cor))

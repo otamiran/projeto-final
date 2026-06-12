@@ -24,7 +24,7 @@ export function textoOcorrencias(relatorio) {
   lista.forEach((item, indice) => {
     linhas.push(
       '\n─────────────────────',
-      `🔧 *OCORRÊNCIA ${indice + 1}*`,
+      `🔧 *OCORRÊNCIA ${indice + 1}${item.executor || item.autor ? '  —  ' + (item.executor || item.autor) : ''}*`,
       `Equipamento: ${item.equipamento || item.equip || '—'}`,
       `Sintoma: ${item.sintoma || '—'}`,
       `Modo de falha: ${item.modo || '—'}  |  Impacto: ${item.impacto || '—'}`,
@@ -51,7 +51,7 @@ export function textoAtividades(relatorio) {
   lista.forEach((item, indice) => {
     linhas.push(
       '\n─────────────────────',
-      `${EMOJI_STATUS[item.status] || '•'} *ATIVIDADE ${indice + 1}*`,
+      `${EMOJI_STATUS[item.status] || '•'} *ATIVIDADE ${indice + 1}${item.executor || item.autor ? '  —  ' + (item.executor || item.autor) : ''}*`,
       `Equipamento: ${item.equipamento || item.equip || '—'}`,
       `Atividade: ${item.descricao || item.desc || item.desc || '—'}`,
       `Status: ${item.status || '—'}`

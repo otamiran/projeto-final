@@ -42,7 +42,7 @@ export default function LinhaItem({ item, indice, aoEditar, aoExcluir, validacao
         <strong>{item.equipamento || item.equip || '(sem equipamento)'}</strong>
         <span>
           {subtexto}
-          {item.autor && <> · <em>{item.autor}</em></>}
+          {(item.executor || item.autor) && <> · <em>{item.executor || item.autor}</em></>}
         </span>
 
         {/* Badge de validação da produção — aparece se a produção já validou */}
