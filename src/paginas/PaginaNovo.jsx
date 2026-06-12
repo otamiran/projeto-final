@@ -252,32 +252,6 @@ export default function PaginaNovo({
         <div className="card">
           <div className="card-cabecalho">
             <span className="label-secao">Informações do Relatório</span>
-            {/* Botão para criar e selecionar um novo relatório em branco */}
-            <button
-              className="botao botao-azul"
-              style={{ fontSize: 11, padding: '4px 10px' }}
-              title="Cria um relatório em branco já com turno e nome preenchidos"
-              onClick={async () => {
-                if (!idSalvou) { mostrarAviso('Confirme sua identificação primeiro.', true); return }
-                if (!turno)    { mostrarAviso('Selecione o turno antes de criar o relatório.', true); return }
-                const setorFinal = setor.trim() || 'Sem setor'
-                const { data: novo, error } = await bd.from(TABELA_ABERTOS).insert({
-                  setor:      setorFinal,
-                  data:       data,
-                  turno:      turno,
-                  itens:      [],
-                  criado_em:  Date.now(),
-                  criado_por: tecnico || sessao.nome,
-                }).select().single()
-                if (error) { mostrarAviso('Erro ao criar relatório: ' + error.message, true); return }
-                recarregar()
-                setIdSel(novo.id)
-                setSetor('')
-                mostrarAviso('✓ Relatório em branco criado e selecionado!')
-              }}
-            >
-              📋 Novo em Branco
-            </button>
           </div>
           <div className="card-corpo">
 
@@ -357,6 +331,31 @@ export default function PaginaNovo({
       {/* Barra fixa no rodapé */}
       <div className="barra-rodape">
         <button className="botao" onClick={() => limparFormulario(false)}>↺</button>
+        {/* Cria relatório em branco com turno e nome já preenchidos */}
+        <button
+          className="botao botao-azul"
+          title="Cria um relatório em branco já com turno e nome preenchidos"
+          onClick={async () => {
+            if (!idSalvou) { mostrarAviso('Confirme sua identificação primeiro.', true); return }
+            if (!turno)    { mostrarAviso('Selecione o turno antes de criar o relatório.', true); return }
+            const setorFinal = setor.trim() || 'Sem setor'
+            const { data: novo, error } = await bd.from(TABELA_ABERTOS).insert({
+              setor:      setorFinal,
+              data:       data,
+              turno:      turno,
+              itens:      [],
+              criado_em:  Date.now(),
+              criado_por: tecnico || sessao.nome,
+            }).select().single()
+            if (error) { mostrarAviso('Erro ao criar relatório: ' + error.message, true); return }
+            recarregar()
+            setIdSel(novo.id)
+            setSetor('')
+            mostrarAviso('✓ Relatório em branco criado e selecionado!')
+          }}
+        >
+          📋 Novo em Branco
+        </button>
         <button
           className="botao botao-destaque"
           onClick={fecharNoHistorico}
