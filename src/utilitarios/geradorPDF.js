@@ -301,17 +301,21 @@ export async function gerarPDF(relatorio) {
       pdf.setFontSize(10)
       pdf.setFont('helvetica', 'bold')
       pdf.setTextColor(212, 219, 232)
-      pdf.text(`Ocorrência ${i + 1}${o.autor ? '  —  ' + o.autor : ''}`, MARGEM + 6, posY + 7)
+      const nomeExec = o.executor || o.autor || ''
+      pdf.text(`Ocorrência ${i + 1}${nomeExec ? '  —  ' + nomeExec : ''}`, MARGEM + 6, posY + 7)
       posY += 13
 
       linhaInfo('Equipamento', o.equipamento || o.equip)
       linhaInfo('Sintoma',     o.sintoma)
       linhaInfo('Modo/Impacto',`${o.modo || '—'} / ${o.impacto || '—'}`)
       linhaInfo('Intervencao', o.intervencao || o.tipo_int)
+      const inicio = o.horario_inicio || ''
+      const fim    = o.horario_fim    || ''
       const dh = Number(o.duracao_h) || 0
       const dm = Number(o.duracao_m) || 0
-      if (dh || dm) linhaInfo('Duracao', [dh ? dh+'h' : '', dm ? dm+'min' : ''].filter(Boolean).join(' '))
+      if (inicio || fim) linhaInfo('Horario', `${inicio || '—'} → ${fim || '—'}${(dh||dm) ? '  (' + [dh?dh+'h':'', dm?dm+'min':''].filter(Boolean).join(' ') + ')' : ''}`)
       linhaInfo('Solucao',     o.solucao)
+      if (o.executor) linhaInfo('Executor',   o.executor)
 
       await desenharFotos(o.fotos)
 

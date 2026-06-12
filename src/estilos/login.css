@@ -16,10 +16,11 @@
   display: flex;
   gap: 12px;
 }
-/* Hexágono maior na tela de login */
-.logo-login .hexagono {
+/* Logo favicon na tela de login */
+.logo-login .logo-favicon {
   width: 36px;
   height: 36px;
+  object-fit: contain;
 }
 
 /* Texto "TURNO" em destaque */

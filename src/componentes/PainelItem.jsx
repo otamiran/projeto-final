@@ -15,8 +15,11 @@ const FORMULARIO_VAZIO = {
   modo: null,
   impacto: null,
   intervencao: null,
-  duracao_h: '',   // horas da intervenção
-  duracao_m: '',   // minutos da intervenção
+  horario_inicio: '',  // horário de início
+  horario_fim: '',     // horário de fim
+  duracao_h: '',       // horas calculadas automaticamente
+  duracao_m: '',       // minutos calculados automaticamente
+  executor: '',        // nome do executor (editável após preenchimento)
   solucao: '',
   descricao: '',
   status: null,

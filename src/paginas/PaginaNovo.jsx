@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { bd, TABELA_ABERTOS, TABELA_HISTORICO } from '../utilitarios/supabase'
+import { gerarPDF } from '../utilitarios/geradorPDF'
 import BarraStatus      from '../componentes/BarraStatus'
 import LinhaItem        from '../componentes/LinhaItem'
 import PrevisaoMensagem from '../componentes/PrevisaoMensagem'
@@ -252,6 +253,26 @@ export default function PaginaNovo({
         <div className="card">
           <div className="card-cabecalho">
             <span className="label-secao">Informações do Relatório</span>
+            {/* Botão para gerar PDF em branco já com turno e nome preenchidos */}
+            <button
+              className="botao botao-pdf"
+              style={{ fontSize: 11, padding: '4px 10px' }}
+              title="Gerar PDF em branco com turno e nome já preenchidos"
+              onClick={() => {
+                if (!idSalvou) { mostrarAviso('Confirme sua identificação primeiro.', true); return }
+                if (!turno)    { mostrarAviso('Selecione o turno antes de abrir o PDF.', true); return }
+                gerarPDF({
+                  setor:       setor.trim() || relatorioAtivo?.setor || '(sem setor)',
+                  data,
+                  turno,
+                  tecnico,
+                  responsavel,
+                  itens: [],
+                })
+              }}
+            >
+              📄 Abrir em Branco
+            </button>
           </div>
           <div className="card-corpo">
 

@@ -88,7 +88,7 @@ export default function App() {
       <>
         <nav className="nav">
           <div className="nav-logo">
-            <div className="hexagono" />
+            <img src="/favicon.icon.png" alt="Logo" className="logo-favicon" style={{ width: 26, height: 26, objectFit: 'contain' }} />
             <span className="nav-nome">Passagem de Turno</span>
           </div>
           <div className="nav-abas">
@@ -122,7 +122,7 @@ export default function App() {
     <>
       <nav className="nav">
         <div className="nav-logo">
-          <div className="hexagono" />
+          <img src="/favicon.icon.png" alt="Logo" className="logo-favicon" style={{ width: 26, height: 26, objectFit: 'contain' }} />
           <span className="nav-nome">Passagem de Turno</span>
         </div>
 
