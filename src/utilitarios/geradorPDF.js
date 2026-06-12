@@ -124,7 +124,7 @@ export async function gerarPDF(relatorio) {
     pdf.setFontSize(13)
     pdf.setFont('helvetica', 'bold')
     pdf.setTextColor(240, 165, 0)
-    pdf.text('PASSAGEM DE TURNO — MANUTENÇÃO', textoX, 13)
+    pdf.text((relatorio.titulo || 'PASSAGEM DE TURNO').toUpperCase() + ' — MANUTENÇÃO', textoX, 13)
     pdf.setFontSize(8.5)
     pdf.setFont('helvetica', 'normal')
     pdf.setTextColor(138, 149, 170)

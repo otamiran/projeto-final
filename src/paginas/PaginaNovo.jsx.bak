@@ -20,7 +20,6 @@ export default function PaginaNovo({
   const [data,     setData]     = useState(() => new Date().toISOString().split('T')[0])
   const [turno,    setTurno]    = useState(null)
   const [setor,    setSetor]    = useState('')
-  const [titulo,   setTitulo]   = useState('Passagem de Turno')
   const [idSel,    setIdSel]    = useState('')
   const [salvando, setSalvando] = useState(false)
 
@@ -36,7 +35,6 @@ export default function PaginaNovo({
     setor:       setor || relatorioAtivo?.setor || '',
     tecnico,
     responsavel,
-    titulo,
   }
 
   // Carrega data e turno ao selecionar um relatório existente
@@ -44,27 +42,22 @@ export default function PaginaNovo({
     if (!relatorioAtivo) return
     setData(relatorioAtivo.data || new Date().toISOString().split('T')[0])
     setTurno(relatorioAtivo.turno || null)
-    setTitulo(relatorioAtivo.titulo || 'Passagem de Turno')
     setSetor('')
   }, [idSel])
 
-  // Auto-salva data, turno, título e responsável quando mudam (só se há relatório aberto selecionado)
+  // Auto-salva data e turno quando mudam (só se há relatório aberto selecionado)
   useEffect(() => {
     if (!idSel) return
     bd.from(TABELA_ABERTOS)
-      .update({ data, turno, titulo, responsavel, tecnico, updated_at: Date.now() })
+      .update({ data, turno, updated_at: Date.now() })
       .eq('id', idSel)
       .then(() => {})
-  }, [data, turno, titulo, responsavel, tecnico, idSel])
+  }, [data, turno, idSel])
 
   // Salva o nome do técnico e responsável na sessão
   function confirmarIdentificacao() {
     if (!tecnico.trim()) {
       mostrarAviso('Informe seu nome.', true)
-      return
-    }
-    if (!responsavel.trim()) {
-      mostrarAviso('Informe o responsável pelo turno.', true)
       return
     }
     atualizarIdentificacao(tecnico.trim(), responsavel.trim())
@@ -84,15 +77,12 @@ export default function PaginaNovo({
 
     // IMPORTANTE: só envia colunas que existem na tabela do Supabase
     const { data: novo, error } = await bd.from(TABELA_ABERTOS).insert({
-      setor:       setorFinal,
-      data:        data,
-      turno:       turno,
-      titulo:      titulo || 'Passagem de Turno',
-      itens:       [],
-      criado_em:   Date.now(),
-      criado_por:  tecnico     || sessao.nome,
-      tecnico:     tecnico     || sessao.nome,
-      responsavel: responsavel || '',
+      setor:      setorFinal,
+      data:       data,
+      turno:      turno,
+      itens:      [],
+      criado_em:  Date.now(),
+      criado_por: tecnico || sessao.nome, // nome do técnico ou nome do login
     }).select().single()
 
     if (error) {
@@ -163,7 +153,6 @@ export default function PaginaNovo({
             setor:       setorFinal,
             data:        data,
             turno:       turno,
-            titulo:      titulo || 'Passagem de Turno',
             tecnico:     tecnico     || sessao.nome,
             responsavel: responsavel || '',
             fechado_por: tecnico     || sessao.nome,
@@ -175,7 +164,6 @@ export default function PaginaNovo({
             setor:       setorFinal,
             data:        data,
             turno:       turno,
-            titulo:      titulo || 'Passagem de Turno',
             itens:       [],
             criado_em:   Date.now(),
             tecnico:     tecnico     || sessao.nome,
@@ -203,7 +191,6 @@ export default function PaginaNovo({
     setData(new Date().toISOString().split('T')[0])
     setTurno(null)
     setSetor('')
-    setTitulo('Passagem de Turno')
   }
 
   return (
@@ -237,7 +224,7 @@ export default function PaginaNovo({
 
               {/* Responsável / líder do turno */}
               <div className="campo">
-                <label>Responsável pelo turno <span style={{ color: '#e05c2a' }}>*</span></label>
+                <label>Responsável pelo turno</label>
                 <input
                   type="text"
                   value={responsavel}
@@ -267,17 +254,6 @@ export default function PaginaNovo({
             <span className="label-secao">Informações do Relatório</span>
           </div>
           <div className="card-corpo">
-
-            {/* Título do relatório — editável, padrão "Passagem de Turno" */}
-            <div className="campo">
-              <label>Título do Relatório</label>
-              <input
-                type="text"
-                value={titulo}
-                onChange={e => setTitulo(e.target.value)}
-                placeholder="Ex: Passagem de Turno, Relatório de Parada..."
-              />
-            </div>
 
             {/* Data e Turno lado a lado */}
             <div className="grade-2">
@@ -364,15 +340,12 @@ export default function PaginaNovo({
             if (!turno)    { mostrarAviso('Selecione o turno antes de criar o relatório.', true); return }
             const setorFinal = setor.trim() || 'Sem setor'
             const { data: novo, error } = await bd.from(TABELA_ABERTOS).insert({
-              setor:       setorFinal,
-              data:        data,
-              turno:       turno,
-              titulo:      titulo || 'Passagem de Turno',
-              itens:       [],
-              criado_em:   Date.now(),
-              criado_por:  tecnico     || sessao.nome,
-              tecnico:     tecnico     || sessao.nome,
-              responsavel: responsavel || '',
+              setor:      setorFinal,
+              data:       data,
+              turno:      turno,
+              itens:      [],
+              criado_em:  Date.now(),
+              criado_por: tecnico || sessao.nome,
             }).select().single()
             if (error) { mostrarAviso('Erro ao criar relatório: ' + error.message, true); return }
             recarregar()

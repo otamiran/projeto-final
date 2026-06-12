@@ -61,8 +61,8 @@ export default function App() {
     const { gerarPDF: gerar } = await import('./utilitarios/geradorPDF')
     await gerar({
       ...relatorio,
-      tecnico:     relatorio.tecnico     || relatorio.criado_por || sessao?.tecnico || '—',
-      responsavel: relatorio.responsavel || relatorio.fechado_por || '—',
+      tecnico:     relatorio.tecnico     || relatorio.criado_por  || sessao?.tecnico     || '—',
+      responsavel: relatorio.responsavel || sessao?.responsavel   || '—',
     })
     mostrarAviso('✓ PDF baixado!')
   }
