@@ -11,6 +11,7 @@ export default function PaginaHistorico({
   pedir,
   mostrarAviso,
   recarregar,
+  aoGerarPDF,
 }) {
   // Exclui permanentemente um relatório do histórico (só admin)
   function excluir(id) {
@@ -104,6 +105,11 @@ export default function PaginaHistorico({
                 <button className="botao botao-verde" onClick={() => aoVer(r)}>
                   👁 Ver
                 </button>
+                {aoGerarPDF && (
+                  <button className="botao botao-pdf" onClick={() => aoGerarPDF(r)}>
+                    📄 PDF
+                  </button>
+                )}
                 <button className="botao botao-azul" onClick={() => reabrir(r)}>
                   ↩ Reabrir
                 </button>

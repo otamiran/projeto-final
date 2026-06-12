@@ -174,6 +174,7 @@ export default function App() {
         <PaginaHistorico
           historico={historico} sessao={sessao} aoVer={setRelatorioVendo}
           pedir={pedir} mostrarAviso={mostrarAviso} recarregar={recarregar}
+          aoGerarPDF={gerarPDF}
         />
       )}
       {aba === 'almox' && (

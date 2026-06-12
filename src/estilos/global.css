@@ -344,6 +344,15 @@ select option {
   flex-shrink: 0;
 }
 
+/* Logo favicon (substitui o hexágono na nav e no login) */
+.logo-favicon {
+  display: block;
+  flex-shrink: 0;
+  object-fit: contain;
+  width: 26px;
+  height: 26px;
+}
+
 /* ── Ponto pulsante (indicador de conexão) ────────────────────────────────*/
 .pulsando {
   width: 7px;

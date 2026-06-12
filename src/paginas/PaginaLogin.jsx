@@ -52,7 +52,7 @@ export default function PaginaLogin({ aoEntrar, carregando }) {
     <div className="pagina-login">
       {/* ── Logo ── */}
       <div className="logo-login">
-        <img src="/favicon.icon.png" alt="Logo" className="logo-favicon" />
+        <img src="/favicon.icon.png" alt="Logo" className="logo-favicon" style={{ width: 40, height: 40, objectFit: "contain", flexShrink: 0 }} />
         <span className="nome-app">PASSAGEM DE TURNO</span>
       </div>
 
