@@ -4,17 +4,8 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
-  plugins: [react()],       // habilita JSX e hot-reload do React
-  server:  { port: 5173 },  // porta local de desenvolvimento
-  base: '/',                // ✅ Vercel usa raiz — não precisa de subpasta
-  build: {
-    outDir: 'dist',
-  },
-})
-
-export default defineConfig({
   plugins: [
-    react(),
+    react(),       // habilita JSX e hot-reload do React
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.icon.png"],
@@ -37,5 +28,10 @@ export default defineConfig({
         ]
       }
     })
-  ]
-});
+  ],
+  server: { port: 5173 },  // porta local de desenvolvimento
+  base: '/',                // ✅ Vercel usa raiz — não precisa de subpasta
+  build: {
+    outDir: 'dist',
+  },
+})
