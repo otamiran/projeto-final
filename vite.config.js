@@ -11,7 +11,7 @@ export default defineConfig({
       includeAssets: ["favicon.icon.png"],
       manifest: {
         name: "Passagem de Turno",
-        short_name: "Passagem",
+        short_name: "Passagem de Turno",
         description: "Aplicativo de passagem de turno",
         theme_color: "#f0a500",
         background_color: "#ffffff",
