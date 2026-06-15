@@ -288,28 +288,38 @@ export async function gerarPDF(relatorio) {
 
   // ── MONTAGEM ──────────────────────────────────────────────────────────────
 
+  const corStatus = {
+    Concluída:      '#2ecc71',
+    'Em andamento': '#4a90e2',
+    Pendente:       '#e05050',
+  }
+
+  // Agrupa TODOS os itens por técnico (ocorrências + atividades juntas)
+  // A ordem de técnicos segue a ordem de aparição no relatório
+  const todosTecnicos = agruparPorTecnico(itens)
+
   // Primeira página: fundo + cabeçalho completo (logo + título)
   cabecalho()
   tabelaResumo()
 
-  // ── Ocorrências ──────────────────────────────────────────────────────────
-  if (ocorrencias.length > 0) {
-    const gruposOc = agruparPorTecnico(ocorrencias)
+  // ── Um bloco por técnico, com quebra de página entre eles ────────────────
+  for (let gi = 0; gi < todosTecnicos.length; gi++) {
+    const grupo = todosTecnicos[gi]
 
-    for (let gi = 0; gi < gruposOc.length; gi++) {
-      const grupo = gruposOc[gi]
+    const ocsTecnico  = grupo.itens.filter(i => i.tipo === 'ocorrencia' || i.tipo === 'occ')
+    const ativsTecnico = grupo.itens.filter(i => i.tipo === 'atividade'  || i.tipo === 'ativ')
 
-      // A partir do segundo técnico: nova página limpa
-      if (gi > 0) {
-        pdf.addPage()
-        fundoNovaPagina()
-      }
+    // A partir do segundo técnico: nova página
+    if (gi > 0) {
+      pdf.addPage()
+      fundoNovaPagina()
+    }
 
-      // Barra de título com nome do técnico já embutido
+    // ── Ocorrências do técnico ──────────────────────────────────────────────
+    if (ocsTecnico.length > 0) {
       tituloSecaoComTecnico('OCORRÊNCIAS DO TURNO', grupo.nome, '#e05c2a')
 
-      for (let i = 0; i < grupo.itens.length; i++) {
-        const o   = grupo.itens[i]
+      for (const o of ocsTecnico) {
         const val = validacaoDoItem(o)
         const cms = comentariosDoItem(o)
         const num = ocorrencias.indexOf(o) + 1
@@ -342,30 +352,15 @@ export async function gerarPDF(relatorio) {
         posY += 6
       }
     }
-  }
 
-  // ── Atividades ────────────────────────────────────────────────────────────
-  if (atividades.length > 0) {
-    const corStatus = {
-      Concluída:      '#2ecc71',
-      'Em andamento': '#4a90e2',
-      Pendente:       '#e05050',
-    }
-
-    const gruposAt = agruparPorTecnico(atividades)
-
-    for (let gi = 0; gi < gruposAt.length; gi++) {
-      const grupo = gruposAt[gi]
-
-      // Sempre nova página para cada técnico de atividades
-      // (e também separa do bloco de ocorrências)
-      pdf.addPage()
-      fundoNovaPagina()
+    // ── Atividades do técnico (continuam na mesma página se couber) ─────────
+    if (ativsTecnico.length > 0) {
+      // Pequeno espaço de separação entre ocorrências e atividades do mesmo técnico
+      if (ocsTecnico.length > 0) posY += 4
 
       tituloSecaoComTecnico('ATIVIDADES PROGRAMADAS', grupo.nome, '#4a90e2')
 
-      for (let i = 0; i < grupo.itens.length; i++) {
-        const a   = grupo.itens[i]
+      for (const a of ativsTecnico) {
         const cor = corStatus[a.status] || '#5c6680'
         const num = atividades.indexOf(a) + 1
 
