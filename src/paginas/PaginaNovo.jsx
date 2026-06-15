@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import { bd, TABELA_ABERTOS, TABELA_HISTORICO } from '../utilitarios/supabase'
+import { useSetores } from '../ganchos/useSetores'
 import BarraStatus      from '../componentes/BarraStatus'
 import LinhaItem        from '../componentes/LinhaItem'
-import PrevisaoMensagem from '../componentes/PrevisaoMensagem'
 
 export default function PaginaNovo({
   sessao, abertos, status, painel,
-  pedir, mostrarAviso, recarregar, aoAbrirWhatsapp,
+  pedir, mostrarAviso, recarregar,
   atualizarIdentificacao, // função do hook de autenticação
 }) {
 
@@ -24,20 +24,12 @@ export default function PaginaNovo({
   const [idSel,    setIdSel]    = useState('')
   const [salvando, setSalvando] = useState(false)
 
+  // Lista permanente de setores cadastrados (gerenciada em Admin)
+  const { setores } = useSetores(!!sessao)
+
   // Relatório atualmente selecionado no dropdown
   const relatorioAtivo = abertos.find(r => r.id === idSel) || null
   const itens = relatorioAtivo?.itens || []
-
-  // Dados para a prévia da mensagem de texto
-  const dadosPrevia = {
-    data,
-    turno,
-    itens,
-    setor:       setor || relatorioAtivo?.setor || '',
-    tecnico,
-    responsavel,
-    titulo,
-  }
 
   // Carrega data e turno ao selecionar um relatório existente
   useEffect(() => {
@@ -45,8 +37,27 @@ export default function PaginaNovo({
     setData(relatorioAtivo.data || new Date().toISOString().split('T')[0])
     setTurno(relatorioAtivo.turno || null)
     setTitulo(relatorioAtivo.titulo || 'Passagem de Turno')
-    setSetor('')
+    setSetor(relatorioAtivo.setor || '')
   }, [idSel])
+
+  // ── Um relatório por setor + turno ─────────────────────────────────────────
+  // Sempre que o setor, a data ou o turno mudarem, verifica se já existe um
+  // relatório aberto para essa combinação e, se existir, carrega ele
+  // automaticamente — evitando que cada pessoa crie um relatório duplicado
+  // para o mesmo setor/turno.
+  useEffect(() => {
+    if (!setor || !turno) return
+
+    const existente = abertos.find(r => r.setor === setor && r.data === data && r.turno === turno)
+
+    if (existente) {
+      if (existente.id !== idSel) setIdSel(existente.id)
+    } else if (idSel && relatorioAtivo &&
+      (relatorioAtivo.setor !== setor || relatorioAtivo.data !== data || relatorioAtivo.turno !== turno)) {
+      // O relatório carregado não corresponde mais ao setor/data/turno selecionados
+      setIdSel('')
+    }
+  }, [setor, data, turno, abertos])
 
   // Auto-salva data, turno, título e responsável quando mudam (só se há relatório aberto selecionado)
   useEffect(() => {
@@ -78,8 +89,19 @@ export default function PaginaNovo({
 
     const setorFinal = setor.trim()
     if (!setorFinal) {
-      mostrarAviso('Informe o setor primeiro.', true)
+      mostrarAviso('Selecione o setor primeiro.', true)
       return null
+    }
+    if (!turno) {
+      mostrarAviso('Selecione o turno primeiro.', true)
+      return null
+    }
+
+    // Já existe um relatório aberto para esse setor + data + turno? Reaproveita.
+    const existente = abertos.find(r => r.setor === setorFinal && r.data === data && r.turno === turno)
+    if (existente) {
+      setIdSel(existente.id)
+      return existente.id
     }
 
     // IMPORTANTE: só envia colunas que existem na tabela do Supabase
@@ -299,12 +321,28 @@ export default function PaginaNovo({
               </div>
             </div>
 
-            {/* Setor — dropdown de abertos ou campo livre para novo */}
+            {/* Setor — escolhido a partir da lista permanente cadastrada em Admin */}
             <div className="campo">
               <label>Setor</label>
-              <div className="linha-setor">
-                <select value={idSel} onChange={e => setIdSel(e.target.value)} style={{ flex: 1 }}>
-                  <option value="">— Carregar relatório aberto —</option>
+              <select value={setor} onChange={e => setSetor(e.target.value)}>
+                <option value="">— Selecione o setor —</option>
+                {setores.map(s => (
+                  <option key={s.id} value={s.nome}>{s.nome}</option>
+                ))}
+              </select>
+              {setores.length === 0 && (
+                <span className="texto-apagado" style={{ fontSize: 11 }}>
+                  Nenhum setor cadastrado. Peça a um administrador para cadastrar em Admin → Setores.
+                </span>
+              )}
+            </div>
+
+            {/* Carregar outro relatório aberto (de outro setor/turno), se necessário */}
+            {abertos.length > 0 && (
+              <div className="campo">
+                <label>Carregar outro relatório aberto (opcional)</label>
+                <select value={idSel} onChange={e => setIdSel(e.target.value)}>
+                  <option value="">— Nenhum —</option>
                   {abertos.map(r => {
                     const d = r.data ? new Date(r.data + 'T12:00').toLocaleDateString('pt-BR') : ''
                     return (
@@ -314,16 +352,8 @@ export default function PaginaNovo({
                     )
                   })}
                 </select>
-                <span className="ou">ou</span>
-                <input
-                  type="text"
-                  value={setor}
-                  onChange={e => setSetor(e.target.value)}
-                  placeholder="Novo setor..."
-                  style={{ flex: 1 }}
-                />
               </div>
-            </div>
+            )}
 
           </div>
         </div>
@@ -343,13 +373,6 @@ export default function PaginaNovo({
           </div>
         </div>
 
-        {/* Prévia da mensagem de texto */}
-        <PrevisaoMensagem
-          relatorio={dadosPrevia}
-          aoAbrirWhatsapp={() => aoAbrirWhatsapp(dadosPrevia)}
-          mostrarAviso={mostrarAviso}
-        />
-
       </div>
 
       {/* Barra fixa no rodapé */}
@@ -362,7 +385,17 @@ export default function PaginaNovo({
           onClick={async () => {
             if (!idSalvou) { mostrarAviso('Confirme sua identificação primeiro.', true); return }
             if (!turno)    { mostrarAviso('Selecione o turno antes de criar o relatório.', true); return }
-            const setorFinal = setor.trim() || 'Sem setor'
+            const setorFinal = setor.trim()
+            if (!setorFinal) { mostrarAviso('Selecione o setor antes de criar o relatório.', true); return }
+
+            // Já existe um relatório aberto para esse setor + data + turno? Apenas seleciona.
+            const existente = abertos.find(r => r.setor === setorFinal && r.data === data && r.turno === turno)
+            if (existente) {
+              setIdSel(existente.id)
+              mostrarAviso('Já existe um relatório aberto para esse setor/turno — selecionado.')
+              return
+            }
+
             const { data: novo, error } = await bd.from(TABELA_ABERTOS).insert({
               setor:       setorFinal,
               data:        data,
@@ -377,7 +410,6 @@ export default function PaginaNovo({
             if (error) { mostrarAviso('Erro ao criar relatório: ' + error.message, true); return }
             recarregar()
             setIdSel(novo.id)
-            setSetor('')
             mostrarAviso('✓ Relatório em branco criado e selecionado!')
           }}
         >

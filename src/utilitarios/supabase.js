@@ -17,3 +17,6 @@ export const TABELA_COMENTARIOS = 'comentarios'
 
 // ── FCA ───────────────────────────────────────────────────────────────────────
 export const TABELA_FCAS        = 'fcas'
+
+// ── Setores permanentes ─────────────────────────────────────────────────────
+export const TABELA_SETORES     = 'setores'

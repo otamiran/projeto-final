@@ -278,6 +278,54 @@
   padding: 8px 13px;
 }
 
+/* ── Grupos de setor (histórico) ──────────────────────────────────────────*/
+.grupo-setor-historico {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.grupo-setor-cabecalho {
+  align-items: center;
+  background: var(--cor-fundo-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 13px;
+  transition: background 0.15s;
+}
+.grupo-setor-cabecalho:hover {
+  background: var(--cor-fundo-3);
+}
+.grupo-setor-titulo {
+  color: var(--ambar);
+  font-family: var(--fonte-mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.grupo-setor-meta {
+  align-items: center;
+  color: var(--cor-apagado);
+  display: flex;
+  font-size: 11px;
+  gap: 8px;
+}
+.grupo-setor-seta {
+  display: inline-block;
+  transition: transform 0.15s;
+}
+.grupo-setor-seta.aberta {
+  transform: rotate(90deg);
+}
+.grupo-setor-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 /* ── Responsividade mobile ────────────────────────────────────────────────*/
 
 

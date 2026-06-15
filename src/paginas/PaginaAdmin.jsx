@@ -1,7 +1,10 @@
 // Painel do administrador
-// Gerencia usuários (aprovar/bloquear/excluir) e acompanha relatórios por usuário
+// Gerencia usuários (aprovar/bloquear/excluir), setores permanentes e
+// acompanha relatórios por usuário
 
+import { useState } from 'react'
 import { useAdmin } from '../ganchos/useAdmin'
+import { useSetores } from '../ganchos/useSetores'
 
 // Formata timestamp em data legível
 function formatarData(ts) {
@@ -14,6 +17,32 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
     pendentes, aprovados, bloqueados,
     aprovar, bloquear, excluir, recarregar,
   } = useAdmin(!!sessao, sessao?.grupo === 'admin')
+
+  const { setores, adicionar: adicionarSetor, remover: removerSetor } = useSetores(!!sessao)
+  const [novoSetor, setNovoSetor] = useState('')
+
+  // Cadastra um novo setor permanente
+  async function handleAdicionarSetor() {
+    const resultado = await adicionarSetor(novoSetor)
+    if (resultado.error) {
+      mostrarAviso(resultado.error, true)
+      return
+    }
+    setNovoSetor('')
+    mostrarAviso('✓ Setor cadastrado!')
+  }
+
+  // Remove um setor permanente (com confirmação)
+  function handleRemoverSetor(s) {
+    pedir(`Remover o setor "${s.nome}"? Relatórios já criados não são afetados.`, async () => {
+      const resultado = await removerSetor(s.id)
+      if (resultado.error) {
+        mostrarAviso(resultado.error, true)
+        return
+      }
+      mostrarAviso('Setor removido.')
+    })
+  }
 
   // Aprovação com feedback
   async function handleAprovar(u) {
@@ -139,6 +168,47 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
             </div>
           </div>
         )}
+
+        {/* ── Setores permanentes ── */}
+        <div className="card">
+          <div className="card-cabecalho">
+            <span className="card-rotulo">Setores</span>
+          </div>
+          <div className="card-corpo">
+            <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+              <input
+                type="text"
+                value={novoSetor}
+                onChange={e => setNovoSetor(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAdicionarSetor()}
+                placeholder="Nome do novo setor..."
+                style={{ flex: 1 }}
+              />
+              <button className="botao botao-destaque" onClick={handleAdicionarSetor}>
+                + Adicionar
+              </button>
+            </div>
+
+            {setores.length === 0 ? (
+              <p className="texto-apagado" style={{ textAlign: 'center', padding: '12px 0' }}>
+                Nenhum setor cadastrado.
+              </p>
+            ) : (
+              setores.map(s => (
+                <div key={s.id} className="linha-usuario">
+                  <div className="usuario-info">
+                    <span className="usuario-nome">🏭 {s.nome}</span>
+                  </div>
+                  <div className="usuario-acoes">
+                    <button className="botao botao-vermelho botao-pequeno" onClick={() => handleRemoverSetor(s)}>
+                      🗑
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
 
         {/* ── Relatórios por usuário ── */}
         <div className="card">

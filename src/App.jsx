@@ -17,7 +17,6 @@ import PaginaAlmoxarifado  from './paginas/PaginaAlmoxarifado'
 
 import PainelItem          from './componentes/PainelItem'
 import ModalVerRelatorio   from './componentes/ModalVerRelatorio'
-import ModalWhatsapp       from './componentes/ModalWhatsapp'
 import ModalConfirmacao    from './componentes/ModalConfirmacao'
 import Aviso               from './componentes/Aviso'
 
@@ -32,7 +31,6 @@ export default function App() {
   const [aba, setAba] = useState('novo')
 
   const [relatorioVendo, setRelatorioVendo] = useState(null)
-  const [relatorioWa,    setRelatorioWa]    = useState(null)
 
   const [painelAberto,     setPainelAberto]     = useState(false)
   const [painelTipo,       setPainelTipo]       = useState('ocorrencia')
@@ -161,7 +159,7 @@ export default function App() {
         <PaginaNovo
           sessao={sessao} abertos={abertos} status={status} painel={painel}
           pedir={pedir} mostrarAviso={mostrarAviso} recarregar={recarregar}
-          aoAbrirWhatsapp={setRelatorioWa} atualizarIdentificacao={atualizarIdentificacao}
+          atualizarIdentificacao={atualizarIdentificacao}
         />
       )}
       {aba === 'abertos' && (
@@ -203,10 +201,6 @@ export default function App() {
         relatorio={relatorioVendo} sessao={sessao} podeExcluir={true}
         aoExcluir={excluirDoHistorico} aoFechar={() => setRelatorioVendo(null)}
         aoGerarPDF={gerarPDF} mostrarAviso={mostrarAviso}
-      />
-
-      <ModalWhatsapp
-        relatorio={relatorioWa} aoFechar={() => setRelatorioWa(null)} mostrarAviso={mostrarAviso}
       />
 
       <ModalConfirmacao
