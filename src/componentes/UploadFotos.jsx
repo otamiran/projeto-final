@@ -2,7 +2,7 @@
 
 import { useRef } from 'react'
 
-export default function UploadFotos({ fotos, aoAdicionar, aoRemover }) {
+export default function UploadFotos({ fotos, aoAdicionar, aoRemover, aoEditarLegenda }) {
   // Referência para o input oculto de arquivo
   const inputRef = useRef()
 
@@ -48,6 +48,16 @@ export default function UploadFotos({ fotos, aoAdicionar, aoRemover }) {
 
               {/* Badge laranja enquanto a foto ainda não foi enviada */}
               {!foto.url && <div className="badge-aguardando">⏳</div>}
+
+              {/* Campo de legenda — exibida junto da foto no PDF */}
+              <input
+                type="text"
+                className="legenda-foto"
+                placeholder={`Legenda da foto ${indice + 1}...`}
+                value={foto.legenda || ''}
+                onChange={e => aoEditarLegenda?.(indice, e.target.value)}
+                onClick={e => e.stopPropagation()}
+              />
             </div>
           ))}
         </div>

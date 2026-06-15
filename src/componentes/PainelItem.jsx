@@ -54,6 +54,7 @@ export default function PainelItem({
           path: f.path,
           dataUrl: f.url,
           file: null,
+          legenda: f.legenda || '',
         }))
       )
     } else {
@@ -75,7 +76,7 @@ export default function PainelItem({
       const leitor = new FileReader()
       leitor.onload = e => {
         // dataUrl é a versão base64 da imagem — usada para preview imediato
-        setFotos(f => [...f, { file: arquivo, dataUrl: e.target.result, url: null, path: null }])
+        setFotos(f => [...f, { file: arquivo, dataUrl: e.target.result, url: null, path: null, legenda: '' }])
       }
       leitor.readAsDataURL(arquivo)
     })
@@ -84,6 +85,11 @@ export default function PainelItem({
   // Remove uma foto da lista pelo índice
   function removerFoto(indice) {
     setFotos(f => f.filter((_, i) => i !== indice))
+  }
+
+  // Atualiza a legenda de uma foto pelo índice
+  function editarLegenda(indice, texto) {
+    setFotos(f => f.map((foto, i) => (i === indice ? { ...foto, legenda: texto } : foto)))
   }
 
   // Envia as fotos novas para o Supabase Storage e retorna lista de {url, path}
@@ -95,7 +101,7 @@ export default function PainelItem({
 
       // Foto já enviada anteriormente — reutiliza sem fazer upload de novo
       if (foto.url && foto.path) {
-        enviadas.push({ url: foto.url, path: foto.path })
+        enviadas.push({ url: foto.url, path: foto.path, legenda: foto.legenda || '' })
         continue
       }
 
@@ -112,7 +118,7 @@ export default function PainelItem({
 
       // Pega a URL pública da foto
       const { data } = bd.storage.from(BUCKET_FOTOS).getPublicUrl(caminho)
-      enviadas.push({ url: data.publicUrl, path: caminho })
+      enviadas.push({ url: data.publicUrl, path: caminho, legenda: foto.legenda || '' })
     }
 
     return enviadas
@@ -203,7 +209,12 @@ export default function PainelItem({
             <FormAtividade formulario={formulario} aoMudar={setFormulario} />
           )}
           <div className="divisor" />
-          <UploadFotos fotos={fotos} aoAdicionar={adicionarFotos} aoRemover={removerFoto} />
+          <UploadFotos
+            fotos={fotos}
+            aoAdicionar={adicionarFotos}
+            aoRemover={removerFoto}
+            aoEditarLegenda={editarLegenda}
+          />
         </div>
 
         {/* Rodapé fixo com os botões */}

@@ -118,8 +118,21 @@
   grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   margin-top:            10px;
 }
-.miniatura-foto          { background: var(--cor-fundo-3); border-radius: var(--raio); overflow: hidden; position: relative; }
+.miniatura-foto          { background: var(--cor-fundo-3); border-radius: var(--raio); overflow: hidden; position: relative; display: flex; flex-direction: column; }
 .miniatura-foto img      { display: block; height: auto; max-height: 120px; object-fit: contain; width: 100%; }
+.legenda-foto {
+  background:    var(--cor-fundo-2);
+  border:        none;
+  border-top:    1px solid var(--cor-borda);
+  color:         var(--cor-texto);
+  font-family:   var(--fonte-sans);
+  font-size:     11px;
+  padding:       5px 6px;
+  width:         100%;
+  box-sizing:    border-box;
+}
+.legenda-foto::placeholder { color: var(--cor-apagado); }
+.legenda-foto:focus { outline: 1px solid var(--ambar); }
 .botao-remover-foto {
   align-items:   center;
   background:    rgba(0,0,0,.7);

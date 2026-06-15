@@ -1,6 +1,6 @@
 {
   "name": "Passagem de Turno",
-  "short_name": "Passagem de Turno",
+  "short_name": "Passagem",
   "description": "Aplicativo de passagem de turno",
   "start_url": "/",
   "scope": "/",

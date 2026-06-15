@@ -271,28 +271,75 @@ export async function gerarPDF(relatorio) {
     pdf.setTextColor(100, 110, 130)
     pdf.text('Fotos:', MARGEM + 2, posY)
     posY += 5
-    let coluna = 0
-    for (let i = 0; i < listaFotos.length; i++) {
-      if (coluna === 0) verificarEspaco(alturaFoto + 8)
-      const x = MARGEM + coluna * (larguraFoto + 6)
-      const base64 = await urlParaBase64(listaFotos[i].url)
+
+    // Pré-carrega imagem (base64) + dimensões reais de cada foto
+    const dados = []
+    for (const foto of listaFotos) {
+      const base64 = await urlParaBase64(foto.url)
+      let props = null
       if (base64) {
-        pdf.addImage(base64, 'JPEG', x, posY, larguraFoto, alturaFoto, undefined, 'FAST')
-      } else {
-        pdf.setFillColor(30, 35, 48)
-        pdf.roundedRect(x, posY, larguraFoto, alturaFoto, 1, 1, 'F')
-        pdf.setFontSize(7.5)
-        pdf.setTextColor(80, 90, 110)
-        pdf.text('Foto indisponível', x + larguraFoto / 2, posY + alturaFoto / 2, { align: 'center' })
+        try { props = pdf.getImageProperties(base64) } catch { props = null }
       }
-      pdf.setFontSize(7)
-      pdf.setFont('helvetica', 'normal')
-      pdf.setTextColor(100, 110, 130)
-      pdf.text(`Foto ${i + 1}`, x + larguraFoto / 2, posY + alturaFoto + 4, { align: 'center' })
-      coluna++
-      if (coluna >= 2) { coluna = 0; posY += alturaFoto + 8 }
+      dados.push({ base64, props, legenda: (foto.legenda || '').trim() })
     }
-    if (coluna > 0) posY += alturaFoto + 8
+
+    // Desenha em linhas de 2 colunas
+    for (let i = 0; i < dados.length; i += 2) {
+      const linha = dados.slice(i, i + 2)
+
+      // Altura da legenda de cada item (pode quebrar em mais de uma linha)
+      const linhasLegendaPorItem = linha.map((d, col) => {
+        const txt = d.legenda || `Foto ${i + col + 1}`
+        return pdf.splitTextToSize(txt, larguraFoto - 2)
+      })
+      const alturaLegenda = Math.max(...linhasLegendaPorItem.map(l => l.length)) * 3.6 + 2
+
+      verificarEspaco(alturaFoto + alturaLegenda + 6)
+
+      linha.forEach((d, col) => {
+        const x = MARGEM + col * (larguraFoto + 6)
+
+        // Demarca o espaço reservado para a foto (caixa de fundo + borda)
+        pdf.setDrawColor(42, 48, 64)
+        pdf.setFillColor(20, 23, 31)
+        pdf.roundedRect(x, posY, larguraFoto, alturaFoto, 1, 1, 'FD')
+
+        if (d.base64 && d.props?.width && d.props?.height) {
+          // Encaixa a imagem dentro da caixa mantendo a proporção original
+          // (equivalente a object-fit: contain), centralizada
+          const imgRatio = d.props.width / d.props.height
+          const boxRatio = larguraFoto / alturaFoto
+
+          let larguraDesenho, alturaDesenho
+          if (imgRatio > boxRatio) {
+            larguraDesenho = larguraFoto
+            alturaDesenho  = larguraFoto / imgRatio
+          } else {
+            alturaDesenho  = alturaFoto
+            larguraDesenho = alturaFoto * imgRatio
+          }
+
+          const offsetX = x + (larguraFoto - larguraDesenho) / 2
+          const offsetY = posY + (alturaFoto - alturaDesenho) / 2
+          const formato = (d.props.fileType || 'JPEG').toUpperCase()
+
+          pdf.addImage(d.base64, formato, offsetX, offsetY, larguraDesenho, alturaDesenho, undefined, 'FAST')
+        } else {
+          pdf.setFontSize(7.5)
+          pdf.setFont('helvetica', 'normal')
+          pdf.setTextColor(80, 90, 110)
+          pdf.text('Foto indisponível', x + larguraFoto / 2, posY + alturaFoto / 2, { align: 'center' })
+        }
+
+        // Legenda — texto digitado pelo usuário, ou "Foto N" como padrão
+        pdf.setFontSize(7)
+        pdf.setFont('helvetica', 'normal')
+        pdf.setTextColor(100, 110, 130)
+        pdf.text(linhasLegendaPorItem[col], x + larguraFoto / 2, posY + alturaFoto + 4, { align: 'center' })
+      })
+
+      posY += alturaFoto + alturaLegenda + 6
+    }
   }
 
   // ── MONTAGEM DO PDF ────────────────────────────────────────────────────────
