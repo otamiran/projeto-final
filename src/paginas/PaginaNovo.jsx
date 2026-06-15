@@ -41,23 +41,24 @@ export default function PaginaNovo({
   }, [idSel])
 
   // ── Um relatório por setor + turno ─────────────────────────────────────────
-  // Sempre que o setor, a data ou o turno mudarem, verifica se já existe um
-  // relatório aberto para essa combinação e, se existir, carrega ele
-  // automaticamente — evitando que cada pessoa crie um relatório duplicado
-  // para o mesmo setor/turno.
+  // Sempre que o setor ou o turno mudarem, verifica se já existe um relatório
+  // ABERTO para essa combinação (independente da data, já que um relatório
+  // aberto pode ter sido criado em um dia anterior e ainda não foi fechado)
+  // e, se existir, carrega ele automaticamente — evitando que cada pessoa
+  // crie um relatório duplicado para o mesmo setor/turno.
   useEffect(() => {
     if (!setor || !turno) return
 
-    const existente = abertos.find(r => r.setor === setor && r.data === data && r.turno === turno)
+    const existente = abertos.find(r => r.setor === setor && r.turno === turno)
 
     if (existente) {
       if (existente.id !== idSel) setIdSel(existente.id)
     } else if (idSel && relatorioAtivo &&
-      (relatorioAtivo.setor !== setor || relatorioAtivo.data !== data || relatorioAtivo.turno !== turno)) {
-      // O relatório carregado não corresponde mais ao setor/data/turno selecionados
+      (relatorioAtivo.setor !== setor || relatorioAtivo.turno !== turno)) {
+      // O relatório carregado não corresponde mais ao setor/turno selecionados
       setIdSel('')
     }
-  }, [setor, data, turno, abertos])
+  }, [setor, turno, abertos])
 
   // Auto-salva data, turno, título e responsável quando mudam (só se há relatório aberto selecionado)
   useEffect(() => {
@@ -97,8 +98,8 @@ export default function PaginaNovo({
       return null
     }
 
-    // Já existe um relatório aberto para esse setor + data + turno? Reaproveita.
-    const existente = abertos.find(r => r.setor === setorFinal && r.data === data && r.turno === turno)
+    // Já existe um relatório ABERTO para esse setor + turno? Reaproveita.
+    const existente = abertos.find(r => r.setor === setorFinal && r.turno === turno)
     if (existente) {
       setIdSel(existente.id)
       return existente.id
@@ -388,8 +389,8 @@ export default function PaginaNovo({
             const setorFinal = setor.trim()
             if (!setorFinal) { mostrarAviso('Selecione o setor antes de criar o relatório.', true); return }
 
-            // Já existe um relatório aberto para esse setor + data + turno? Apenas seleciona.
-            const existente = abertos.find(r => r.setor === setorFinal && r.data === data && r.turno === turno)
+            // Já existe um relatório ABERTO para esse setor + turno? Apenas seleciona.
+            const existente = abertos.find(r => r.setor === setorFinal && r.turno === turno)
             if (existente) {
               setIdSel(existente.id)
               mostrarAviso('Já existe um relatório aberto para esse setor/turno — selecionado.')
