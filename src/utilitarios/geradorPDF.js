@@ -359,7 +359,7 @@ export async function gerarPDF(relatorio) {
       for (const o of ocsTecnico) {
         const val = validacaoDoItem(o)
         const cms = comentariosDoItem(o)
-        const num = ocorrencias.indexOf(o) + 1
+        const num = ocsTecnico.indexOf(o) + 1
 
         verificarEspaco(14)
         pdf.setFillColor(24, 28, 37)
@@ -399,7 +399,7 @@ export async function gerarPDF(relatorio) {
 
       for (const a of ativsTecnico) {
         const cor = corStatus[a.status] || '#5c6680'
-        const num = atividades.indexOf(a) + 1
+        const num = ativsTecnico.indexOf(a) + 1
 
         verificarEspaco(14)
         pdf.setFillColor(24, 28, 37)
