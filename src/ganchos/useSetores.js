@@ -48,6 +48,13 @@ export function useSetores(estaLogado) {
     return { ok: true }
   }
 
+  // Atualiza o responsável de um setor existente
+  async function atualizarResponsavel(id, responsavel) {
+    const { error } = await bd.from(TABELA_SETORES).update({ responsavel: responsavel.trim() }).eq('id', id)
+    if (error) return { error: error.message }
+    return { ok: true }
+  }
+
   // Remove um setor permanente
   async function remover(id) {
     const { error } = await bd.from(TABELA_SETORES).delete().eq('id', id)
@@ -55,5 +62,5 @@ export function useSetores(estaLogado) {
     return { ok: true }
   }
 
-  return { setores, carregando, adicionar, remover, recarregar }
+  return { setores, carregando, adicionar, remover, recarregar, atualizarResponsavel }
 }

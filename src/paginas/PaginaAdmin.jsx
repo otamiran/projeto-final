@@ -18,8 +18,22 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
     aprovar, bloquear, excluir, recarregar,
   } = useAdmin(!!sessao, sessao?.grupo === 'admin')
 
-  const { setores, adicionar: adicionarSetor, remover: removerSetor } = useSetores(!!sessao)
+  const { setores, adicionar: adicionarSetor, remover: removerSetor, atualizarResponsavel } = useSetores(!!sessao)
   const [novoSetor, setNovoSetor] = useState('')
+  // Controla qual setor está com o campo de responsável aberto para edição
+  const [editandoResponsavel, setEditandoResponsavel] = useState(null)  // id do setor
+  const [valorResponsavel, setValorResponsavel] = useState('')
+
+  // Salva o responsável editado de um setor
+  async function handleSalvarResponsavel(s) {
+    const resultado = await atualizarResponsavel(s.id, valorResponsavel)
+    if (resultado.error) {
+      mostrarAviso(resultado.error, true)
+      return
+    }
+    setEditandoResponsavel(null)
+    mostrarAviso('✓ Responsável atualizado!')
+  }
 
   // Cadastra um novo setor permanente
   async function handleAdicionarSetor() {
@@ -195,15 +209,48 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
               </p>
             ) : (
               setores.map(s => (
-                <div key={s.id} className="linha-usuario">
-                  <div className="usuario-info">
-                    <span className="usuario-nome">🏭 {s.nome}</span>
+                <div key={s.id} className="linha-usuario" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div className="usuario-info">
+                      <span className="usuario-nome">🏭 {s.nome}</span>
+                      {s.responsavel && editandoResponsavel !== s.id && (
+                        <span className="usuario-meta">Responsável: {s.responsavel}</span>
+                      )}
+                    </div>
+                    <div className="usuario-acoes">
+                      <button
+                        className="botao botao-pequeno"
+                        onClick={() => {
+                          setEditandoResponsavel(s.id)
+                          setValorResponsavel(s.responsavel || '')
+                        }}
+                      >
+                        ✏️ Responsável
+                      </button>
+                      <button className="botao botao-vermelho botao-pequeno" onClick={() => handleRemoverSetor(s)}>
+                        🗑
+                      </button>
+                    </div>
                   </div>
-                  <div className="usuario-acoes">
-                    <button className="botao botao-vermelho botao-pequeno" onClick={() => handleRemoverSetor(s)}>
-                      🗑
-                    </button>
-                  </div>
+                  {editandoResponsavel === s.id && (
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <input
+                        type="text"
+                        value={valorResponsavel}
+                        onChange={e => setValorResponsavel(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleSalvarResponsavel(s)}
+                        placeholder="Nome do responsável pelo setor..."
+                        style={{ flex: 1 }}
+                        autoFocus
+                      />
+                      <button className="botao botao-destaque botao-pequeno" onClick={() => handleSalvarResponsavel(s)}>
+                        ✓ Salvar
+                      </button>
+                      <button className="botao botao-pequeno" onClick={() => setEditandoResponsavel(null)}>
+                        ✕
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))
             )}
