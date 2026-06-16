@@ -325,11 +325,13 @@ export async function gerarPDF(relatorio) {
 
   // Primeira página: fundo + cabeçalho completo (logo + título)
   cabecalho()
-  // A tabela de resumo da primeira página mostra totais globais.
-  // Se houver apenas um técnico, exibe o nome dele; se houver vários, exibe o do relatório.
+  // A tabela de resumo da primeira página mostra os dados do primeiro técnico do grupo
+  // (quem tem itens primeiro na ordem de aparição), nunca o nome genérico do relatório.
   {
-    const nomeResumo = todosTecnicos.length === 1 ? todosTecnicos[0].nome : (relatorio.tecnico || null)
-    tabelaResumo(nomeResumo, null, null)
+    const primeiro     = todosTecnicos[0]
+    const ocsP  = primeiro ? primeiro.itens.filter(i => i.tipo === 'ocorrencia' || i.tipo === 'occ').length  : 0
+    const ativsP = primeiro ? primeiro.itens.filter(i => i.tipo === 'atividade'  || i.tipo === 'ativ').length : 0
+    tabelaResumo(primeiro?.nome || null, ocsP, ativsP)
   }
 
   // ── Um bloco por técnico, com quebra de página entre eles ────────────────
