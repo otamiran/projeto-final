@@ -18,21 +18,21 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
     aprovar, bloquear, excluir, recarregar,
   } = useAdmin(!!sessao, sessao?.grupo === 'admin')
 
-  const { setores, adicionar: adicionarSetor, remover: removerSetor, atualizarResponsavel } = useSetores(!!sessao)
+  const { setores, adicionar: adicionarSetor, remover: removerSetor, atualizarResponsavel, TURNOS } = useSetores(!!sessao)
   const [novoSetor, setNovoSetor] = useState('')
-  // Controla qual setor está com o campo de responsável aberto para edição
-  const [editandoResponsavel, setEditandoResponsavel] = useState(null)  // id do setor
-  const [valorResponsavel, setValorResponsavel] = useState('')
+  // Controla qual setor está com os campos de responsável abertos para edição
+  const [editandoResponsavel, setEditandoResponsavel] = useState(null)   // id do setor
+  const [valoresResponsavel, setValoresResponsavel]   = useState({})     // { turno: nome }
 
-  // Salva o responsável editado de um setor
+  // Salva o mapa de responsáveis por turno de um setor
   async function handleSalvarResponsavel(s) {
-    const resultado = await atualizarResponsavel(s.id, valorResponsavel)
+    const resultado = await atualizarResponsavel(s.id, valoresResponsavel)
     if (resultado.error) {
       mostrarAviso(resultado.error, true)
       return
     }
     setEditandoResponsavel(null)
-    mostrarAviso('✓ Responsável atualizado!')
+    mostrarAviso('✓ Responsáveis atualizados!')
   }
 
   // Cadastra um novo setor permanente
@@ -213,8 +213,15 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div className="usuario-info">
                       <span className="usuario-nome">🏭 {s.nome}</span>
-                      {s.responsavel && editandoResponsavel !== s.id && (
-                        <span className="usuario-meta">Responsável: {s.responsavel}</span>
+                      {/* Mostra resumo dos responsáveis cadastrados */}
+                      {s.responsaveis && editandoResponsavel !== s.id && (
+                        <span className="usuario-meta">
+                          {(TURNOS || ['Turno 0','Manhã','Tarde','Noite'])
+                            .filter(t => s.responsaveis[t])
+                            .map(t => `${t}: ${s.responsaveis[t]}`)
+                            .join('  ·  ')
+                          }
+                        </span>
                       )}
                     </div>
                     <div className="usuario-acoes">
@@ -222,10 +229,10 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
                         className="botao botao-pequeno"
                         onClick={() => {
                           setEditandoResponsavel(s.id)
-                          setValorResponsavel(s.responsavel || '')
+                          setValoresResponsavel(s.responsaveis || {})
                         }}
                       >
-                        ✏️ Responsável
+                        ✏️ Responsáveis
                       </button>
                       <button className="botao botao-vermelho botao-pequeno" onClick={() => handleRemoverSetor(s)}>
                         🗑
@@ -233,22 +240,31 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
                     </div>
                   </div>
                   {editandoResponsavel === s.id && (
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <input
-                        type="text"
-                        value={valorResponsavel}
-                        onChange={e => setValorResponsavel(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && handleSalvarResponsavel(s)}
-                        placeholder="Nome do responsável pelo setor..."
-                        style={{ flex: 1 }}
-                        autoFocus
-                      />
-                      <button className="botao botao-destaque botao-pequeno" onClick={() => handleSalvarResponsavel(s)}>
-                        ✓ Salvar
-                      </button>
-                      <button className="botao botao-pequeno" onClick={() => setEditandoResponsavel(null)}>
-                        ✕
-                      </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {(TURNOS || ['Turno 0','Manhã','Tarde','Noite']).map(t => (
+                        <div key={t} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                          <span style={{
+                            minWidth: 64, fontSize: 12, color: 'var(--cor-apagado)',
+                            fontWeight: 600, textAlign: 'right'
+                          }}>{t}</span>
+                          <input
+                            type="text"
+                            value={valoresResponsavel[t] || ''}
+                            onChange={e => setValoresResponsavel(v => ({ ...v, [t]: e.target.value }))}
+                            onKeyDown={e => e.key === 'Enter' && handleSalvarResponsavel(s)}
+                            placeholder={`Responsável ${t}...`}
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+                      ))}
+                      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                        <button className="botao botao-destaque botao-pequeno" onClick={() => handleSalvarResponsavel(s)}>
+                          ✓ Salvar
+                        </button>
+                        <button className="botao botao-pequeno" onClick={() => setEditandoResponsavel(null)}>
+                          ✕
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>

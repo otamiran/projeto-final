@@ -48,9 +48,10 @@ export function useSetores(estaLogado) {
     return { ok: true }
   }
 
-  // Atualiza o responsável de um setor existente
-  async function atualizarResponsavel(id, responsavel) {
-    const { error } = await bd.from(TABELA_SETORES).update({ responsavel: responsavel.trim() }).eq('id', id)
+  // Atualiza o mapa de responsáveis por turno de um setor
+  // responsaveis = { 'Turno 0': '...', 'Manhã': '...', 'Tarde': '...', 'Noite': '...' }
+  async function atualizarResponsavel(id, responsaveis) {
+    const { error } = await bd.from(TABELA_SETORES).update({ responsaveis }).eq('id', id)
     if (error) return { error: error.message }
     return { ok: true }
   }
@@ -62,5 +63,5 @@ export function useSetores(estaLogado) {
     return { ok: true }
   }
 
-  return { setores, carregando, adicionar, remover, recarregar, atualizarResponsavel }
+  return { setores, carregando, adicionar, remover, recarregar, atualizarResponsavel, TURNOS: ['Turno 0', 'Manhã', 'Tarde', 'Noite'] }
 }

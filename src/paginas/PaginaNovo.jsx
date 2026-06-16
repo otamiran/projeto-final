@@ -60,15 +60,16 @@ export default function PaginaNovo({
     }
   }, [setor, turno, abertos])
 
-  // Pré-preenche o responsável com o valor cadastrado no setor pelo admin,
-  // mas só se o campo ainda não foi preenchido manualmente pelo usuário.
+  // Pré-preenche o responsável com o valor do setor+turno cadastrado pelo admin
   useEffect(() => {
     if (!setor) return
     const setorObj = setores.find(s => s.nome === setor)
-    if (setorObj?.responsavel) {
-      setResponsavel(setorObj.responsavel)
-    }
-  }, [setor, setores])
+    if (!setorObj) return
+    // Tenta pegar o responsável específico do turno selecionado;
+    // se não houver, limpa o campo para o técnico preencher manualmente.
+    const resp = turno ? setorObj.responsaveis?.[turno] : null
+    if (resp) setResponsavel(resp)
+  }, [setor, turno, setores])
 
   // Auto-salva data, turno, título e responsável quando mudam (só se há relatório aberto selecionado)
   useEffect(() => {
@@ -321,7 +322,7 @@ export default function PaginaNovo({
               <div className="campo">
                 <label>Turno</label>
                 <div className="grupo-botoes">
-                  {['Manhã', 'Tarde', 'Noite'].map(t => (
+                  {['Turno 0', 'Manhã', 'Tarde', 'Noite'].map(t => (
                     <button key={t} type="button"
                       className={`botao-alternancia ${turno === t ? 'selecionado' : ''}`}
                       onClick={() => setTurno(t === turno ? null : t)}>
