@@ -78,6 +78,14 @@ export async function gerarPDF(relatorio) {
     return [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)]
   }
 
+  // Contexto da seção atual — atualizado sempre que uma nova seção é iniciada
+  // Permite que páginas de continuação repitam o cabeçalho da seção
+  let _secaoAtual = { textoBase: null, nomeTecnico: null, cor: null }
+
+  function definirSecaoAtual(textoBase, nomeTecnico, cor) {
+    _secaoAtual = { textoBase, nomeTecnico, cor }
+  }
+
   // Fundo escuro de página (sem cabeçalho)
   function fundoNovaPagina() {
     pdf.setFillColor(15, 17, 23)
@@ -88,11 +96,25 @@ export async function gerarPDF(relatorio) {
     posY = 10
   }
 
-  // Verifica espaço — em nova página NÃO desenha cabeçalho completo
+  // Verifica espaço — se precisar de nova página, repete o cabeçalho da seção atual
   function verificarEspaco(altura) {
     if (posY + altura > 284) {
       pdf.addPage()
       fundoNovaPagina()
+      // Repete o título da seção na página de continuação (com indicação "(cont.)")
+      if (_secaoAtual.textoBase && _secaoAtual.cor) {
+        const { textoBase, nomeTecnico, cor } = _secaoAtual
+        pdf.setFillColor(...hexRGB(cor))
+        pdf.roundedRect(MARGEM, posY, UTIL, 8.5, 1, 1, 'F')
+        pdf.setFontSize(9)
+        pdf.setFont('helvetica', 'bold')
+        pdf.setTextColor(255, 255, 255)
+        const textoCont = nomeTecnico
+          ? `${textoBase}  —  ${nomeTecnico.toUpperCase()}  (cont.)`
+          : `${textoBase}  (cont.)`
+        pdf.text(textoCont, MARGEM + 3.5, posY + 5.8)
+        posY += 12
+      }
     }
   }
 
@@ -124,16 +146,17 @@ export async function gerarPDF(relatorio) {
     posY = 32
   }
 
-  function tabelaResumo() {
+  // Recebe opcionalmente os dados do técnico atual para exibir por bloco
+  function tabelaResumo(nomeTecnico, qtdOcs, qtdAtivs) {
     verificarEspaco(20)
     const colW = UTIL / 4
     pdf.setFillColor(24, 28, 37)
     pdf.roundedRect(MARGEM, posY, UTIL, 16, 1.5, 1.5, 'F')
     const celulas = [
-      { rotulo: 'Técnico',     valor: relatorio.tecnico     || '—' },
-      { rotulo: 'Responsável', valor: relatorio.responsavel || '—' },
-      { rotulo: 'Ocorrências', valor: String(ocorrencias.length) },
-      { rotulo: 'Atividades',  valor: String(atividades.length) },
+      { rotulo: 'Técnico',     valor: nomeTecnico            || relatorio.tecnico     || '—' },
+      { rotulo: 'Responsável', valor: relatorio.responsavel  || '—' },
+      { rotulo: 'Ocorrências', valor: qtdOcs   != null ? String(qtdOcs)   : String(ocorrencias.length) },
+      { rotulo: 'Atividades',  valor: qtdAtivs != null ? String(qtdAtivs) : String(atividades.length) },
     ]
     celulas.forEach((cel, i) => {
       const x = MARGEM + i * colW
@@ -149,6 +172,8 @@ export async function gerarPDF(relatorio) {
   // Barra de seção com nome do técnico já incluído
   // ex: "OCORRÊNCIAS DO TURNO  —  João Silva"
   function tituloSecaoComTecnico(textoBase, nomeTecnico, cor) {
+    // Registra o contexto da seção para que páginas de continuação possam repeti-lo
+    definirSecaoAtual(textoBase, nomeTecnico, cor)
     verificarEspaco(10)
     pdf.setFillColor(...hexRGB(cor))
     pdf.roundedRect(MARGEM, posY, UTIL, 8.5, 1, 1, 'F')
@@ -300,20 +325,30 @@ export async function gerarPDF(relatorio) {
 
   // Primeira página: fundo + cabeçalho completo (logo + título)
   cabecalho()
-  tabelaResumo()
+  // A tabela de resumo da primeira página mostra totais globais.
+  // Se houver apenas um técnico, exibe o nome dele; se houver vários, exibe o do relatório.
+  {
+    const nomeResumo = todosTecnicos.length === 1 ? todosTecnicos[0].nome : (relatorio.tecnico || null)
+    tabelaResumo(nomeResumo, null, null)
+  }
 
   // ── Um bloco por técnico, com quebra de página entre eles ────────────────
   for (let gi = 0; gi < todosTecnicos.length; gi++) {
     const grupo = todosTecnicos[gi]
 
-    const ocsTecnico  = grupo.itens.filter(i => i.tipo === 'ocorrencia' || i.tipo === 'occ')
+    const ocsTecnico   = grupo.itens.filter(i => i.tipo === 'ocorrencia' || i.tipo === 'occ')
     const ativsTecnico = grupo.itens.filter(i => i.tipo === 'atividade'  || i.tipo === 'ativ')
 
-    // A partir do segundo técnico: nova página
+    // A partir do segundo técnico: nova página com tabela de resumo do técnico
     if (gi > 0) {
       pdf.addPage()
       fundoNovaPagina()
+      // Limpa o contexto de seção anterior — nova página começa do zero
+      definirSecaoAtual(null, null, null)
+      // Tabela de resumo específica deste técnico no topo da página dele
+      tabelaResumo(grupo.nome, ocsTecnico.length, ativsTecnico.length)
     }
+    // gi === 0: a tabela global já foi desenhada pelo cabecalho() acima — não repete
 
     // ── Ocorrências do técnico ──────────────────────────────────────────────
     if (ocsTecnico.length > 0) {
