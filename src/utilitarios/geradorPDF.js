@@ -10,50 +10,70 @@ async function carregarJsPDF() {
   })
 }
 
-// Converte URL de imagem para base64 já normalizada para JPEG
-// (jsPDF só suporta JPEG e PNG de forma confiável; WEBP e outros são convertidos)
+// Converte qualquer URL de imagem para JPEG base64 via canvas.
+// Sempre usa canvas — garante formato limpo que o jsPDF aceita
+// independente do formato original (WEBP, HEIC, AVIF, JPEG, PNG).
 async function urlParaBase64(url) {
-  try {
-    const resposta = await fetch(url)
-    const blob = await resposta.blob()
+  return new Promise((ok) => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
 
-    // Tenta ler como base64 original primeiro
-    const base64Original = await new Promise((ok, erro) => {
-      const leitor = new FileReader()
-      leitor.onload = () => ok(leitor.result)
-      leitor.onerror = erro
-      leitor.readAsDataURL(blob)
-    })
-
-    // Se for PNG, mantém como está (jsPDF suporta bem)
-    if (base64Original.startsWith('data:image/png')) return base64Original
-
-    // Para JPEG já válido, mantém
-    if (base64Original.startsWith('data:image/jpeg') || base64Original.startsWith('data:image/jpg')) {
-      return base64Original
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas')
+        // Limita resolução para não explodir o PDF (máx 2400px no lado maior)
+        const MAX = 2400
+        let w = img.naturalWidth  || img.width  || 800
+        let h = img.naturalHeight || img.height || 600
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX }
+          else       { w = Math.round(w * MAX / h); h = MAX }
+        }
+        canvas.width  = w
+        canvas.height = h
+        const ctx = canvas.getContext('2d')
+        ctx.fillStyle = '#ffffff'          // fundo branco (JPEG não tem transparência)
+        ctx.fillRect(0, 0, w, h)
+        ctx.drawImage(img, 0, 0, w, h)
+        ok(canvas.toDataURL('image/jpeg', 0.90))
+      } catch {
+        ok(null)
+      }
     }
 
-    // Para WEBP, HEIC, AVIF e outros: converte para JPEG via canvas
-    return await new Promise((ok) => {
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        canvas.width  = img.naturalWidth  || img.width
-        canvas.height = img.naturalHeight || img.height
-        const ctx = canvas.getContext('2d')
-        // Fundo branco para imagens com transparência (evita preto no JPEG)
-        ctx.fillStyle = '#ffffff'
-        ctx.fillRect(0, 0, canvas.width, canvas.height)
-        ctx.drawImage(img, 0, 0)
-        ok(canvas.toDataURL('image/jpeg', 0.92))
-      }
-      img.onerror = () => ok(base64Original) // fallback: usa original
-      img.src = base64Original
-    })
-  } catch {
-    return null
-  }
+    img.onerror = async () => {
+      // Fallback: fetch da URL e cria blob URL local (contorna CORS do Supabase Storage)
+      try {
+        const res  = await fetch(url)
+        const blob = await res.blob()
+        const blobUrl = URL.createObjectURL(blob)
+        const img2 = new Image()
+        img2.onload = () => {
+          try {
+            const canvas = document.createElement('canvas')
+            let w = img2.naturalWidth  || 800
+            let h = img2.naturalHeight || 600
+            const MAX = 2400
+            if (w > MAX || h > MAX) {
+              if (w > h) { h = Math.round(h * MAX / w); w = MAX }
+              else       { w = Math.round(w * MAX / h); h = MAX }
+            }
+            canvas.width = w; canvas.height = h
+            const ctx = canvas.getContext('2d')
+            ctx.fillStyle = '#ffffff'
+            ctx.fillRect(0, 0, w, h)
+            ctx.drawImage(img2, 0, 0, w, h)
+            URL.revokeObjectURL(blobUrl)
+            ok(canvas.toDataURL('image/jpeg', 0.90))
+          } catch { URL.revokeObjectURL(blobUrl); ok(null) }
+        }
+        img2.onerror = () => { URL.revokeObjectURL(blobUrl); ok(null) }
+        img2.src = blobUrl
+      } catch { ok(null) }
+    }
+
+    img.src = url
+  }).catch(() => null)
 }
 
 // Busca validações e comentários do relatório no Supabase
@@ -285,43 +305,54 @@ export async function gerarPDF(relatorio) {
     pdf.text('Fotos:', MARGEM+2, posY)
     posY += 5
 
-    const dados = []
-    for (const foto of listaFotos) {
+    // Carrega todas as fotos em paralelo e extrai dimensões via Image()
+    const dados = await Promise.all(listaFotos.map(async (foto, idx) => {
       const base64 = await urlParaBase64(foto.url)
-      let props = null
-      if (base64) { try { props = pdf.getImageProperties(base64) } catch { } }
-      dados.push({ base64, props, legenda: (foto.legenda || '').trim() })
-    }
+      let w = 0, h = 0
+      if (base64) {
+        // Extrai dimensões reais do base64 via Image — não depende do jsPDF
+        await new Promise(res => {
+          const img = new Image()
+          img.onload = () => { w = img.naturalWidth; h = img.naturalHeight; res() }
+          img.onerror = res
+          img.src = base64
+        })
+      }
+      return { base64, w, h, legenda: (foto.legenda || `Foto ${idx + 1}`).trim() }
+    }))
 
     for (let i = 0; i < dados.length; i += 2) {
-      const linha = dados.slice(i, i+2)
-      const linhasLegendaPorItem = linha.map((d, col) => {
-        const txt = d.legenda || `Foto ${i+col+1}`
-        return pdf.splitTextToSize(txt, larguraFoto-2)
-      })
+      const linha = dados.slice(i, i + 2)
+      const linhasLegendaPorItem = linha.map(d =>
+        pdf.splitTextToSize(d.legenda, larguraFoto - 2)
+      )
       const alturaLegenda = Math.max(...linhasLegendaPorItem.map(l => l.length)) * 3.6 + 2
       verificarEspaco(alturaFoto + alturaLegenda + 6)
       linha.forEach((d, col) => {
         const x = MARGEM + col * (larguraFoto + 6)
-        pdf.setDrawColor(42,48,64); pdf.setFillColor(20,23,31)
+        pdf.setDrawColor(42, 48, 64); pdf.setFillColor(20, 23, 31)
         pdf.roundedRect(x, posY, larguraFoto, alturaFoto, 1, 1, 'FD')
-        if (d.base64 && d.props?.width && d.props?.height) {
-          const imgRatio = d.props.width / d.props.height
+        if (d.base64 && d.w > 0 && d.h > 0) {
+          const imgRatio = d.w / d.h
           const boxRatio = larguraFoto / alturaFoto
           let lD, aD
-          if (imgRatio > boxRatio) { lD = larguraFoto; aD = larguraFoto/imgRatio }
-          else                     { aD = alturaFoto;  lD = alturaFoto*imgRatio  }
-          const oX = x + (larguraFoto-lD)/2
-          const oY = posY + (alturaFoto-aD)/2
-          // Detecta formato pelo prefixo do base64 — mais confiável que props.fileType
-          const fmt = d.base64.startsWith('data:image/png') ? 'PNG' : 'JPEG'
-          pdf.addImage(d.base64, fmt, oX, oY, lD, aD, undefined, 'FAST')
+          if (imgRatio > boxRatio) { lD = larguraFoto; aD = larguraFoto / imgRatio }
+          else                     { aD = alturaFoto;  lD = alturaFoto  * imgRatio }
+          const oX = x + (larguraFoto - lD) / 2
+          const oY = posY + (alturaFoto - aD) / 2
+          // Sempre JPEG — urlParaBase64 já normaliza tudo para JPEG via canvas
+          try {
+            pdf.addImage(d.base64, 'JPEG', oX, oY, lD, aD, undefined, 'FAST')
+          } catch {
+            pdf.setFontSize(7.5); pdf.setFont('helvetica', 'normal'); pdf.setTextColor(80, 90, 110)
+            pdf.text('Erro ao carregar foto', x + larguraFoto / 2, posY + alturaFoto / 2, { align: 'center' })
+          }
         } else {
-          pdf.setFontSize(7.5); pdf.setFont('helvetica','normal'); pdf.setTextColor(80,90,110)
-          pdf.text('Foto indisponível', x+larguraFoto/2, posY+alturaFoto/2, {align:'center'})
+          pdf.setFontSize(7.5); pdf.setFont('helvetica', 'normal'); pdf.setTextColor(80, 90, 110)
+          pdf.text('Foto indisponível', x + larguraFoto / 2, posY + alturaFoto / 2, { align: 'center' })
         }
-        pdf.setFontSize(7); pdf.setFont('helvetica','normal'); pdf.setTextColor(100,110,130)
-        pdf.text(linhasLegendaPorItem[col], x+larguraFoto/2, posY+alturaFoto+4, {align:'center'})
+        pdf.setFontSize(7); pdf.setFont('helvetica', 'normal'); pdf.setTextColor(100, 110, 130)
+        pdf.text(linhasLegendaPorItem[col], x + larguraFoto / 2, posY + alturaFoto + 4, { align: 'center' })
       })
       posY += alturaFoto + alturaLegenda + 6
     }
