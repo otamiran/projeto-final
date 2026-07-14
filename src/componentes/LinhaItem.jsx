@@ -3,7 +3,7 @@
 
 import { EMOJI_STATUS } from '../utilitarios/constantes'
 
-export default function LinhaItem({ item, indice, aoEditar, aoExcluir, validacao }) {
+export default function LinhaItem({ item, indice, aoEditar, aoExcluir, validacao, podeExcluir = true }) {
   const ehOcorrencia = item.tipo === 'ocorrencia' || item.tipo === 'occ'
 
   const corPonto = ehOcorrencia
@@ -63,7 +63,9 @@ export default function LinhaItem({ item, indice, aoEditar, aoExcluir, validacao
 
       <div className="botoes-item">
         <button className="botao botao-azul botao-pequeno" onClick={() => aoEditar(item, indice)}>✏</button>
-        <button className="botao botao-vermelho botao-pequeno" onClick={() => aoExcluir(indice)}>✕</button>
+        {podeExcluir && (
+          <button className="botao botao-vermelho botao-pequeno" onClick={() => aoExcluir(indice)}>✕</button>
+        )}
       </div>
     </div>
   )

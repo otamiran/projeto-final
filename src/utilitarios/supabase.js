@@ -20,3 +20,6 @@ export const TABELA_FCAS        = 'fcas'
 
 // ── Setores permanentes ─────────────────────────────────────────────────────
 export const TABELA_SETORES     = 'setores'
+
+// ── Equipamentos permanentes (tag + nome, para autocomplete) ────────────────
+export const TABELA_EQUIPAMENTOS = 'equipamentos'

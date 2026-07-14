@@ -1,7 +1,7 @@
 // Painel que sobe da parte de baixo da tela para adicionar ou editar um item
 // Chamado de "bottom sheet" — padrão mobile muito usado em apps
 
-import { useState, useRef } from 'react'
+import { useState, useLayoutEffect } from 'react'
 import { bd, TABELA_ABERTOS, BUCKET_FOTOS } from '../utilitarios/supabase'
 import FormOcorrencia from './FormOcorrencia'
 import FormAtividade from './FormAtividade'
@@ -32,6 +32,7 @@ export default function PainelItem({
   indiceEditando,
   idRelatorio,
   nomeusuario,
+  equipamentos = [],
   aoSalvar,
   aoFechar,
   mostrarAviso,
@@ -40,11 +41,13 @@ export default function PainelItem({
   const [fotos, setFotos] = useState([]) // array de {file, dataUrl, url, path}
   const [salvando, setSalvando] = useState(false)
 
-  // Preenche o formulário quando abre para editar um item existente
-  // useRef para não re-executar toda vez que renderiza
-  const inicializado = useRef(false)
-  if (aberto && !inicializado.current) {
-    inicializado.current = true
+  // Preenche o formulário quando o painel abre (edição carrega os dados do item,
+  // item novo começa em branco). useLayoutEffect roda antes do navegador pintar a
+  // tela, então o usuário nunca vê o formulário em branco piscar ao abrir uma
+  // ocorrência já preenchida — e reage sempre que o item sendo editado muda.
+  useLayoutEffect(() => {
+    if (!aberto) return
+
     if (itemEditando) {
       // Edição: carrega os dados do item
       setFormulario({ ...FORMULARIO_VAZIO, ...itemEditando })
@@ -62,11 +65,9 @@ export default function PainelItem({
       setFormulario({ ...FORMULARIO_VAZIO, tipo })
       setFotos([])
     }
-  }
+  }, [aberto, itemEditando, indiceEditando, tipo])
 
-  // Quando o painel fecha, reseta o flag para a próxima abertura
   function fechar() {
-    inicializado.current = false
     aoFechar()
   }
 
@@ -204,9 +205,9 @@ export default function PainelItem({
         {/* Conteúdo com scroll */}
         <div className="painel-conteudo">
           {ehOcorrencia ? (
-            <FormOcorrencia formulario={formulario} aoMudar={setFormulario} />
+            <FormOcorrencia formulario={formulario} aoMudar={setFormulario} equipamentos={equipamentos} />
           ) : (
-            <FormAtividade formulario={formulario} aoMudar={setFormulario} />
+            <FormAtividade formulario={formulario} aoMudar={setFormulario} equipamentos={equipamentos} />
           )}
           <div className="divisor" />
           <UploadFotos

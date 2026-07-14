@@ -181,9 +181,6 @@ export default function ModalVerRelatorio({
               <button className="botao botao-verde" onClick={copiar}>
                 📋 Copiar
               </button>
-              <button className="botao botao-pdf" onClick={() => aoGerarPDF(relatorio)}>
-                📄 PDF
-              </button>
               {podeExcluir && ehAdmin(sessao) && (
                 <button className="botao botao-vermelho" onClick={() => aoExcluir(relatorio.id)}>
                   🗑 Excluir

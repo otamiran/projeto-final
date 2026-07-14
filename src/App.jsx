@@ -4,6 +4,7 @@ import { useAutenticacaoBD }  from './ganchos/useAutenticacaoBD'
 import { useRelatorios }       from './ganchos/useRelatorios'
 import { useAviso }            from './ganchos/useAviso'
 import { useConfirmacao }      from './ganchos/useConfirmacao'
+import { useEquipamentos }     from './ganchos/useEquipamentos'
 
 import PaginaLogin         from './paginas/PaginaLogin'
 import PaginaNovo          from './paginas/PaginaNovo'
@@ -45,6 +46,7 @@ export default function App() {
   } = useAutenticacaoBD()
 
   const { abertos, historico, status, recarregar } = useRelatorios(estaLogado)
+  const equipamentosGancho = useEquipamentos(estaLogado)
   const { aviso, mostrar: mostrarAviso }            = useAviso()
   const { confirmacaoAberta, mensagemConfirmacao, pedir, confirmar, cancelar } = useConfirmacao()
 
@@ -160,12 +162,14 @@ export default function App() {
           sessao={sessao} abertos={abertos} status={status} painel={painel}
           pedir={pedir} mostrarAviso={mostrarAviso} recarregar={recarregar}
           atualizarIdentificacao={atualizarIdentificacao}
+          ehAdmin={ehAdmin}
         />
       )}
       {aba === 'abertos' && (
         <PaginaAbertos
           abertos={abertos} sessao={sessao} aoVer={setRelatorioVendo}
           pedir={pedir} mostrarAviso={mostrarAviso} recarregar={recarregar}
+          ehAdmin={ehAdmin} aoGerarPDF={gerarPDF}
         />
       )}
       {aba === 'historico' && (
@@ -185,6 +189,7 @@ export default function App() {
         <PaginaAdmin
           sessao={sessao} historico={historico}
           pedir={pedir} mostrarAviso={mostrarAviso} aoVerRelatorio={setRelatorioVendo}
+          equipamentosGancho={equipamentosGancho}
         />
       )}
 
@@ -193,6 +198,7 @@ export default function App() {
         itemEditando={itemEditando} indiceEditando={indiceEditando}
         idRelatorio={idRelatorioRef.current}
         nomeusuario={sessao.tecnico || sessao.nome}
+        equipamentos={equipamentosGancho.equipamentos}
         aoSalvar={recarregar} aoFechar={() => setPainelAberto(false)}
         mostrarAviso={mostrarAviso}
       />

@@ -1,23 +1,30 @@
 // Formulário de campos para uma atividade programada
 
 import BotoesAlternancia from './BotoesAlternancia'
+import BotaoAudio from './BotaoAudio'
 import { STATUS_ATIVIDADE, COR_STATUS } from '../utilitarios/constantes'
 
-export default function FormAtividade({ formulario, aoMudar }) {
+export default function FormAtividade({ formulario, aoMudar, equipamentos = [] }) {
   return (
     <>
-      {/* Equipamento */}
+      {/* Equipamento — com autocomplete a partir da lista cadastrada em Admin */}
       <div className="campo">
         <label>Equipamento</label>
-        <textarea
-          rows={2}
-          placeholder="Ex: Motor da esteira 2..."
+        <input
+          type="text"
+          list="lista-equipamentos-atividade"
+          placeholder="Ex: MR6034 — Motor da esteira 2..."
           value={formulario.equipamento}
           onChange={e => aoMudar(f => ({ ...f, equipamento: e.target.value }))}
         />
+        <datalist id="lista-equipamentos-atividade">
+          {equipamentos.map(eq => (
+            <option key={eq.id} value={eq.tag ? `${eq.tag} — ${eq.nome}` : eq.nome} />
+          ))}
+        </datalist>
       </div>
 
-      {/* Descrição da atividade */}
+      {/* Descrição da atividade — pode ser digitada ou ditada por voz */}
       <div className="campo">
         <label>Descrição da atividade</label>
         <textarea
@@ -25,6 +32,10 @@ export default function FormAtividade({ formulario, aoMudar }) {
           placeholder="Descreva o que foi feito ou precisa ser feito..."
           value={formulario.descricao}
           onChange={e => aoMudar(f => ({ ...f, descricao: e.target.value }))}
+        />
+        <BotaoAudio
+          valorAtual={formulario.descricao}
+          aoReconhecer={texto => aoMudar(f => ({ ...f, descricao: texto }))}
         />
       </div>
 

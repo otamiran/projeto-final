@@ -41,7 +41,7 @@ async function buscarRetornoProducao(relatorioId) {
   }
 }
 
-export async function gerarPDF(relatorio) {
+async function montarPDF(relatorio) {
   await carregarJsPDF()
   const { jsPDF } = window.jspdf
 
@@ -438,5 +438,54 @@ export async function gerarPDF(relatorio) {
     )
   }
 
-  pdf.save(`turno_${(relatorio.setor||'relatorio').replace(/\s+/g,'_')}_${relatorio.data||'sem_data'}.pdf`)
+  return pdf
+}
+
+// Nome de arquivo padrão usado tanto no download individual quanto no lote em zip
+function nomeArquivoPDF(relatorio) {
+  return `turno_${(relatorio.setor || 'relatorio').replace(/\s+/g, '_')}_${relatorio.data || 'sem_data'}.pdf`
+}
+
+// Gera o PDF de um único relatório e já dispara o download (uso individual, como antes)
+export async function gerarPDF(relatorio) {
+  const pdf = await montarPDF(relatorio)
+  pdf.save(nomeArquivoPDF(relatorio))
+}
+
+// Carrega o JSZip do CDN (só na primeira vez) — usado na exportação em lote
+async function carregarJSZip() {
+  if (window.JSZip) return
+  await new Promise((ok, erro) => {
+    const script = document.createElement('script')
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'
+    script.onload = ok
+    script.onerror = erro
+    document.head.appendChild(script)
+  })
+}
+
+// Gera um PDF (no mesmo padrão visual do relatório individual, com fotos incluídas)
+// para cada relatório da lista e empacota tudo em um único arquivo .zip para download.
+// Usado na exportação em lote da tela de Histórico.
+export async function gerarZipDeRelatorios(lista, nomeArquivoZip) {
+  await carregarJSZip()
+  const zip = new window.JSZip()
+
+  for (let i = 0; i < lista.length; i++) {
+    const relatorio = lista[i]
+    const pdf = await montarPDF(relatorio)
+    // Prefixo numérico garante ordem e evita colisão de nomes entre relatórios iguais
+    const nome = `${String(i + 1).padStart(3, '0')}_${nomeArquivoPDF(relatorio)}`
+    zip.file(nome, pdf.output('blob'))
+  }
+
+  const conteudoZip = await zip.generateAsync({ type: 'blob' })
+  const url = URL.createObjectURL(conteudoZip)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = nomeArquivoZip
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
 }

@@ -8,6 +8,7 @@ export default function PaginaNovo({
   sessao, abertos, status, painel,
   pedir, mostrarAviso, recarregar,
   atualizarIdentificacao, // função do hook de autenticação
+  ehAdmin, // true apenas para o grupo "admin" — controla quem pode fechar no histórico
 }) {
 
   // ── Identificação do técnico (preenchida uma vez ao entrar) ───────────────
@@ -159,8 +160,13 @@ export default function PaginaNovo({
     painel.abrirEditar(item, indice)
   }
 
-  // Remove um item da lista (com confirmação)
+  // Remove um item da lista (com confirmação) — só admin, para evitar que um
+  // usuário exclua acidentalmente a ocorrência/atividade lançada por outro
   function excluirItem(indice) {
+    if (!ehAdmin) {
+      mostrarAviso('Só o administrador pode excluir itens já lançados.', true)
+      return
+    }
     pedir('Remover este item?', async () => {
       const { data: atual } = await bd.from(TABELA_ABERTOS).select('itens').eq('id', idSel).single()
       const lista = [...(atual?.itens || [])]
@@ -372,7 +378,11 @@ export default function PaginaNovo({
 
         {/* Lista de itens do relatório ativo */}
         {itens.map((item, i) => (
-          <LinhaItem key={i} item={item} indice={i} aoEditar={editarItem} aoExcluir={excluirItem} />
+          <LinhaItem
+            key={i} item={item} indice={i}
+            aoEditar={editarItem} aoExcluir={excluirItem}
+            podeExcluir={ehAdmin}
+          />
         ))}
 
         {/* Botões para adicionar novos itens */}
@@ -427,14 +437,16 @@ export default function PaginaNovo({
         >
           📋 Novo em Branco
         </button>
-        <button
-          className="botao botao-destaque"
-          onClick={fecharNoHistorico}
-          disabled={salvando}
-          style={{ flex: 2, justifyContent: 'center' }}
-        >
-          {salvando ? 'Salvando...' : '💾 Fechar no Histórico'}
-        </button>
+        {ehAdmin && (
+          <button
+            className="botao botao-destaque"
+            onClick={fecharNoHistorico}
+            disabled={salvando}
+            style={{ flex: 2, justifyContent: 'center' }}
+          >
+            {salvando ? 'Salvando...' : '💾 Fechar no Histórico'}
+          </button>
+        )}
       </div>
 
     </div>

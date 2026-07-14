@@ -2,9 +2,10 @@
 // Gerencia usuários (aprovar/bloquear/excluir), setores permanentes e
 // acompanha relatórios por usuário
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useAdmin } from '../ganchos/useAdmin'
 import { useSetores } from '../ganchos/useSetores'
+import SecaoColapsavel from '../componentes/SecaoColapsavel'
 
 // Formata timestamp em data legível
 function formatarData(ts) {
@@ -12,7 +13,7 @@ function formatarData(ts) {
   return new Date(ts).toLocaleDateString('pt-BR')
 }
 
-export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, aoVerRelatorio }) {
+export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, aoVerRelatorio, equipamentosGancho = {} }) {
   const {
     pendentes, aprovados, bloqueados,
     aprovar, bloquear, excluir, recarregar,
@@ -23,6 +24,94 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
   // Controla qual setor está com os campos de responsável abertos para edição
   const [editandoResponsavel, setEditandoResponsavel] = useState(null)   // id do setor
   const [valoresResponsavel, setValoresResponsavel]   = useState({})     // { turno: nome }
+
+  // ── Equipamentos (tag + nome) — cadastro manual e importação via Excel ────
+  const {
+    equipamentos = [],
+    adicionar: adicionarEquipamento,
+    importarLista: importarEquipamentos,
+    remover: removerEquipamento,
+  } = equipamentosGancho
+  const [tagNovoEquip, setTagNovoEquip]   = useState('')
+  const [nomeNovoEquip, setNomeNovoEquip] = useState('')
+  const [importando, setImportando]       = useState(false)
+  const inputExcelRef = useRef()
+
+  // Cadastra um equipamento manualmente
+  async function handleAdicionarEquipamento() {
+    const resultado = await adicionarEquipamento(tagNovoEquip, nomeNovoEquip)
+    if (resultado.error) {
+      mostrarAviso(resultado.error, true)
+      return
+    }
+    setTagNovoEquip('')
+    setNomeNovoEquip('')
+    mostrarAviso('✓ Equipamento cadastrado!')
+  }
+
+  // Remove um equipamento (com confirmação)
+  function handleRemoverEquipamento(eq) {
+    pedir(`Remover o equipamento "${eq.nome}"?`, async () => {
+      const resultado = await removerEquipamento(eq.id)
+      if (resultado.error) {
+        mostrarAviso(resultado.error, true)
+        return
+      }
+      mostrarAviso('Equipamento removido.')
+    })
+  }
+
+  // Importa uma lista de equipamentos a partir de um arquivo Excel (.xlsx/.xls)
+  // Espera colunas "tag" e "nome" (aceita também "equipamento"/"descrição" no lugar de "nome")
+  async function handleUploadExcel(evento) {
+    const arquivo = evento.target.files[0]
+    evento.target.value = '' // permite selecionar o mesmo arquivo de novo depois
+    if (!arquivo) return
+
+    setImportando(true)
+    try {
+      const XLSX = await import('xlsx')
+      const buffer = await arquivo.arrayBuffer()
+      const planilha = XLSX.read(buffer, { type: 'array' })
+      const primeiraAba = planilha.SheetNames[0]
+      const linhas = XLSX.utils.sheet_to_json(planilha.Sheets[primeiraAba], { defval: '' })
+
+      if (linhas.length === 0) {
+        mostrarAviso('A planilha está vazia.', true)
+        return
+      }
+
+      // Identifica as colunas de tag e nome de forma flexível (não faz diferença maiúsc./minúsc.)
+      const colunas = Object.keys(linhas[0])
+      const colTag  = colunas.find(c => /^tag$/i.test(c.trim()))
+      const colNome = colunas.find(c => /^(nome|equipamento|descri[cç][aã]o)$/i.test(c.trim()))
+
+      if (!colNome) {
+        mostrarAviso('Não encontrei uma coluna "nome" (ou "equipamento") na planilha.', true)
+        return
+      }
+
+      const itens = linhas.map(l => ({
+        tag:  colTag ? String(l[colTag] ?? '').trim() : '',
+        nome: String(l[colNome] ?? '').trim(),
+      }))
+
+      const resultado = await importarEquipamentos(itens)
+      if (resultado.error) {
+        mostrarAviso(resultado.error, true)
+        return
+      }
+
+      const partes = [`✓ ${resultado.inseridos} equipamento(s) importado(s)`]
+      if (resultado.duplicados) partes.push(`${resultado.duplicados} já existiam`)
+      if (resultado.semNome)    partes.push(`${resultado.semNome} sem nome (ignorados)`)
+      mostrarAviso(partes.join(' · '))
+    } catch (e) {
+      mostrarAviso('Erro ao ler a planilha: ' + e.message, true)
+    } finally {
+      setImportando(false)
+    }
+  }
 
   // Salva o mapa de responsáveis por turno de um setor
   async function handleSalvarResponsavel(s) {
@@ -88,14 +177,10 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
       <div className="container">
 
         {/* ── Pendentes (destaque no topo) ── */}
-        <div className="card">
-          <div className="card-cabecalho">
-            <span className="card-rotulo">Aguardando Aprovação</span>
-            {pendentes.length > 0 && (
-              <span className="nav-badge badge-vermelho">{pendentes.length}</span>
-            )}
-          </div>
-          <div className="card-corpo">
+        <SecaoColapsavel
+          titulo="Aguardando Aprovação"
+          badge={pendentes.length > 0 && <span className="nav-badge badge-vermelho">{pendentes.length}</span>}
+        >
             {pendentes.length === 0 ? (
               <p className="texto-apagado" style={{ textAlign: 'center', padding: '12px 0' }}>
                 Nenhum cadastro pendente.
@@ -118,15 +203,10 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
                 </div>
               ))
             )}
-          </div>
-        </div>
+        </SecaoColapsavel>
 
         {/* ── Usuários aprovados ── */}
-        <div className="card">
-          <div className="card-cabecalho">
-            <span className="card-rotulo">Usuários Ativos</span>
-          </div>
-          <div className="card-corpo">
+        <SecaoColapsavel titulo="Usuários Ativos">
             {aprovados.length === 0 ? (
               <p className="texto-apagado" style={{ textAlign: 'center', padding: '12px 0' }}>Nenhum usuário cadastrado.</p>
             ) : (
@@ -153,16 +233,11 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
                 )
               })
             )}
-          </div>
-        </div>
+        </SecaoColapsavel>
 
         {/* ── Usuários bloqueados ── */}
         {bloqueados.length > 0 && (
-          <div className="card">
-            <div className="card-cabecalho">
-              <span className="card-rotulo">Bloqueados</span>
-            </div>
-            <div className="card-corpo">
+          <SecaoColapsavel titulo="Bloqueados">
               {bloqueados.map(u => (
                 <div key={u.id} className="linha-usuario">
                   <div className="usuario-info">
@@ -179,16 +254,11 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
+          </SecaoColapsavel>
         )}
 
         {/* ── Setores permanentes ── */}
-        <div className="card">
-          <div className="card-cabecalho">
-            <span className="card-rotulo">Setores</span>
-          </div>
-          <div className="card-corpo">
+        <SecaoColapsavel titulo="Setores">
             <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
               <input
                 type="text"
@@ -270,15 +340,86 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
                 </div>
               ))
             )}
-          </div>
-        </div>
+        </SecaoColapsavel>
+
+        {/* ── Equipamentos permanentes (tag + nome) ── */}
+        <SecaoColapsavel
+          titulo="Equipamentos"
+          badge={equipamentos.length > 0 && <span className="nav-badge badge-azul">{equipamentos.length}</span>}
+        >
+
+            {/* Cadastro manual: tag + nome */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+              <input
+                type="text"
+                value={tagNovoEquip}
+                onChange={e => setTagNovoEquip(e.target.value)}
+                placeholder="Tag (opcional, ex: MR6034)"
+                style={{ flex: '0 1 160px' }}
+              />
+              <input
+                type="text"
+                value={nomeNovoEquip}
+                onChange={e => setNomeNovoEquip(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAdicionarEquipamento()}
+                placeholder="Nome do equipamento..."
+                style={{ flex: '1 1 220px' }}
+              />
+              <button className="botao botao-destaque" onClick={handleAdicionarEquipamento}>
+                + Adicionar
+              </button>
+            </div>
+
+            {/* Importação em massa via planilha Excel */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+              background: 'var(--cor-fundo-3)', border: '1px dashed var(--cor-borda-2)',
+              borderRadius: 'var(--raio)', padding: '10px 12px', marginBottom: 12,
+            }}>
+              <button
+                className="botao botao-azul"
+                onClick={() => inputExcelRef.current.click()}
+                disabled={importando}
+              >
+                {importando ? 'Importando...' : '📥 Importar planilha Excel'}
+              </button>
+              <span className="texto-apagado" style={{ fontSize: 11 }}>
+                Colunas esperadas: <strong>tag</strong> e <strong>nome</strong> (ou "equipamento"). Uma linha por equipamento.
+              </span>
+              <input
+                ref={inputExcelRef}
+                type="file"
+                accept=".xlsx,.xls"
+                style={{ display: 'none' }}
+                onChange={handleUploadExcel}
+              />
+            </div>
+
+            {equipamentos.length === 0 ? (
+              <p className="texto-apagado" style={{ textAlign: 'center', padding: '12px 0' }}>
+                Nenhum equipamento cadastrado.
+              </p>
+            ) : (
+              equipamentos.map(eq => (
+                <div key={eq.id} className="linha-usuario">
+                  <div className="usuario-info">
+                    <span className="usuario-nome">
+                      {eq.tag && <span style={{ color: 'var(--ambar)', fontFamily: 'var(--fonte-mono)', fontSize: 12, marginRight: 8 }}>{eq.tag}</span>}
+                      {eq.nome}
+                    </span>
+                  </div>
+                  <div className="usuario-acoes">
+                    <button className="botao botao-vermelho botao-pequeno" onClick={() => handleRemoverEquipamento(eq)}>
+                      🗑
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+        </SecaoColapsavel>
 
         {/* ── Relatórios por usuário ── */}
-        <div className="card">
-          <div className="card-cabecalho">
-            <span className="card-rotulo">Relatórios por Usuário</span>
-          </div>
-          <div className="card-corpo">
+        <SecaoColapsavel titulo="Relatórios por Usuário">
             {(historico || []).length === 0 ? (
               <p className="texto-apagado" style={{ textAlign: 'center', padding: '12px 0' }}>Nenhum relatório no histórico.</p>
             ) : (
@@ -312,8 +453,7 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
                 </div>
               ))
             )}
-          </div>
-        </div>
+        </SecaoColapsavel>
 
       </div>
     </div>

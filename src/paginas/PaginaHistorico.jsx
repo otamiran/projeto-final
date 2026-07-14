@@ -4,7 +4,7 @@
 // e cada grupo pode ser recolhido/expandido
 
 import { useState } from 'react'
-import { bd, TABELA_ABERTOS, TABELA_HISTORICO } from '../utilitarios/supabase'
+import { bd, TABELA_ABERTOS, TABELA_HISTORICO, BUCKET_FOTOS } from '../utilitarios/supabase'
 import { ehAdmin } from '../utilitarios/autenticacao'
 import { useSetores } from '../ganchos/useSetores'
 
@@ -21,6 +21,76 @@ export default function PaginaHistorico({
 
   // Setores recolhidos (chave: nome do grupo). Começam todos expandidos.
   const [colapsados, setColapsados] = useState({})
+
+  // ── Exportar + limpar relatórios de um período (economiza espaço no Supabase) ──
+  const [dataInicioExport, setDataInicioExport] = useState('')
+  const [dataFimExport, setDataFimExport]       = useState('')
+  const [exportando, setExportando]             = useState(false)
+
+  // Gera um .zip com um PDF de cada relatório selecionado (padrão visual do app, com fotos),
+  // depois apaga as fotos do Storage e os registros da tabela de histórico.
+  async function handleExportarELimpar() {
+    if (!dataInicioExport || !dataFimExport) {
+      mostrarAviso('Selecione a data de início e fim do período.', true)
+      return
+    }
+    if (dataInicioExport > dataFimExport) {
+      mostrarAviso('A data de início deve ser antes (ou igual) à data de fim.', true)
+      return
+    }
+
+    // Filtra os relatórios do histórico dentro do período (inclusive)
+    const selecionados = historico.filter(r => r.data && r.data >= dataInicioExport && r.data <= dataFimExport)
+
+    if (selecionados.length === 0) {
+      mostrarAviso('Nenhum relatório encontrado nesse período.', true)
+      return
+    }
+
+    const dataInicioBR = new Date(dataInicioExport + 'T12:00').toLocaleDateString('pt-BR')
+    const dataFimBR    = new Date(dataFimExport    + 'T12:00').toLocaleDateString('pt-BR')
+
+    pedir(
+      `Exportar e APAGAR ${selecionados.length} relatório(s) entre ${dataInicioBR} e ${dataFimBR}? ` +
+      'Um arquivo .zip com um PDF de cada relatório (com fotos) será baixado antes da exclusão. Esta ação NÃO pode ser desfeita.',
+      async () => {
+        setExportando(true)
+        try {
+          // 1) Gera um PDF por relatório (no padrão visual já usado no app, com fotos)
+          //    e baixa tudo junto em um .zip
+          mostrarAviso(`Gerando ${selecionados.length} PDF(s), aguarde...`)
+          const { gerarZipDeRelatorios } = await import('../utilitarios/geradorPDF')
+          await gerarZipDeRelatorios(
+            selecionados,
+            `relatorios_${dataInicioExport}_a_${dataFimExport}.zip`
+          )
+
+          // 2) Remove as fotos do Storage (é o que realmente ocupa mais espaço)
+          for (const r of selecionados) {
+            for (const item of (r.itens || [])) {
+              for (const foto of (item.fotos || [])) {
+                if (foto.path) await bd.storage.from(BUCKET_FOTOS).remove([foto.path])
+              }
+            }
+          }
+
+          // 3) Remove os registros do histórico no banco
+          const ids = selecionados.map(r => r.id)
+          const { error } = await bd.from(TABELA_HISTORICO).delete().in('id', ids)
+          if (error) throw error
+
+          mostrarAviso(`✓ ${selecionados.length} relatório(s) exportado(s) em PDF e removido(s) do Supabase!`)
+          setDataInicioExport('')
+          setDataFimExport('')
+          recarregar()
+        } catch (e) {
+          mostrarAviso('Erro ao exportar/limpar: ' + e.message, true)
+        } finally {
+          setExportando(false)
+        }
+      }
+    )
+  }
 
   function alternarGrupo(nomeGrupo) {
     setColapsados(c => ({ ...c, [nomeGrupo]: !c[nomeGrupo] }))
@@ -143,9 +213,9 @@ export default function PaginaHistorico({
               📄 PDF
             </button>
           )}
-          <button className="botao botao-azul" onClick={() => reabrir(r)}>
+          {/* <button className="botao botao-azul" onClick={() => reabrir(r)}>
             ↩ Reabrir
-          </button>
+          </button> */}
           {/* Botão excluir só para admin */}
           {ehAdmin(sessao) && (
             <button className="botao botao-vermelho" onClick={() => excluir(r.id)}>
@@ -160,6 +230,48 @@ export default function PaginaHistorico({
   return (
     <div className="pagina">
       <div className="conteudo">
+
+        {/* ── Exportar e limpar relatórios de um período (só admin) ── */}
+        {ehAdmin(sessao) && (
+          <div className="card" style={{ marginBottom: 14 }}>
+            <div className="card-cabecalho">
+              <span className="card-rotulo">📦 Exportar e Limpar Período</span>
+            </div>
+            <div className="card-corpo">
+              <p className="texto-apagado" style={{ fontSize: 11, marginBottom: 10 }}>
+                Baixa um arquivo .zip com um PDF de cada relatório do período (no mesmo padrão do
+                relatório individual, com fotos) e depois os remove do Supabase para economizar espaço.
+              </p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                <div className="campo" style={{ flex: '1 1 140px' }}>
+                  <label>De</label>
+                  <input
+                    type="date"
+                    value={dataInicioExport}
+                    onChange={e => setDataInicioExport(e.target.value)}
+                  />
+                </div>
+                <div className="campo" style={{ flex: '1 1 140px' }}>
+                  <label>Até</label>
+                  <input
+                    type="date"
+                    value={dataFimExport}
+                    onChange={e => setDataFimExport(e.target.value)}
+                  />
+                </div>
+                <button
+                  className="botao botao-laranja"
+                  onClick={handleExportarELimpar}
+                  disabled={exportando}
+                  style={{ height: 37 }}
+                >
+                  {exportando ? 'Processando...' : '📦 Exportar e Limpar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Um grupo colapsável para cada setor */}
         {gruposOrdenados.map(grupo => {
           const colapsado = !!colapsados[grupo.nome]

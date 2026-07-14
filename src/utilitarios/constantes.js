@@ -1,11 +1,11 @@
 // Opções do campo "Modo de Falha" em ocorrências
-export const MODOS_FALHA = ['Elétrico', 'Mecânico', 'Instrumental', 'Processo', 'Outro']
+export const MODOS_FALHA = ['Elétrico', 'Mecânico', 'Automação', 'Operacional', 'Outro']
 
 // Opções do campo "Impacto" em ocorrências
 export const IMPACTOS = ['Parada total', 'Redução de capacidade', 'Sem impacto']
 
 // Opções do campo "Tipo de Intervenção" em ocorrências
-export const TIPOS_INTERVENCAO = ['Corretiva', 'Paliativa', 'Preventiva', 'Substituição']
+export const TIPOS_INTERVENCAO = ['Corretiva', 'Preventiva', 'Acompanhamento']
 
 // Opções do campo "Status" em atividades
 export const STATUS_ATIVIDADE = ['Concluída', 'Em andamento', 'Pendente']

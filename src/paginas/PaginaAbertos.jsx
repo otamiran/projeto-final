@@ -2,7 +2,7 @@
 
 import { bd, TABELA_ABERTOS, TABELA_HISTORICO } from '../utilitarios/supabase'
 
-export default function PaginaAbertos({ abertos, sessao, aoVer, pedir, mostrarAviso, recarregar }) {
+export default function PaginaAbertos({ abertos, sessao, aoVer, pedir, mostrarAviso, recarregar, ehAdmin, aoGerarPDF }) {
   // Fecha o relatório e move para o histórico
   function fechar(relatorio) {
     pedir('Mover este relatório para o Histórico?', async () => {
@@ -18,8 +18,12 @@ export default function PaginaAbertos({ abertos, sessao, aoVer, pedir, mostrarAv
     })
   }
 
-  // Exclui permanentemente um relatório aberto
+  // Exclui permanentemente um relatório aberto (só admin)
   function excluir(id) {
+    if (!ehAdmin) {
+      mostrarAviso('Só o administrador pode excluir.', true)
+      return
+    }
     pedir('Excluir este relatório aberto?', async () => {
       await bd.from(TABELA_ABERTOS).delete().eq('id', id)
       mostrarAviso('Excluído.')
@@ -103,12 +107,21 @@ export default function PaginaAbertos({ abertos, sessao, aoVer, pedir, mostrarAv
                 <button className="botao botao-verde" onClick={() => aoVer(r)}>
                   👁 Ver
                 </button>
-                <button className="botao botao-destaque" onClick={() => fechar(r)}>
-                  ✓ Fechar
-                </button>
-                <button className="botao botao-vermelho" onClick={() => excluir(r.id)}>
-                  🗑
-                </button>
+                {aoGerarPDF && (
+                  <button className="botao botao-pdf" onClick={() => aoGerarPDF(r)}>
+                    📄 PDF
+                  </button>
+                )}
+                {ehAdmin && (
+                  <button className="botao botao-destaque" onClick={() => fechar(r)}>
+                    ✓ Fechar
+                  </button>
+                )}
+                {ehAdmin && (
+                  <button className="botao botao-vermelho" onClick={() => excluir(r.id)}>
+                    🗑
+                  </button>
+                )}
               </div>
             </div>
           )
