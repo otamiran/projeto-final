@@ -41,25 +41,29 @@ export default function PaginaNovo({
     setSetor(relatorioAtivo.setor || '')
   }, [idSel])
 
-  // ── Um relatório por setor + turno ─────────────────────────────────────────
-  // Sempre que o setor ou o turno mudarem, verifica se já existe um relatório
-  // ABERTO para essa combinação (independente da data, já que um relatório
-  // aberto pode ter sido criado em um dia anterior e ainda não foi fechado)
-  // e, se existir, carrega ele automaticamente — evitando que cada pessoa
-  // crie um relatório duplicado para o mesmo setor/turno.
+  // ── Um relatório por setor + turno + DATA ──────────────────────────────────
+  // Sempre que o setor, turno ou data mudarem, verifica se já existe um
+  // relatório ABERTO para essa combinação exata e, se existir, carrega ele
+  // automaticamente — evitando que cada pessoa crie um relatório duplicado
+  // para o mesmo setor/turno/dia.
+  // IMPORTANTE: a data entra na comparação de propósito — um relatório aberto
+  // de um dia anterior (esquecido, não fechado) NUNCA deve ser reaproveitado
+  // automaticamente aqui, senão as ocorrências/atividades de ontem apareceriam
+  // junto com as de hoje. Para continuar um relatório antigo, use o campo
+  // "Carregar outro relatório aberto" manualmente.
   useEffect(() => {
-    if (!setor || !turno) return
+    if (!setor || !turno || !data) return
 
-    const existente = abertos.find(r => r.setor === setor && r.turno === turno)
+    const existente = abertos.find(r => r.setor === setor && r.turno === turno && r.data === data)
 
     if (existente) {
       if (existente.id !== idSel) setIdSel(existente.id)
     } else if (idSel && relatorioAtivo &&
-      (relatorioAtivo.setor !== setor || relatorioAtivo.turno !== turno)) {
-      // O relatório carregado não corresponde mais ao setor/turno selecionados
+      (relatorioAtivo.setor !== setor || relatorioAtivo.turno !== turno || relatorioAtivo.data !== data)) {
+      // O relatório carregado não corresponde mais ao setor/turno/data selecionados
       setIdSel('')
     }
-  }, [setor, turno, abertos])
+  }, [setor, turno, data, abertos])
 
   // Pré-preenche o responsável com o valor do setor+turno cadastrado pelo admin
   useEffect(() => {
@@ -96,6 +100,52 @@ export default function PaginaNovo({
     mostrarAviso('✓ Identificação salva!')
   }
 
+  // Cria um novo relatório (setor + turno + data) ou reaproveita um já aberto.
+  // Robusto contra condição de corrida: se dois cliques/usuários tentarem criar
+  // o mesmo relatório ao mesmo tempo, o banco rejeita o segundo insert (restrição
+  // única em setor+turno+data — ver instrução SQL) e aqui buscamos o registro que
+  // já foi criado, evitando duplicidade sem mostrar erro para o usuário.
+  async function obterOuCriarRelatorio(setorFinal, turnoFinal, dataFinal) {
+    // 1) Checagem rápida local (evita ida ao banco na maioria dos casos)
+    const existenteLocal = abertos.find(r => r.setor === setorFinal && r.turno === turnoFinal && r.data === dataFinal)
+    if (existenteLocal) return existenteLocal.id
+
+    // 2) Tenta criar
+    const { data: novo, error } = await bd.from(TABELA_ABERTOS).insert({
+      setor:       setorFinal,
+      data:        dataFinal,
+      turno:       turnoFinal,
+      titulo:      titulo || 'Passagem de Turno',
+      itens:       [],
+      criado_em:   Date.now(),
+      criado_por:  tecnico     || sessao.nome,
+      tecnico:     tecnico     || sessao.nome,
+      responsavel: responsavel || '',
+    }).select().single()
+
+    if (!error) {
+      recarregar()
+      return novo.id
+    }
+
+    // 3) Violação da restrição única (23505) = alguém criou ao mesmo tempo.
+    //    Busca o relatório que já existe em vez de mostrar erro para o usuário.
+    if (error.code === '23505') {
+      const { data: jaExiste } = await bd.from(TABELA_ABERTOS)
+        .select('*')
+        .eq('setor', setorFinal).eq('turno', turnoFinal).eq('data', dataFinal)
+        .maybeSingle()
+      if (jaExiste) {
+        recarregar()
+        return jaExiste.id
+      }
+    }
+
+    console.error('Erro Supabase:', error)
+    mostrarAviso('Erro ao criar relatório: ' + error.message, true)
+    return null
+  }
+
   // Cria um novo relatório no banco (se ainda não existir um ativo)
   async function garantirRelatorio() {
     if (idSel) return idSel
@@ -110,35 +160,9 @@ export default function PaginaNovo({
       return null
     }
 
-    // Já existe um relatório ABERTO para esse setor + turno? Reaproveita.
-    const existente = abertos.find(r => r.setor === setorFinal && r.turno === turno)
-    if (existente) {
-      setIdSel(existente.id)
-      return existente.id
-    }
-
-    // IMPORTANTE: só envia colunas que existem na tabela do Supabase
-    const { data: novo, error } = await bd.from(TABELA_ABERTOS).insert({
-      setor:       setorFinal,
-      data:        data,
-      turno:       turno,
-      titulo:      titulo || 'Passagem de Turno',
-      itens:       [],
-      criado_em:   Date.now(),
-      criado_por:  tecnico     || sessao.nome,
-      tecnico:     tecnico     || sessao.nome,
-      responsavel: responsavel || '',
-    }).select().single()
-
-    if (error) {
-      console.error('Erro Supabase:', error)
-      mostrarAviso('Erro ao criar relatório: ' + error.message, true)
-      return null
-    }
-
-    setIdSel(novo.id)
-    recarregar()
-    return novo.id
+    const id = await obterOuCriarRelatorio(setorFinal, turno, data)
+    if (id) setIdSel(id)
+    return id
   }
 
   // Abre o painel para adicionar ocorrência ou atividade
@@ -410,29 +434,15 @@ export default function PaginaNovo({
             const setorFinal = setor.trim()
             if (!setorFinal) { mostrarAviso('Selecione o setor antes de criar o relatório.', true); return }
 
-            // Já existe um relatório ABERTO para esse setor + turno? Apenas seleciona.
-            const existente = abertos.find(r => r.setor === setorFinal && r.turno === turno)
-            if (existente) {
-              setIdSel(existente.id)
-              mostrarAviso('Já existe um relatório aberto para esse setor/turno — selecionado.')
-              return
-            }
+            const jaAberto = abertos.some(r => r.setor === setorFinal && r.turno === turno && r.data === data)
 
-            const { data: novo, error } = await bd.from(TABELA_ABERTOS).insert({
-              setor:       setorFinal,
-              data:        data,
-              turno:       turno,
-              titulo:      titulo || 'Passagem de Turno',
-              itens:       [],
-              criado_em:   Date.now(),
-              criado_por:  tecnico     || sessao.nome,
-              tecnico:     tecnico     || sessao.nome,
-              responsavel: responsavel || '',
-            }).select().single()
-            if (error) { mostrarAviso('Erro ao criar relatório: ' + error.message, true); return }
-            recarregar()
-            setIdSel(novo.id)
-            mostrarAviso('✓ Relatório em branco criado e selecionado!')
+            const id = await obterOuCriarRelatorio(setorFinal, turno, data)
+            if (!id) return
+
+            setIdSel(id)
+            mostrarAviso(jaAberto
+              ? 'Já existe um relatório aberto para esse setor/turno/dia — selecionado.'
+              : '✓ Relatório em branco criado e selecionado!')
           }}
         >
           📋 Novo em Branco
