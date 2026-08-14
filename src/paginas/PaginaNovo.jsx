@@ -9,6 +9,8 @@ export default function PaginaNovo({
   pedir, mostrarAviso, recarregar,
   atualizarIdentificacao, // função do hook de autenticação
   ehAdmin, // true apenas para o grupo "admin" — controla quem pode fechar no histórico
+  idParaSelecionar,   // ID de um relatório reaberto do Histórico, a ser selecionado aqui
+  aoConsumirSelecao,  // avisa o App que já consumimos idParaSelecionar (evita loop)
 }) {
 
   // ── Identificação do técnico (preenchida uma vez ao entrar) ───────────────
@@ -40,6 +42,16 @@ export default function PaginaNovo({
     setTitulo(relatorioAtivo.titulo || 'Passagem de Turno')
     setSetor(relatorioAtivo.setor || '')
   }, [idSel])
+
+  // Seleciona automaticamente um relatório reaberto do Histórico (via botão
+  // "↩ Reabrir para preenchimento"), assim que a PaginaNovo é exibida.
+  // Por essa altura o App já esperou o recarregar() completar, então
+  // "abertos" já contém o registro e o efeito acima consegue pré-preencher tudo.
+  useEffect(() => {
+    if (!idParaSelecionar) return
+    setIdSel(idParaSelecionar)
+    aoConsumirSelecao?.()
+  }, [idParaSelecionar])
 
   // ── Um relatório por setor + turno + DATA ──────────────────────────────────
   // Sempre que o setor, turno ou data mudarem, verifica se já existe um
@@ -409,12 +421,20 @@ export default function PaginaNovo({
           />
         ))}
 
-        {/* Botões para adicionar novos itens */}
+        {/* Botões para adicionar novos itens — desabilitados até turno + setor estarem definidos */}
         <div className="grade-adicionar">
-          <div className="botao-adicionar botao-adicionar-ocorrencia" onClick={() => adicionarItem('ocorrencia')}>
+          <div
+            className={`botao-adicionar botao-adicionar-ocorrencia ${(!turno || !setor) ? 'desabilitado' : ''}`}
+            onClick={() => adicionarItem('ocorrencia')}
+            title={(!turno || !setor) ? 'Selecione o turno e o setor primeiro' : ''}
+          >
             <span style={{ fontSize: 20 }}>🔧</span>+ Ocorrência
           </div>
-          <div className="botao-adicionar botao-adicionar-atividade" onClick={() => adicionarItem('atividade')}>
+          <div
+            className={`botao-adicionar botao-adicionar-atividade ${(!turno || !setor) ? 'desabilitado' : ''}`}
+            onClick={() => adicionarItem('atividade')}
+            title={(!turno || !setor) ? 'Selecione o turno e o setor primeiro' : ''}
+          >
             <span style={{ fontSize: 20 }}>📅</span>+ Atividade
           </div>
         </div>
@@ -427,7 +447,13 @@ export default function PaginaNovo({
         {/* Cria relatório em branco com turno e nome já preenchidos */}
         <button
           className="botao botao-azul"
-          title="Cria um relatório em branco já com turno e nome preenchidos"
+          title={
+            !idSalvou ? 'Confirme sua identificação primeiro'
+              : !turno  ? 'Selecione o turno primeiro'
+              : !setor.trim() ? 'Selecione o setor primeiro'
+              : 'Cria um relatório em branco já com turno e nome preenchidos'
+          }
+          disabled={!idSalvou || !turno || !setor.trim()}
           onClick={async () => {
             if (!idSalvou) { mostrarAviso('Confirme sua identificação primeiro.', true); return }
             if (!turno)    { mostrarAviso('Selecione o turno antes de criar o relatório.', true); return }

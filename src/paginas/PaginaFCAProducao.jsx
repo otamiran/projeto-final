@@ -60,6 +60,7 @@ export default function PaginaFCAProducao({ sessao, mostrarAviso }) {
               podeValidar={true}
               aoValidar={handleValidar}
               autor={autor}
+              mostrarAviso={mostrarAviso}
             />
           ) : (
             <div className="fca-vazio-detalhe">

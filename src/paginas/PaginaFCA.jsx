@@ -125,6 +125,7 @@ export default function PaginaFCA({ sessao, pedir, mostrarAviso }) {
           podeValidar={false}
           aoEditar={f => { setEditando(f); setSelecionado(null) }}
           aoExcluir={handleExcluir}
+          mostrarAviso={mostrarAviso}
         />
       )
     }

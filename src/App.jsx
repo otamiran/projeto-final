@@ -32,6 +32,9 @@ export default function App() {
   const [aba, setAba] = useState('novo')
 
   const [relatorioVendo, setRelatorioVendo] = useState(null)
+  // Guarda o ID de um relatório recém-reaberto do Histórico, para a PaginaNovo
+  // selecioná-lo automaticamente assim que a aba "Novo" for exibida.
+  const [idParaAbrirNovo, setIdParaAbrirNovo] = useState(null)
 
   const [painelAberto,     setPainelAberto]     = useState(false)
   const [painelTipo,       setPainelTipo]       = useState('ocorrencia')
@@ -75,6 +78,14 @@ export default function App() {
       mostrarAviso('Relatório excluído.')
       recarregar()
     })
+  }
+
+  // Chamado pela PaginaHistorico após reabrir um relatório: leva o usuário
+  // para a aba "Novo" já com esse relatório selecionado para preenchimento.
+  function handleReabrirParaPreenchimento(idRelatorio) {
+    if (!idRelatorio) return
+    setAba('novo')
+    setIdParaAbrirNovo(idRelatorio)
   }
 
   // ── Tela de login ──────────────────────────────────────────────────────────
@@ -163,6 +174,8 @@ export default function App() {
           pedir={pedir} mostrarAviso={mostrarAviso} recarregar={recarregar}
           atualizarIdentificacao={atualizarIdentificacao}
           ehAdmin={ehAdmin}
+          idParaSelecionar={idParaAbrirNovo}
+          aoConsumirSelecao={() => setIdParaAbrirNovo(null)}
         />
       )}
       {aba === 'abertos' && (
@@ -177,6 +190,7 @@ export default function App() {
           historico={historico} sessao={sessao} aoVer={setRelatorioVendo}
           pedir={pedir} mostrarAviso={mostrarAviso} recarregar={recarregar}
           aoGerarPDF={gerarPDF}
+          aoReabrir={handleReabrirParaPreenchimento}
         />
       )}
       {aba === 'almox' && (

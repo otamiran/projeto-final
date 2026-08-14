@@ -84,7 +84,7 @@ function SecaoTexto({ icone, titulo, texto }) {
   )
 }
 
-export default function CardFCA({ fca, podeEditar, podeValidar, aoEditar, aoExcluir, aoValidar, autor }) {
+export default function CardFCA({ fca, podeEditar, podeValidar, aoEditar, aoExcluir, aoValidar, autor, mostrarAviso }) {
   const data = fca.criado_em
     ? new Date(fca.criado_em).toLocaleDateString('pt-BR')
     : '—'
@@ -92,6 +92,14 @@ export default function CardFCA({ fca, podeEditar, podeValidar, aoEditar, aoExcl
   function enviarWhatsApp() {
     const texto = gerarTextoFCA(fca)
     window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank')
+  }
+
+  function copiarTexto() {
+    const texto = gerarTextoFCA(fca)
+    navigator.clipboard
+      .writeText(texto)
+      .then(() => mostrarAviso?.('✓ Copiado!'))
+      .catch(() => mostrarAviso?.('Erro ao copiar.', true))
   }
 
   return (
@@ -126,9 +134,12 @@ export default function CardFCA({ fca, podeEditar, podeValidar, aoEditar, aoExcl
           </>
         )}
 
-        {/* WhatsApp — disponível para todos */}
+        {/* WhatsApp e Copiar — disponíveis para todos */}
         <button className="botao botao-whatsapp botao-pequeno" onClick={enviarWhatsApp}>
           📲 WhatsApp
+        </button>
+        <button className="botao botao-verde botao-pequeno" onClick={copiarTexto}>
+          📋 Copiar
         </button>
 
         {/* Produção: aprovar e reprovar */}

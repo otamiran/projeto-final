@@ -16,6 +16,7 @@ export default function PaginaHistorico({
   mostrarAviso,
   recarregar,
   aoGerarPDF,
+  aoReabrir, // navega para a aba "Novo" já com o relatório reaberto selecionado
 }) {
   const { setores } = useSetores(!!sessao)
 
@@ -109,26 +110,58 @@ export default function PaginaHistorico({
     })
   }
 
-  // Move o relatório de volta para abertos
+  // Move o relatório de volta para Abertos, para continuar o preenchimento.
+  // Reaproveita um relatório aberto já existente para o mesmo setor+turno+data
+  // em vez de duplicar (mesma regra de "um relatório por turno/setor" da PaginaNovo),
+  // e é resiliente a uma condição de corrida via o código 23505 (restrição única).
   function reabrir(relatorio) {
-    pedir('Mover de volta para Abertos?', async () => {
+    if (!sessao?.nome) {
+      mostrarAviso('Informe seu nome antes de reabrir.', true)
+      return
+    }
+    pedir('Mover de volta para Abertos para preenchimento?', async () => {
       // Remove campos de fechamento antes de reinserir em abertos
-      const { fechado_por, fechado_em, ...dados } = relatorio
+      const { fechado_por, fechado_em, id: idAntigo, ...dados } = relatorio
 
-      const { error } = await bd.from(TABELA_ABERTOS).insert({
-        ...dados,
-        id: undefined, // novo ID
-        reaberto_em: Date.now(),
-        reaberto_por: sessao.nome,
-      })
+      // 1) Já existe um relatório aberto igual (setor+turno+data)? Reaproveita.
+      const { data: existente } = await bd.from(TABELA_ABERTOS)
+        .select('*')
+        .eq('setor', dados.setor).eq('turno', dados.turno).eq('data', dados.data)
+        .maybeSingle()
 
-      if (error) {
-        mostrarAviso('Erro ao reabrir.', true)
-        return
+      let idNovo = existente?.id || null
+
+      if (existente) {
+        mostrarAviso('Já existia um relatório aberto para este turno/setor — reaproveitado.')
+      } else {
+        const { data: novo, error } = await bd.from(TABELA_ABERTOS).insert({
+          ...dados,
+          reaberto_em: Date.now(),
+          reaberto_por: sessao.nome,
+        }).select().single()
+
+        if (error) {
+          // 23505 = alguém reabriu/criou o mesmo relatório ao mesmo tempo
+          if (error.code === '23505') {
+            const { data: jaExiste } = await bd.from(TABELA_ABERTOS)
+              .select('*')
+              .eq('setor', dados.setor).eq('turno', dados.turno).eq('data', dados.data)
+              .maybeSingle()
+            idNovo = jaExiste?.id || null
+          }
+          if (!idNovo) {
+            mostrarAviso('Erro ao reabrir: ' + error.message, true)
+            return
+          }
+        } else {
+          idNovo = novo.id
+        }
       }
-      await bd.from(TABELA_HISTORICO).delete().eq('id', relatorio.id)
-      mostrarAviso('Relatório reaberto!')
-      recarregar()
+
+      await bd.from(TABELA_HISTORICO).delete().eq('id', idAntigo)
+      mostrarAviso('✓ Relatório reaberto para preenchimento!')
+      await recarregar()
+      aoReabrir?.(idNovo)
     })
   }
 
@@ -213,9 +246,10 @@ export default function PaginaHistorico({
               📄 PDF
             </button>
           )}
-          {/* <button className="botao botao-azul" onClick={() => reabrir(r)}>
+          {/* Botão reabrir — reaproveita relatório aberto existente para o mesmo turno/setor/data */}
+          <button className="botao botao-azul" onClick={() => reabrir(r)}>
             ↩ Reabrir
-          </button> */}
+          </button>
           {/* Botão excluir só para admin */}
           {ehAdmin(sessao) && (
             <button className="botao botao-vermelho" onClick={() => excluir(r.id)}>
