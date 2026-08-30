@@ -78,6 +78,22 @@ aviso do tipo:
 > 🔧 Nova ocorrência — Setor X
 > Bomba 12: Vazamento no selo mecânico (turno da manhã)
 
+## Clicar na notificação abre o relatório com todos os detalhes
+
+Agora, ao tocar em qualquer notificação (ocorrência ou atividade), o app
+abre automaticamente a tela **"Ver relatório"** do relatório correspondente
+— que já mostra, pra cada ocorrência: Sintoma, Modo de falha, Impacto,
+Tipo de intervenção e Solução (e pra atividades: descrição e status).
+
+O texto da própria notificação também já vem com o Modo de falha e o
+Impacto, então dá pra ver um resumo até sem precisar abrir o app.
+
+Não precisa de nenhuma configuração extra — arquivos alterados: `sw.js`,
+`useNotificacoesTempoReal.js`, o novo `useAbrirRelatorioDaNotificacao.js`, e
+a Edge Function (pra quando o push via Google funcionar nesse aparelho).
+Só rebuild + redeploy (e, se for usar o push via Google, republicar a
+função de novo).
+
 ## Notificação local (sem depender do Google) — recomendada
 
 Como o push tradicional (via Google/FCM) depende da entrega chegar no

@@ -48,26 +48,34 @@ self.addEventListener("push", (event) => {
     icon: "/icons/icon-192.png",
     badge: "/icons/icon-192.png",
     vibrate: [120, 60, 120],
-    data: { url: dados.url || "/" },
+    data: { url: dados.url || "/", relatorioId: dados.relatorioId || null },
     tag: dados.tag || undefined, // agrupa notificações do mesmo relatório, se informado
   };
 
   event.waitUntil(self.registration.showNotification(titulo, opcoes));
 });
 
-// Ao tocar na notificação, foca a aba já aberta (se houver) ou abre uma nova
+// Ao tocar na notificação: se já tem uma aba aberta, avisa ela qual
+// relatório abrir (postMessage); se não tem nenhuma, abre uma nova já com
+// o relatório na URL.
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = event.notification.data && event.notification.data.url ? event.notification.data.url : "/";
+  const dados = event.notification.data || {};
+  const relatorioId = dados.relatorioId || null;
+  const url = dados.url || "/";
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((lista) => {
       for (const cliente of lista) {
         if (cliente.url.includes(self.location.origin) && "focus" in cliente) {
+          if (relatorioId) cliente.postMessage({ tipo: "abrir-relatorio", relatorioId });
           return cliente.focus();
         }
       }
-      if (clients.openWindow) return clients.openWindow(url);
+      if (clients.openWindow) {
+        const destino = relatorioId ? `/?relatorio=${relatorioId}` : url;
+        return clients.openWindow(destino);
+      }
     })
   );
 });

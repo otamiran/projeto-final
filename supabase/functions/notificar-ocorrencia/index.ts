@@ -128,15 +128,28 @@ Deno.serve(async (req) => {
     const emoji = ehOcorrencia ? '🔧' : '📅'
     const rotulo = ehOcorrencia ? 'Nova ocorrência' : 'Nova atividade'
     const titulo = `${emoji} ${rotulo} — ${setor}`
-    const corpo = ehOcorrencia
-      ? [item.equipamento, item.sintoma].filter(Boolean).join(': ') ||
+
+    let corpo: string
+    if (ehOcorrencia) {
+      const sintoma =
+        [item.equipamento, item.sintoma].filter(Boolean).join(': ') ||
         `Ocorrência registrada no turno da ${turno}`
-      : item.descricao || `Atividade registrada no turno da ${turno}`
+      const classificadores = [
+        item.modo && `Modo: ${item.modo}`,
+        item.impacto && `Impacto: ${item.impacto}`,
+      ].filter(Boolean).join(' · ')
+      corpo = classificadores ? `${sintoma}\n${classificadores}` : sintoma
+    } else {
+      corpo =
+        [item.equipamento, item.descricao].filter(Boolean).join(': ') ||
+        `Atividade registrada no turno da ${turno}`
+    }
 
     const dadosNotificacao = JSON.stringify({
       titulo,
       corpo,
       url: '/',
+      relatorioId: registroNovo.id,
       tag: `relatorio-${registroNovo.id}`,
     })
 

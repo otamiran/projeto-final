@@ -71,10 +71,20 @@ export function useNotificacoesTempoReal(abertos) {
         const ehOcorrencia = tipo === 'ocorrencia'
         const emoji = ehOcorrencia ? '🔧' : '📅'
         const rotulo = ehOcorrencia ? 'Nova ocorrência' : 'Nova atividade'
-        const corpo = ehOcorrencia
-          ? [item.equipamento, item.sintoma].filter(Boolean).join(': ') ||
+
+        let corpo
+        if (ehOcorrencia) {
+          const sintoma = [item.equipamento, item.sintoma].filter(Boolean).join(': ') ||
             `Ocorrência registrada no turno da ${relatorio.turno || ''}`.trim()
-          : item.descricao || `Atividade registrada no turno da ${relatorio.turno || ''}`.trim()
+          const classificadores = [
+            item.modo && `Modo: ${item.modo}`,
+            item.impacto && `Impacto: ${item.impacto}`,
+          ].filter(Boolean).join(' · ')
+          corpo = classificadores ? `${sintoma}\n${classificadores}` : sintoma
+        } else {
+          corpo = [item.equipamento, item.descricao].filter(Boolean).join(': ') ||
+            `Atividade registrada no turno da ${relatorio.turno || ''}`.trim()
+        }
 
         mostrarNotificacaoLocal(`${emoji} ${rotulo} — ${relatorio.setor || 'Setor'}`, {
           body: corpo,
@@ -82,7 +92,7 @@ export function useNotificacoesTempoReal(abertos) {
           badge: '/icons/icon-192.png',
           vibrate: [120, 60, 120],
           tag: `relatorio-${relatorio.id}`,
-          data: { url: '/' },
+          data: { url: '/', relatorioId: relatorio.id },
         })
       }
     }
