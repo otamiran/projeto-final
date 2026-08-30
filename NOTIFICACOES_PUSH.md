@@ -78,6 +78,31 @@ aviso do tipo:
 > 🔧 Nova ocorrência — Setor X
 > Bomba 12: Vazamento no selo mecânico (turno da manhã)
 
+## Notificação local (sem depender do Google) — recomendada
+
+Como o push tradicional (via Google/FCM) depende da entrega chegar no
+aparelho — e isso às vezes falha silenciosamente, sem erro nenhum pra
+diagnosticar — foi adicionada uma segunda via, **independente do Google**:
+
+`src/ganchos/useNotificacoesTempoReal.js` usa o Realtime que o app já tem
+(o mesmo WebSocket que atualiza a tela sozinha quando alguém mexe num
+relatório) e, ao detectar uma ocorrência nova, mostra a notificação
+diretamente — sem passar pelo servidor de push de ninguém.
+
+**Não precisa de nenhuma configuração extra no Supabase** pra essa parte —
+é só código no app mesmo. Só rebuild + redeploy no Vercel.
+
+**A única limitação (inevitável em qualquer plataforma, não é algo que dá
+pra contornar) é**: só funciona com o app **aberto** — em primeiro plano ou
+minimizado, mas não fechado de vez. Pra notificação chegar com o app
+totalmente fechado, não tem outro jeito que não passe pelo FCM do Google
+(Android) ou APNs da Apple (iPhone) — é assim que todo app do mundo
+funciona, incluindo WhatsApp e Instagram.
+
+Se a rotina do time é deixar o app aberto (minimizado) durante o turno, essa
+via já resolve o problema sem depender de mais nenhum diagnóstico de rede.
+O push via Google continua configurado como reforço, pra quando funcionar.
+
 ## Ativação automática (sem precisar clicar no sino)
 
 Agora o app pede a permissão de notificação **sozinho, assim que a pessoa

@@ -6,6 +6,7 @@ import { useAviso }            from './ganchos/useAviso'
 import { useConfirmacao }      from './ganchos/useConfirmacao'
 import { useEquipamentos }     from './ganchos/useEquipamentos'
 import { useNotificacoesPush } from './ganchos/useNotificacoesPush'
+import { useNotificacoesTempoReal } from './ganchos/useNotificacoesTempoReal'
 
 import PaginaLogin         from './paginas/PaginaLogin'
 import PaginaNovo          from './paginas/PaginaNovo'
@@ -50,6 +51,7 @@ export default function App() {
   } = useAutenticacaoBD()
 
   const { abertos, historico, status, recarregar } = useRelatorios(estaLogado)
+  useNotificacoesTempoReal(abertos)
   const equipamentosGancho = useEquipamentos(estaLogado)
   const { aviso, mostrar: mostrarAviso }            = useAviso()
   const { status: statusNotif, alternar: alternarNotif } = useNotificacoesPush(sessao, mostrarAviso)
