@@ -33,7 +33,7 @@ export function useNotificacoesPush(sessao, mostrarAviso) {
       } else {
         setStatus('carregando')
         const nome = sessao?.tecnico || sessao?.login || sessao?.nome || ''
-        await ativarNotificacoes(nome)
+        await ativarNotificacoes(nome, sessao?.id)
         setStatus('ativo')
         mostrarAviso?.('🔔 Notificações ativadas neste aparelho!')
       }

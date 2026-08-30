@@ -48,8 +48,10 @@ export async function statusNotificacoes() {
 }
 
 // Pede permissão e inscreve este aparelho para receber notificações.
-// `usuario` = nome/login de quem está usando (só para identificar a inscrição).
-export async function ativarNotificacoes(usuario) {
+// `usuario`   = nome/login de quem está usando (só para exibição no Admin).
+// `usuarioId` = id do usuário na tabela `usuarios` (permite ao Admin ativar/
+//               desativar notificações dessa pessoa depois).
+export async function ativarNotificacoes(usuario, usuarioId) {
   if (!suportaNotificacoesPush()) {
     throw new Error('Este navegador não suporta notificações push.')
   }
@@ -77,6 +79,7 @@ export async function ativarNotificacoes(usuario) {
       p256dh: json.keys.p256dh,
       auth: json.keys.auth,
       usuario: usuario || null,
+      usuario_id: usuarioId != null ? String(usuarioId) : null,
       atualizado_em: Date.now(),
     },
     { onConflict: 'endpoint' }

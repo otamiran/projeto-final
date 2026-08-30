@@ -16,7 +16,7 @@ function formatarData(ts) {
 export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, aoVerRelatorio, equipamentosGancho = {} }) {
   const {
     pendentes, aprovados, bloqueados,
-    aprovar, bloquear, excluir, recarregar,
+    aprovar, bloquear, excluir, alternarNotificacoes, recarregar,
   } = useAdmin(!!sessao, sessao?.grupo === 'admin')
 
   const { setores, adicionar: adicionarSetor, remover: removerSetor, atualizarResponsavel, TURNOS } = useSetores(!!sessao)
@@ -161,6 +161,16 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
     })
   }
 
+  // Ativa/desativa notificações push desse usuário
+  async function handleAlternarNotificacoes(u) {
+    await alternarNotificacoes(u.id, u.notificacoes_ativas)
+    mostrarAviso(
+      u.notificacoes_ativas
+        ? `🔕 Notificações desativadas para ${u.username}.`
+        : `🔔 Notificações ativadas para ${u.username}.`
+    )
+  }
+
   // Exclusão permanente
   function handleExcluir(u) {
     pedir(`Excluir permanentemente "${u.username}"? Esta ação não pode ser desfeita.`, async () => {
@@ -222,6 +232,17 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
                       </span>
                     </div>
                     <div className="usuario-acoes">
+                      <button
+                        className="botao botao-pequeno"
+                        onClick={() => handleAlternarNotificacoes(u)}
+                        title={
+                          u.notificacoes_ativas === false
+                            ? 'Notificações desativadas — clique pra ativar'
+                            : 'Notificações ativadas — clique pra desativar'
+                        }
+                      >
+                        {u.notificacoes_ativas === false ? '🔕' : '🔔'}
+                      </button>
                       <button className="botao botao-laranja botao-pequeno" onClick={() => handleBloquear(u)}>
                         🚫 Bloquear
                       </button>

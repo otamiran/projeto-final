@@ -14,7 +14,7 @@ export function useAdmin(estaLogado, ehAdmin) {
     setCarregando(true)
     const { data } = await bd
       .from(TABELA_USUARIOS)
-      .select('id, username, grupo, status, criado_em, ultimo_acesso')
+      .select('id, username, grupo, status, criado_em, ultimo_acesso, notificacoes_ativas')
       .order('criado_em', { ascending: false })
     setUsuarios(data || [])
     setCarregando(false)
@@ -47,10 +47,16 @@ export function useAdmin(estaLogado, ehAdmin) {
     await bd.from(TABELA_USUARIOS).delete().eq('id', id)
   }
 
+  // Ativa/desativa o recebimento de notificações push desse usuário
+  // (não mexe na inscrição do aparelho — só impede o envio pra ele)
+  async function alternarNotificacoes(id, valorAtual) {
+    await bd.from(TABELA_USUARIOS).update({ notificacoes_ativas: !valorAtual }).eq('id', id)
+  }
+
   // Usuários separados por status para facilitar a exibição
   const pendentes  = usuarios.filter(u => u.status === 'pendente')
   const aprovados  = usuarios.filter(u => u.status === 'aprovado' && u.grupo !== 'admin')
   const bloqueados = usuarios.filter(u => u.status === 'bloqueado')
 
-  return { usuarios, pendentes, aprovados, bloqueados, carregando, aprovar, bloquear, excluir, recarregar }
+  return { usuarios, pendentes, aprovados, bloqueados, carregando, aprovar, bloquear, excluir, alternarNotificacoes, recarregar }
 }

@@ -39,3 +39,15 @@ create policy "anon pode listar (necessário para o upsert funcionar)"
 
 -- A Edge Function usa a service_role key (não passa pelo RLS), então ela
 -- consegue ler todas as inscrições para enviar as notificações.
+
+-- ── Gerenciamento por usuário (rodar depois da tabela acima) ────────────────
+-- Liga cada inscrição a um usuário (para o Admin poder ativar/desativar por
+-- pessoa). Usamos "text" em vez de referenciar o tipo da coluna usuarios.id
+-- diretamente, pra funcionar independente do tipo (uuid, bigint, etc.).
+alter table push_inscricoes
+  add column if not exists usuario_id text;
+
+-- Permite ao admin desativar notificações de uma pessoa específica sem
+-- precisar que ela desinstale o app. Todo mundo começa habilitado.
+alter table usuarios
+  add column if not exists notificacoes_ativas boolean not null default true;

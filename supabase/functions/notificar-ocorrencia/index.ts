@@ -42,6 +42,22 @@ async function buscarInscricoes() {
   return await resposta.json()
 }
 
+// Retorna o conjunto de ids de usuários que desativaram notificações no Admin
+async function buscarUsuariosComNotificacaoDesativada(): Promise<Set<string>> {
+  const resposta = await fetch(
+    `${SUPABASE_URL}/rest/v1/usuarios?select=id&notificacoes_ativas=eq.false`,
+    {
+      headers: {
+        apikey: SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+    }
+  )
+  if (!resposta.ok) return new Set()
+  const linhas = await resposta.json()
+  return new Set(linhas.map((u: any) => String(u.id)))
+}
+
 async function removerInscricao(endpoint: string) {
   await fetch(`${SUPABASE_URL}/rest/v1/push_inscricoes?endpoint=eq.${encodeURIComponent(endpoint)}`, {
     method: 'DELETE',
@@ -84,9 +100,18 @@ Deno.serve(async (req) => {
     return new Response('sem novas ocorrências', { status: 200 })
   }
 
-  const inscricoes = await buscarInscricoes()
+  const todasInscricoes = await buscarInscricoes()
+  const idsDesativados = await buscarUsuariosComNotificacaoDesativada()
+
+  // Só remove da lista quem TEM usuario_id vinculado e está desativado no
+  // Admin. Inscrições antigas sem usuario_id (feitas antes dessa função
+  // existir) continuam recebendo normalmente.
+  const inscricoes = todasInscricoes.filter(
+    (i: any) => !i.usuario_id || !idsDesativados.has(String(i.usuario_id))
+  )
+
   if (inscricoes.length === 0) {
-    return new Response('nenhum aparelho inscrito', { status: 200 })
+    return new Response('nenhum aparelho inscrito (ou todos desativados)', { status: 200 })
   }
 
   const setor = registroNovo.setor || 'Setor'
