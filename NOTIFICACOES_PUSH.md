@@ -78,6 +78,23 @@ aviso do tipo:
 > 🔧 Nova ocorrência — Setor X
 > Bomba 12: Vazamento no selo mecânico (turno da manhã)
 
+## Ativação automática (sem precisar clicar no sino)
+
+Agora o app pede a permissão de notificação **sozinho, assim que a pessoa
+faz login** — ela só precisa tocar em "Permitir" na caixinha nativa que o
+próprio navegador mostra. O sino 🔔 continua existindo, mas só como opção
+manual pra quem recusou sem querer e quer tentar de novo, ou quer desativar.
+
+**Limitação que não dá pra contornar:** por segurança, nenhum site, app,
+servidor ou administrador consegue conceder essa permissão *pelo* usuário —
+só o próprio aparelho da pessoa pode aceitar. É uma regra do navegador (vale
+pra qualquer site, não é algo específico deste app). O toggle 🔔/🔕 no Admin
+continua controlando se um aparelho **que já aceitou** vai receber ou não —
+ele não consegue "ligar" a permissão em um aparelho que nunca aceitou.
+
+Novos usuários já nascem com `notificacoes_ativas = true` (o padrão da
+coluna), então o admin só precisa mexer no toggle pra exceções.
+
 ## Gerenciar quem recebe notificação (tela Admin)
 
 Agora cada usuário aprovado, na seção **Usuários Ativos** do Admin, tem um
