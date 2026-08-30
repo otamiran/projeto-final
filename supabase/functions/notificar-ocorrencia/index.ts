@@ -145,7 +145,13 @@ Deno.serve(async (req) => {
         if (erro?.statusCode === 404 || erro?.statusCode === 410) {
           await removerInscricao(inscricao.endpoint)
         }
-        resultados.push({ endpoint: inscricao.endpoint, ok: false, erro: String(erro) })
+        resultados.push({
+          endpoint: inscricao.endpoint,
+          ok: false,
+          statusCode: erro?.statusCode ?? null,
+          corpoResposta: erro?.body ?? null,
+          erro: String(erro),
+        })
       }
     }
   }
