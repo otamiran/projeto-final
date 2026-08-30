@@ -31,6 +31,47 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+// ── Notificações push ────────────────────────────────────────────────────
+// Disparado quando a Edge Function do Supabase envia uma notificação
+// (ex.: nova ocorrência adicionada em um relatório aberto).
+self.addEventListener("push", (event) => {
+  let dados = {};
+  try {
+    dados = event.data ? event.data.json() : {};
+  } catch {
+    dados = { titulo: "Passagem de Turno", corpo: event.data ? event.data.text() : "" };
+  }
+
+  const titulo = dados.titulo || "Nova ocorrência";
+  const opcoes = {
+    body: dados.corpo || "",
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-192.png",
+    vibrate: [120, 60, 120],
+    data: { url: dados.url || "/" },
+    tag: dados.tag || undefined, // agrupa notificações do mesmo relatório, se informado
+  };
+
+  event.waitUntil(self.registration.showNotification(titulo, opcoes));
+});
+
+// Ao tocar na notificação, foca a aba já aberta (se houver) ou abre uma nova
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data && event.notification.data.url ? event.notification.data.url : "/";
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((lista) => {
+      for (const cliente of lista) {
+        if (cliente.url.includes(self.location.origin) && "focus" in cliente) {
+          return cliente.focus();
+        }
+      }
+      if (clients.openWindow) return clients.openWindow(url);
+    })
+  );
+});
+
 self.addEventListener("fetch", (event) => {
   // Apenas GET deve ser cacheado
   if (event.request.method !== "GET") return;

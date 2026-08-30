@@ -43,10 +43,10 @@ export function textoAtividades(relatorio) {
   const lista = (relatorio.itens || []).filter(i => i.tipo === 'atividade'  || i.tipo === 'ativ')
 
   if (lista.length === 0) {
-    return `📅 *ATIVIDADES PROGRAMADAS*\n${cabecalho(relatorio)}\n\nNenhuma atividade registrada.`
+    return `📅 *ATIVIDADES *\n${cabecalho(relatorio)}\n\nNenhuma atividade registrada.`
   }
 
-  const linhas = ['📅 *ATIVIDADES PROGRAMADAS*', cabecalho(relatorio)]
+  const linhas = ['📅 *ATIVIDADES*', cabecalho(relatorio)]
 
   lista.forEach((item, indice) => {
     linhas.push(

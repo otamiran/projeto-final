@@ -5,6 +5,7 @@ import { useRelatorios }       from './ganchos/useRelatorios'
 import { useAviso }            from './ganchos/useAviso'
 import { useConfirmacao }      from './ganchos/useConfirmacao'
 import { useEquipamentos }     from './ganchos/useEquipamentos'
+import { useNotificacoesPush } from './ganchos/useNotificacoesPush'
 
 import PaginaLogin         from './paginas/PaginaLogin'
 import PaginaNovo          from './paginas/PaginaNovo'
@@ -51,6 +52,7 @@ export default function App() {
   const { abertos, historico, status, recarregar } = useRelatorios(estaLogado)
   const equipamentosGancho = useEquipamentos(estaLogado)
   const { aviso, mostrar: mostrarAviso }            = useAviso()
+  const { status: statusNotif, alternar: alternarNotif } = useNotificacoesPush(sessao, mostrarAviso)
   const { confirmacaoAberta, mensagemConfirmacao, pedir, confirmar, cancelar } = useConfirmacao()
 
   const painel = {
@@ -111,6 +113,22 @@ export default function App() {
             </button>
           </div>
           <div className="nav-usuario">
+            {statusNotif !== 'indisponivel' && (
+              <button
+                className="botao botao-pequeno"
+                onClick={alternarNotif}
+                disabled={statusNotif === 'carregando' || statusNotif === 'negado'}
+                title={
+                  statusNotif === 'negado'
+                    ? 'Notificações bloqueadas nas configurações do navegador'
+                    : statusNotif === 'ativo'
+                    ? 'Desativar notificações de novas ocorrências'
+                    : 'Ativar notificações de novas ocorrências'
+                }
+              >
+                {statusNotif === 'ativo' ? '🔔' : statusNotif === 'negado' ? '🔕' : '🔔'}
+              </button>
+            )}
             <span>{sessao.login} · 🏭</span>
             <button className="botao botao-pequeno" onClick={sair}>Sair</button>
           </div>
@@ -135,8 +153,9 @@ export default function App() {
         <div className="nav-logo">
           <img src="/favicon.icon.png" alt="Logo" className="logo-favicon" style={{ width: 26, height: 26, objectFit: 'contain' }} />
           <span className="nav-nome">Passagem de Turno</span>
+          
         </div>
-
+                
         <div className="nav-abas">
           <button className={`nav-aba ${aba === 'novo' ? 'ativa' : ''}`} onClick={() => setAba('novo')}>
             <h1>✦</h1> Novo
@@ -163,6 +182,22 @@ export default function App() {
         </div>
 
         <div className="nav-usuario">
+          {statusNotif !== 'indisponivel' && (
+            <button
+              className="botao botao-pequeno"
+              onClick={alternarNotif}
+              disabled={statusNotif === 'carregando' || statusNotif === 'negado'}
+              title={
+                statusNotif === 'negado'
+                  ? 'Notificações bloqueadas nas configurações do navegador'
+                  : statusNotif === 'ativo'
+                  ? 'Desativar notificações de novas ocorrências'
+                  : 'Ativar notificações de novas ocorrências'
+              }
+            >
+              {statusNotif === 'ativo' ? '🔔' : statusNotif === 'negado' ? '🔕' : '🔔'}
+            </button>
+          )}
           <span>{sessao.tecnico || sessao.nome}{ehAdmin && ' 👑'}</span>
           <button className="botao botao-pequeno" onClick={sair}>Sair</button>
         </div>

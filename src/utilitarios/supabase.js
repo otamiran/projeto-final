@@ -23,3 +23,6 @@ export const TABELA_SETORES     = 'setores'
 
 // ── Equipamentos permanentes (tag + nome, para autocomplete) ────────────────
 export const TABELA_EQUIPAMENTOS = 'equipamentos'
+
+// ── Notificações push (inscrições do navegador/celular de cada usuário) ─────
+export const TABELA_PUSH_INSCRICOES = 'push_inscricoes'
