@@ -53,6 +53,29 @@
 .linha-item.tipo-ocorrencia { border-left: 3px solid var(--laranja); }
 .linha-item.tipo-atividade  { border-left: 3px solid var(--azul); }
 
+/* Wrapper do item expansível (linha + bloco de descrição) */
+.linha-item-wrapper { display: flex; flex-direction: column; }
+
+.botao-expandir {
+  flex-shrink: 0;
+  padding: 4px 8px;
+}
+
+/* Bloco que aparece abaixo da linha ao expandir, com a descrição completa */
+.linha-item-detalhe {
+  background:     var(--cor-fundo-3);
+  border:         1px solid var(--cor-borda);
+  border-top:     none;
+  border-radius:  0 0 var(--raio) var(--raio);
+  margin-top:     -1px;
+  padding:        10px 13px;
+  font-size:      13px;
+  line-height:    1.5;
+}
+.linha-item-detalhe p { margin: 0; }
+.linha-item-detalhe p + p { margin-top: 6px; }
+.linha-item-detalhe strong { color: var(--cor-texto); opacity: .85; }
+
 /* Badge tipo: 🔧 ou 📅 */
 .badge-tipo {
   border-radius:  2px;

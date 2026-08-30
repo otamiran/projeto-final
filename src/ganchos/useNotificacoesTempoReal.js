@@ -14,8 +14,11 @@
 
 import { useEffect, useRef } from 'react'
 
-function ehOcorrencia(item) {
-  return !!item && (item.tipo === 'ocorrencia' || item.tipo === 'occ')
+function tipoNotificavel(item) {
+  if (!item) return null
+  if (item.tipo === 'ocorrencia' || item.tipo === 'occ') return 'ocorrencia'
+  if (item.tipo === 'atividade' || item.tipo === 'ativ') return 'atividade'
+  return null
 }
 
 async function mostrarNotificacaoLocal(titulo, opcoes) {
@@ -60,13 +63,20 @@ export function useNotificacoesTempoReal(abertos) {
       const itens = Array.isArray(relatorio.itens) ? relatorio.itens : []
       if (itens.length <= qtdAntes) continue
 
-      const novosItens = itens.slice(qtdAntes).filter(ehOcorrencia)
-      for (const ocorrencia of novosItens) {
-        const corpo =
-          [ocorrencia.equipamento, ocorrencia.sintoma].filter(Boolean).join(': ') ||
-          `Ocorrência registrada no turno da ${relatorio.turno || ''}`.trim()
+      const novosItens = itens.slice(qtdAntes)
+      for (const item of novosItens) {
+        const tipo = tipoNotificavel(item)
+        if (!tipo) continue
 
-        mostrarNotificacaoLocal(`🔧 Nova ocorrência — ${relatorio.setor || 'Setor'}`, {
+        const ehOcorrencia = tipo === 'ocorrencia'
+        const emoji = ehOcorrencia ? '🔧' : '📅'
+        const rotulo = ehOcorrencia ? 'Nova ocorrência' : 'Nova atividade'
+        const corpo = ehOcorrencia
+          ? [item.equipamento, item.sintoma].filter(Boolean).join(': ') ||
+            `Ocorrência registrada no turno da ${relatorio.turno || ''}`.trim()
+          : item.descricao || `Atividade registrada no turno da ${relatorio.turno || ''}`.trim()
+
+        mostrarNotificacaoLocal(`${emoji} ${rotulo} — ${relatorio.setor || 'Setor'}`, {
           body: corpo,
           icon: '/icons/icon-192.png',
           badge: '/icons/icon-192.png',

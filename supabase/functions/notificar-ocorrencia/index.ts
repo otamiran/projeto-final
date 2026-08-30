@@ -27,8 +27,11 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY)
 }
 
-function ehOcorrencia(item: any) {
-  return !!item && (item.tipo === 'ocorrencia' || item.tipo === 'occ')
+function tipoNotificavel(item: any): 'ocorrencia' | 'atividade' | null {
+  if (!item) return null
+  if (item.tipo === 'ocorrencia' || item.tipo === 'occ') return 'ocorrencia'
+  if (item.tipo === 'atividade' || item.tipo === 'ativ') return 'atividade'
+  return null
 }
 
 async function buscarInscricoes() {
@@ -94,10 +97,10 @@ Deno.serve(async (req) => {
 
   // Itens que existem agora mas não existiam antes = itens recém-adicionados
   const itensAdicionados = itensNovos.slice(itensAntigos.length)
-  const novasOcorrencias = itensAdicionados.filter(ehOcorrencia)
+  const itensParaNotificar = itensAdicionados.filter((item: any) => tipoNotificavel(item) !== null)
 
-  if (novasOcorrencias.length === 0) {
-    return new Response('sem novas ocorrências', { status: 200 })
+  if (itensParaNotificar.length === 0) {
+    return new Response('sem itens novos para notificar', { status: 200 })
   }
 
   const todasInscricoes = await buscarInscricoes()
@@ -119,11 +122,16 @@ Deno.serve(async (req) => {
 
   const resultados: any[] = []
 
-  for (const ocorrencia of novasOcorrencias) {
-    const titulo = `🔧 Nova ocorrência — ${setor}`
-    const corpo = [ocorrencia.equipamento, ocorrencia.sintoma]
-      .filter(Boolean)
-      .join(': ') || `Ocorrência registrada no turno da ${turno}`
+  for (const item of itensParaNotificar) {
+    const tipo = tipoNotificavel(item)
+    const ehOcorrencia = tipo === 'ocorrencia'
+    const emoji = ehOcorrencia ? '🔧' : '📅'
+    const rotulo = ehOcorrencia ? 'Nova ocorrência' : 'Nova atividade'
+    const titulo = `${emoji} ${rotulo} — ${setor}`
+    const corpo = ehOcorrencia
+      ? [item.equipamento, item.sintoma].filter(Boolean).join(': ') ||
+        `Ocorrência registrada no turno da ${turno}`
+      : item.descricao || `Atividade registrada no turno da ${turno}`
 
     const dadosNotificacao = JSON.stringify({
       titulo,
