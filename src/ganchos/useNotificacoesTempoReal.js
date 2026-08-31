@@ -74,13 +74,15 @@ export function useNotificacoesTempoReal(abertos) {
 
         let corpo
         if (ehOcorrencia) {
-          const sintoma = [item.equipamento, item.sintoma].filter(Boolean).join(': ') ||
-            `Ocorrência registrada no turno da ${relatorio.turno || ''}`.trim()
-          const classificadores = [
-            item.modo && `Modo: ${item.modo}`,
-            item.impacto && `Impacto: ${item.impacto}`,
-          ].filter(Boolean).join(' · ')
-          corpo = classificadores ? `${sintoma}\n${classificadores}` : sintoma
+          // Uma linha por campo, com rótulo, para a notificação mostrar
+          // claramente a descrição e o modo de falha quando expandida.
+          const linhas = []
+          if (item.equipamento) linhas.push(`Equipamento: ${item.equipamento}`)
+          linhas.push(`Descrição: ${item.sintoma || '—'}`)
+          if (item.modo) {
+            linhas.push(`Modo de falha: ${item.modo}${item.impacto ? ` · Impacto: ${item.impacto}` : ''}`)
+          }
+          corpo = linhas.length ? linhas.join('\n') : `Ocorrência registrada no turno da ${relatorio.turno || ''}`.trim()
         } else {
           corpo = [item.equipamento, item.descricao].filter(Boolean).join(': ') ||
             `Atividade registrada no turno da ${relatorio.turno || ''}`.trim()
@@ -92,6 +94,11 @@ export function useNotificacoesTempoReal(abertos) {
           badge: '/icons/icon-192.png',
           vibrate: [120, 60, 120],
           tag: `relatorio-${relatorio.id}`,
+          renotify: true,
+          requireInteraction: true,
+          // Adicionar uma action faz o Android/Chrome já exibir a notificação
+          // no formato expandido, com a descrição e o modo de falha visíveis.
+          actions: [{ action: 'ver', title: '👁 Ver relatório' }],
           data: { url: '/', relatorioId: relatorio.id },
         })
       }

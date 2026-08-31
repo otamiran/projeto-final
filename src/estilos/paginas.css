@@ -85,6 +85,25 @@
   background: var(--laranja);
 }
 
+/* Ícone de menu (☰) — só aparece no celular, ver media query abaixo */
+.nav-menu-toggle {
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--ambar);
+  cursor: pointer;
+  display: none;
+  flex-shrink: 0;
+  font-size: 20px;
+  justify-content: center;
+  padding: 0 12px;
+}
+
+/* Fundo escurecido atrás do menu flutuante — fecha o menu ao ser tocado */
+.nav-abas-overlay {
+  display: none;
+}
+
 /* Área do usuário logado */
 .nav-usuario {
   align-items: center;
@@ -348,14 +367,52 @@
   .nav-logo { flex-shrink: 0; padding: 0 10px; }
   .nav-nome  { display: none; }
 
-  /* Abas rolam sem scrollbar visível */
+  /* Abas recolhidas por padrão — só o ícone ☰ fica visível na barra */
+  .nav-menu-toggle { display: flex; }
+
   .nav-abas {
-    flex: 1;
-    min-width: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
+    display: none;
   }
-  .nav-abas::-webkit-scrollbar { display: none; }
+
+  /* Menu flutuante: aparece ao tocar no ícone ☰, ocupando a largura da
+     tela logo abaixo da barra de navegação. Fecha sozinho ao escolher
+     uma aba (ver selecionarAba() no App.jsx) ou ao tocar fora dele. */
+  .nav-abas.aberta {
+    background: var(--cor-fundo-2);
+    border-bottom: 2px solid var(--ambar);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    left: 0;
+    max-height: 70vh;
+    overflow-y: auto;
+    position: fixed;
+    right: 0;
+    top: 50px; /* altura da .nav */
+    z-index: 500;
+  }
+  .nav-abas.aberta .nav-aba {
+    border-bottom: 1px solid var(--cor-borda);
+    font-size: 15px;
+    justify-content: flex-start;
+    padding: 14px 18px;
+    white-space: normal;
+  }
+  .nav-abas.aberta .nav-aba:last-child { border-bottom: none; }
+  .nav-abas.aberta .nav-aba.ativa { background: rgba(230, 162, 60, 0.08); }
+
+  /* Escurece o restante da tela enquanto o menu flutuante está aberto */
+  .nav-abas-overlay {
+    background: rgba(0, 0, 0, 0.45);
+    bottom: 0;
+    display: block;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 50px;
+    z-index: 400;
+  }
+
   .nav-aba { font-size: 15px; padding: 0 10px; }
 
   /* ── BOTÃO SAIR: sempre visível no canto direito ──

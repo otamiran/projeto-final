@@ -50,14 +50,20 @@ self.addEventListener("push", (event) => {
     vibrate: [120, 60, 120],
     data: { url: dados.url || "/", relatorioId: dados.relatorioId || null },
     tag: dados.tag || undefined, // agrupa notificações do mesmo relatório, se informado
+    renotify: !!dados.tag,       // alerta de novo mesmo agrupando pela tag
+    requireInteraction: true,    // mantém visível até o usuário interagir
+    // Ter ao menos uma "action" faz o Android/Chrome desenhar a notificação
+    // já no formato expandido (com o corpo completo — descrição e modo de
+    // falha — visível), em vez do resumo de uma linha só.
+    actions: [{ action: "ver", title: "👁 Ver relatório" }],
   };
 
   event.waitUntil(self.registration.showNotification(titulo, opcoes));
 });
 
-// Ao tocar na notificação: se já tem uma aba aberta, avisa ela qual
-// relatório abrir (postMessage); se não tem nenhuma, abre uma nova já com
-// o relatório na URL.
+// Ao tocar na notificação (ou no botão "Ver relatório"): se já tem uma aba
+// aberta, avisa ela qual relatório abrir (postMessage); se não tem nenhuma,
+// abre uma nova já com o relatório na URL.
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const dados = event.notification.data || {};

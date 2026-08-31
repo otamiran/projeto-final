@@ -1,3 +1,8 @@
+// Liga/desliga a aba "Almox" em toda a aplicação — deixe `false` para
+// desativá-la (some do menu e da navegação) sem precisar apagar o código;
+// volte para `true` quando quiser reativá-la.
+export const ABA_ALMOX_ATIVA = false
+
 // Opções do campo "Modo de Falha" em ocorrências
 export const MODOS_FALHA = ['Elétrico', 'Mecânico', 'Automação', 'Operacional', 'Outro']
 

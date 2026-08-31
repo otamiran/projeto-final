@@ -223,6 +223,10 @@ export default function PaginaNovo({
   async function fecharNoHistorico() {
     const setorFinal = setor.trim() || relatorioAtivo?.setor || ''
     if (!setorFinal) { mostrarAviso('Informe o setor.', true); return }
+    // Trava: nunca fecha/cria um relatório sem o turno escolhido — mesmo
+    // quando o relatório ainda não tem itens (idSel vazio), caso em que
+    // este botão criaria um registro novo direto no Histórico.
+    if (!turno) { mostrarAviso('Selecione o turno antes de fechar o relatório.', true); return }
 
     pedir('Fechar e salvar no Histórico?', async () => {
       setSalvando(true)
@@ -477,7 +481,8 @@ export default function PaginaNovo({
           <button
             className="botao botao-destaque"
             onClick={fecharNoHistorico}
-            disabled={salvando}
+            disabled={salvando || !turno || !setor.trim()}
+            title={!turno ? 'Selecione o turno primeiro' : !setor.trim() ? 'Selecione o setor primeiro' : ''}
             style={{ flex: 2, justifyContent: 'center' }}
           >
             {salvando ? 'Salvando...' : '💾 Fechar no Histórico'}

@@ -131,14 +131,16 @@ Deno.serve(async (req) => {
 
     let corpo: string
     if (ehOcorrencia) {
-      const sintoma =
-        [item.equipamento, item.sintoma].filter(Boolean).join(': ') ||
-        `Ocorrência registrada no turno da ${turno}`
-      const classificadores = [
-        item.modo && `Modo: ${item.modo}`,
-        item.impacto && `Impacto: ${item.impacto}`,
-      ].filter(Boolean).join(' · ')
-      corpo = classificadores ? `${sintoma}\n${classificadores}` : sintoma
+      // Uma linha por campo (com rótulo), para a notificação — quando
+      // expandida no aparelho — mostrar claramente a descrição e o modo de
+      // falha da ocorrência.
+      const linhas: string[] = []
+      if (item.equipamento) linhas.push(`Equipamento: ${item.equipamento}`)
+      linhas.push(`Descrição: ${item.sintoma || '—'}`)
+      if (item.modo) {
+        linhas.push(`Modo de falha: ${item.modo}${item.impacto ? ` · Impacto: ${item.impacto}` : ''}`)
+      }
+      corpo = linhas.length ? linhas.join('\n') : `Ocorrência registrada no turno da ${turno}`
     } else {
       corpo =
         [item.equipamento, item.descricao].filter(Boolean).join(': ') ||
