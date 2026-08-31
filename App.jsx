@@ -162,7 +162,7 @@ export default function App() {
             <h1>↺</h1> Histórico
             {historico.length > 0 && <span className="nav-badge badge-laranja">{historico.length}</span>}
           </button>
-          { <button className={`nav-aba .disabled ${aba === 'almox' ? 'ativa' : ''}`} onClick={() => setAba('almox')}>
+          { <button className={`nav-aba ${aba === 'almox' ? 'ativa' : ''}`} onClick={() => setAba('almox')}>
             <h1>📦</h1> Almoxarifado
           </button> }
           <button className={`nav-aba nav-aba-fca ${aba === 'fca' ? 'ativa' : ''}`} onClick={() => setAba('fca')}>
