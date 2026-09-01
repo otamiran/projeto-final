@@ -53,7 +53,7 @@ export async function excluirManutentor(id) {
 export async function listarAtendimentosAtivos() {
   const { data, error } = await supabase
     .from('ronda_atendimentos_manutencao')
-    .select('id, maquina_id, manutentor_id, manutentor_nome, estacao_id, estacao_nome, descricao, iniciado_em, finalizado_em, criado_em')
+    .select('id, maquina_id, manutentor_id, manutentor_nome, estacao_id, estacao_nome, descricao, modo_falha, executor, horario_inicio_manual, horario_fim_manual, iniciado_em, finalizado_em, criado_em')
     .is('finalizado_em', null)
     .order('criado_em', { ascending: false })
   if (error) throw new Error(`atendimentos de manutenção: ${error.message}`)
@@ -63,7 +63,10 @@ export async function listarAtendimentosAtivos() {
 // Registra uma pendência: máquina (+ opcionalmente estação) e o problema
 // relatado, ainda SEM manutentor atribuído. Fica na lista de pendências
 // até alguém usar atribuirManutentor() para assumir o atendimento.
-export async function criarPendencia(maquinaId, estacaoId = null, estacaoNome = null, descricao = null) {
+// `opcionais` = { modoFalha, executor, horarioInicio, horarioFim } — todos
+// opcionais; se informados, seguem junto quando o atendimento for
+// concluído e viram valores pré-selecionados na ocorrência automática.
+export async function criarPendencia(maquinaId, estacaoId = null, estacaoNome = null, descricao = null, opcionais = {}) {
   const { data, error } = await supabase
     .from('ronda_atendimentos_manutencao')
     .insert({
@@ -71,6 +74,10 @@ export async function criarPendencia(maquinaId, estacaoId = null, estacaoNome = 
       estacao_id: estacaoId,
       estacao_nome: estacaoNome,
       descricao: descricao || null,
+      modo_falha: opcionais.modoFalha || null,
+      executor: opcionais.executor || null,
+      horario_inicio_manual: opcionais.horarioInicio || null,
+      horario_fim_manual: opcionais.horarioFim || null,
       manutentor_id: null,
       manutentor_nome: null,
       iniciado_em: null,
@@ -102,7 +109,9 @@ export async function atribuirManutentor(id, manutentorId, manutentorNome) {
 
 // Atalho para já criar o atendimento direto "em andamento" (máquina +
 // manutentor conhecidos de antemão, sem passar pela etapa de pendência).
-export async function iniciarAtendimento(maquinaId, manutentorId, manutentorNome, estacaoId = null, estacaoNome = null, descricao = null) {
+// `opcionais` = { modoFalha, executor, horarioInicio, horarioFim } — ver
+// criarPendencia() acima para o que cada um significa.
+export async function iniciarAtendimento(maquinaId, manutentorId, manutentorNome, estacaoId = null, estacaoNome = null, descricao = null, opcionais = {}) {
   const agora = new Date().toISOString()
   const { data, error } = await supabase
     .from('ronda_atendimentos_manutencao')
@@ -113,6 +122,10 @@ export async function iniciarAtendimento(maquinaId, manutentorId, manutentorNome
       estacao_id: estacaoId,
       estacao_nome: estacaoNome,
       descricao: descricao || null,
+      modo_falha: opcionais.modoFalha || null,
+      executor: opcionais.executor || null,
+      horario_inicio_manual: opcionais.horarioInicio || null,
+      horario_fim_manual: opcionais.horarioFim || null,
       iniciado_em: agora,
     })
     .select()

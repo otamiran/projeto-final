@@ -81,6 +81,14 @@ create table if not exists ronda_atendimentos_manutencao (
   manutentor_id    uuid references ronda_manutentores(id) on delete set null,
   manutentor_nome  text, -- nulo enquanto pendente (nenhum manutentor atribuído ainda)
   descricao        text, -- problema relatado / o que está sendo atendido no momento
+  -- Campos OPCIONAIS preenchidos já no início do atendimento — quando
+  -- preenchidos, pré-selecionam os mesmos campos na ocorrência automática
+  -- criada ao concluir (ver src/ronda/ocorrenciaAutomatica.js). Espelham
+  -- "Modo de falha" e "Executor" do formulário de Ocorrência.
+  modo_falha             text, -- um de MODOS_FALHA (Elétrico/Mecânico/Automação/Operacional/Outro)
+  executor               text, -- se vazio, a ocorrência usa manutentor_nome
+  horario_inicio_manual  text, -- "HH:MM", opcional — sobrepõe iniciado_em na ocorrência
+  horario_fim_manual     text, -- "HH:MM", opcional — sobrepõe o horário de conclusão na ocorrência
   iniciado_em      timestamptz, -- nulo enquanto pendente; preenchido quando um manutentor é atribuído
   finalizado_em    timestamptz, -- nulo enquanto o atendimento está ativo (pendente ou em andamento)
   criado_em        timestamptz not null default now()

@@ -20,6 +20,8 @@ import {
   atribuirManutentor, encerrarAtendimento, obterOuCriarManutentor,
 } from '../ronda/manutencao.js'
 import { criarOcorrenciaAutomatica } from '../ronda/ocorrenciaAutomatica.js'
+import BotoesAlternancia from '../componentes/BotoesAlternancia.jsx'
+import { MODOS_FALHA } from '../utilitarios/constantes.js'
 
 function tempoDecorrido(desde) {
   if (!desde) return ''
@@ -47,6 +49,13 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
   const [estacaoId, setEstacaoId] = useState('')
   const [descricao, setDescricao] = useState('')
   const [enviando, setEnviando]   = useState(false)
+
+  // ── campos opcionais — se preenchidos, já vêm pré-selecionados na
+  // ocorrência criada automaticamente ao concluir (ver ocorrenciaAutomatica.js)
+  const [modoFalha, setModoFalha]           = useState(null)
+  const [executor, setExecutor]             = useState('')
+  const [horarioInicio, setHorarioInicio]   = useState('')
+  const [horarioFim, setHorarioFim]         = useState('')
 
   const carregar = useCallback(async () => {
     try {
@@ -83,7 +92,15 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
 
   function limparFormulario() {
     setSetorId(''); setGrupoId(''); setMaquinaId(''); setEstacaoId(''); setDescricao('')
+    setModoFalha(null); setExecutor(''); setHorarioInicio(''); setHorarioFim('')
   }
+
+  const opcionaisAtuais = useMemo(() => ({
+    modoFalha: modoFalha || null,
+    executor: executor.trim() || null,
+    horarioInicio: horarioInicio || null,
+    horarioFim: horarioFim || null,
+  }), [modoFalha, executor, horarioInicio, horarioFim])
 
   // ── sinalizar que estou atendendo agora ────────────────────────
   async function handleIniciar() {
@@ -92,7 +109,7 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
     try {
       const manutentor = await obterOuCriarManutentor(nomeAtual)
       const estacao = estacaoId ? estacoes.find(e => e.id === estacaoId) : null
-      await iniciarAtendimento(maquinaId, manutentor.id, manutentor.nome, estacaoId || null, estacao?.nome || null, descricao || null)
+      await iniciarAtendimento(maquinaId, manutentor.id, manutentor.nome, estacaoId || null, estacao?.nome || null, descricao || null, opcionaisAtuais)
       mostrarAviso('🔧 Atendimento iniciado — você já pode ver na lista abaixo.')
       limparFormulario()
       await carregar()
@@ -109,7 +126,7 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
     setEnviando(true)
     try {
       const estacao = estacaoId ? estacoes.find(e => e.id === estacaoId) : null
-      await criarPendencia(maquinaId, estacaoId || null, estacao?.nome || null, descricao || null)
+      await criarPendencia(maquinaId, estacaoId || null, estacao?.nome || null, descricao || null, opcionaisAtuais)
       mostrarAviso('📋 Pendência registrada — alguém pode assumir depois.')
       limparFormulario()
       await carregar()
@@ -196,6 +213,41 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
               value={descricao}
               onChange={e => setDescricao(e.target.value)}
             />
+
+            {/* Campos opcionais — se preenchidos, já vêm prontos na ocorrência
+                automática criada ao concluir o atendimento (mesmos campos do
+                formulário de Ocorrência do Passagem de Turno). */}
+            <div className="campo" style={{ marginBottom: 0 }}>
+              <label>
+                Tipologia de falha
+                <span style={{ color: 'var(--cor-apagado)', fontWeight: 'normal', fontSize: 11, marginLeft: 6 }}>(opcional)</span>
+              </label>
+              <BotoesAlternancia opcoes={MODOS_FALHA} valor={modoFalha} aoMudar={setModoFalha} />
+            </div>
+
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <div className="campo" style={{ flex: '1 1 200px', marginBottom: 0 }}>
+                <label>
+                  Executor
+                  <span style={{ color: 'var(--cor-apagado)', fontWeight: 'normal', fontSize: 11, marginLeft: 6 }}>(opcional — se vazio, usa seu nome)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder={nomeAtual}
+                  value={executor}
+                  onChange={e => setExecutor(e.target.value)}
+                />
+              </div>
+              <div className="campo" style={{ flex: '0 0 auto', marginBottom: 0 }}>
+                <label>Início <span style={{ color: 'var(--cor-apagado)', fontWeight: 'normal', fontSize: 11 }}>(opcional)</span></label>
+                <input type="time" value={horarioInicio} onChange={e => setHorarioInicio(e.target.value)} style={{ padding: '6px 8px' }} />
+              </div>
+              <div className="campo" style={{ flex: '0 0 auto', marginBottom: 0 }}>
+                <label>Fim <span style={{ color: 'var(--cor-apagado)', fontWeight: 'normal', fontSize: 11 }}>(opcional)</span></label>
+                <input type="time" value={horarioFim} onChange={e => setHorarioFim(e.target.value)} style={{ padding: '6px 8px' }} />
+              </div>
+            </div>
+
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <button className="botao botao-destaque" onClick={handleIniciar} disabled={enviando || !maquinaId}>
                 🔧 Estou atendendo agora
@@ -221,7 +273,10 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
                 <div className="usuario-info">
                   <span className="usuario-nome">{nomeCompleto(a)}</span>
                   <span className="usuario-meta">
-                    {a.descricao ? `${a.descricao} · ` : ''}iniciado há {tempoDecorrido(a.iniciado_em)}
+                    {a.descricao ? `${a.descricao} · ` : ''}
+                    {a.modo_falha ? `${a.modo_falha} · ` : ''}
+                    iniciado há {tempoDecorrido(a.iniciado_em)}
+                    {a.executor ? ` · executor: ${a.executor}` : ''}
                   </span>
                 </div>
                 <div className="usuario-acoes">
@@ -247,7 +302,11 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
               <div key={a.id} className="linha-usuario">
                 <div className="usuario-info">
                   <span className="usuario-nome">{nomeCompleto(a)}</span>
-                  {a.descricao && <span className="usuario-meta">{a.descricao}</span>}
+                  {(a.descricao || a.modo_falha) && (
+                    <span className="usuario-meta">
+                      {[a.descricao, a.modo_falha].filter(Boolean).join(' · ')}
+                    </span>
+                  )}
                 </div>
                 <div className="usuario-acoes">
                   <button className="botao botao-azul botao-pequeno" onClick={() => handleAssumir(a.id)} disabled={enviando}>

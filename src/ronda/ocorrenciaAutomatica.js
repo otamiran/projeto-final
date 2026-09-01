@@ -35,18 +35,40 @@ export async function criarOcorrenciaAutomatica(atendimento, contexto) {
 
   const equipamento = [contexto.maquinaNome, contexto.estacaoNome].filter(Boolean).join(' — ')
 
+  // Se o manutentor já preencheu modo de falha / executor / horários no
+  // início do atendimento (tela "Manutenção" → "Sinalizar atendimento"),
+  // esses valores vêm prontos aqui e pré-selecionam os mesmos campos na
+  // ocorrência — economizando esse preenchimento depois. Tudo continua
+  // opcional: se nada foi informado, os campos ficam em branco como antes.
+  const horarioInicio = atendimento.horario_inicio_manual
+    || (atendimento.iniciado_em ? new Date(atendimento.iniciado_em).toTimeString().slice(0, 5) : '')
+  const horarioFim = atendimento.horario_fim_manual
+    || new Date(agora).toTimeString().slice(0, 5)
+
+  // Mesmo cálculo de duração usado no formulário de Ocorrência, pra já
+  // vir preenchido quando os dois horários (início e fim) são conhecidos.
+  let duracaoH = '', duracaoM = ''
+  if (horarioInicio && horarioFim) {
+    const [hi, mi] = horarioInicio.split(':').map(Number)
+    const [hf, mf] = horarioFim.split(':').map(Number)
+    let total = (hf * 60 + mf) - (hi * 60 + mi)
+    if (total < 0) total += 24 * 60
+    duracaoH = Math.floor(total / 60)
+    duracaoM = total % 60
+  }
+
   const item = {
     tipo: 'ocorrencia',
     equipamento,
     sintoma: atendimento.descricao || '',
-    modo: '',
+    modo: atendimento.modo_falha || '',
     impacto: '',
     intervencao: '',
-    horario_inicio: atendimento.iniciado_em ? new Date(atendimento.iniciado_em).toTimeString().slice(0, 5) : '',
-    horario_fim: new Date(agora).toTimeString().slice(0, 5),
-    duracao_h: '', duracao_m: '',
+    horario_inicio: horarioInicio,
+    horario_fim: horarioFim,
+    duracao_h: duracaoH, duracao_m: duracaoM,
     solucao: '',
-    executor: atendimento.manutentor_nome || '',
+    executor: atendimento.executor || atendimento.manutentor_nome || '',
     // marcador interno — não usado em nenhum outro lugar do app, só serve
     // para diferenciar visualmente/auditar que este item veio da Ronda
     origem: 'ronda',
