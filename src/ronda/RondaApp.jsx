@@ -9,7 +9,6 @@ import {
 import { listarAtendimentosAtivos } from './manutencao.js'
 import PainelHierarquia from './componentes/PainelHierarquia.jsx'
 import RelatorioModal from './componentes/RelatorioModal.jsx'
-import logo from './assets/logo.png'
 import './estilos.css'
 
 // Módulo "Ronda de Produção", integrado ao Passagem de Turno.
@@ -258,9 +257,6 @@ export default function RondaApp({ ehAdmin = false }) {
     <div className="app">
       <header className="topo">
         <div className="marca">
-          <span className="logo-marca-wrap">
-            <img src={logo} alt="Ronda Manutenção" className="logo-marca" />
-          </span>
           <div>
             <h1>Ronda de Produção</h1>
             <div className="sub">{feitas}/{total} verificações · salvo neste aparelho</div>

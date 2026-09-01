@@ -56,7 +56,14 @@
   box-sizing: border-box;
 }
 
-.ronda-modulo .app{ height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+/* A ronda roda dentro do app principal, abaixo da barra .nav (que tem
+   50px fixos — ver .nav em src/estilos/paginas.css). Descontar essa
+   altura aqui evita que a página toda fique mais alta que a tela e o
+   rodapé (Limpar ronda / Salvar / WhatsApp) fique cortado embaixo. */
+.ronda-modulo .app{
+  height: calc(100vh - 50px); height: calc(100dvh - 50px);
+  display: flex; flex-direction: column; overflow: hidden;
+}
 
 /* ── carregando ────────────────────────────────────────── */
 .ronda-modulo .carregando{

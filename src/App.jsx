@@ -142,18 +142,18 @@ export default function App() {
           {menuAbasAberto && <div className="nav-abas-overlay" onClick={() => setMenuAbasAberto(false)} />}
           <div className={`nav-abas ${menuAbasAberto ? 'aberta' : ''}`}>
             <button className={`nav-aba ${aba === 'producao' ? 'ativa' : ''}`} onClick={() => selecionarAba('producao')}>
-              🏭 Relatórios
+              <span className="nav-aba-icone">🏭</span> Relatórios
             </button>
             <button className={`nav-aba nav-aba-fca ${aba === 'fca' ? 'ativa' : ''}`} onClick={() => selecionarAba('fca')}>
-              📋 FCAs
+              <span className="nav-aba-icone">📋</span> FCAs
             </button>
             {ABA_RONDA_ATIVA && (
               <button className={`nav-aba ${aba === 'ronda' ? 'ativa' : ''}`} onClick={() => selecionarAba('ronda')}>
-                🔄 Ronda
+                <span className="nav-aba-icone">🔄</span> Ronda
               </button>
             )}
             <button className={`nav-aba ${aba === 'manutencao' ? 'ativa' : ''}`} onClick={() => selecionarAba('manutencao')}>
-              🔧 Manutenção
+              <span className="nav-aba-icone">🔧</span> Manutenção
             </button>
           </div>
           <div className="nav-usuario">
@@ -219,35 +219,35 @@ export default function App() {
 
         <div className={`nav-abas ${menuAbasAberto ? 'aberta' : ''}`}>
           <button className={`nav-aba ${aba === 'novo' ? 'ativa' : ''}`} onClick={() => selecionarAba('novo')}>
-            <h1>✦</h1> Novo
+            <span className="nav-aba-icone">✦</span> Novo
           </button>
           <button className={`nav-aba ${aba === 'abertos' ? 'ativa' : ''}`} onClick={() => selecionarAba('abertos')}>
-            <h1>◉</h1> Abertos
+            <span className="nav-aba-icone">◉</span> Abertos
             {abertos.length > 0 && <span className="nav-badge badge-azul">{abertos.length}</span>}
           </button>
           <button className={`nav-aba ${aba === 'historico' ? 'ativa' : ''}`} onClick={() => selecionarAba('historico')}>
-            <h1>↺</h1> Histórico
+            <span className="nav-aba-icone">↺</span> Histórico
             {historico.length > 0 && <span className="nav-badge badge-laranja">{historico.length}</span>}
           </button>
           {ABA_ALMOX_ATIVA && (
             <button className={`nav-aba ${aba === 'almox' ? 'ativa' : ''}`} onClick={() => selecionarAba('almox')}>
-              <h1>📦</h1> Almox
+              <span className="nav-aba-icone">📦</span> Almox
             </button>
           )}
           <button className={`nav-aba nav-aba-fca ${aba === 'fca' ? 'ativa' : ''}`} onClick={() => selecionarAba('fca')}>
-            <h1>📋</h1> FCA
+            <span className="nav-aba-icone">📋</span> FCA
           </button>
           {ABA_RONDA_ATIVA && (
             <button className={`nav-aba ${aba === 'ronda' ? 'ativa' : ''}`} onClick={() => selecionarAba('ronda')}>
-              <h1>🔄</h1> Ronda
+              <span className="nav-aba-icone">🔄</span> Ronda
             </button>
           )}
           <button className={`nav-aba ${aba === 'manutencao' ? 'ativa' : ''}`} onClick={() => selecionarAba('manutencao')}>
-            <h1>🔧</h1> Manutenção
+            <span className="nav-aba-icone">🔧</span> Manutenção
           </button>
           {ehAdmin && (
             <button className={`nav-aba nav-aba-admin ${aba === 'admin' ? 'ativa' : ''}`} onClick={() => selecionarAba('admin')}>
-              <h1>⚙</h1> Admin
+              <span className="nav-aba-icone">⚙</span> Admin
             </button>
           )}
         </div>

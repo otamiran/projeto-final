@@ -42,6 +42,13 @@
   display: none;             /* esconde scrollbar (Chrome/Safari) */
 }
 
+/* Ícone de cada aba — separado do rótulo pra poder ficar maior sem
+   also aumentar o texto (que segue pequeno/mono, estilo "console"). */
+.nav-aba-icone {
+  font-size: 20px;
+  line-height: 1;
+}
+
 /* Botão de aba */
 .nav-aba {
   align-items: center;
@@ -54,7 +61,7 @@
   font-family: var(--fonte-mono);
   font-size: 10px;
   font-weight: 600;
-  gap: 5px;
+  gap: 7px;
   letter-spacing: 1px;
   margin-bottom: -2px; /* alinha com a borda inferior da nav */
   padding: 0 14px;
