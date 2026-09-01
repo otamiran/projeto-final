@@ -4,9 +4,10 @@ import { useAutenticacaoBD }  from './ganchos/useAutenticacaoBD'
 import { useRelatorios }       from './ganchos/useRelatorios'
 import { useAviso }            from './ganchos/useAviso'
 import { useConfirmacao }      from './ganchos/useConfirmacao'
-import { useEquipamentos }     from './ganchos/useEquipamentos'
+import { useEstruturaEquipamentos } from './ganchos/useEstruturaEquipamentos'
 import { useNotificacoesPush } from './ganchos/useNotificacoesPush'
 import { useNotificacoesTempoReal } from './ganchos/useNotificacoesTempoReal'
+import { useNotificacoesManutencaoTempoReal } from './ganchos/useNotificacoesManutencaoTempoReal'
 import { useAbrirRelatorioDaNotificacao } from './ganchos/useAbrirRelatorioDaNotificacao'
 import { useMesclarDuplicados } from './ganchos/useMesclarDuplicados'
 
@@ -19,13 +20,15 @@ import PaginaProducao      from './paginas/PaginaProducao'
 import PaginaFCA           from './paginas/PaginaFCA'
 import PaginaFCAProducao   from './paginas/PaginaFCAProducao'
 import PaginaAlmoxarifado  from './paginas/PaginaAlmoxarifado'
+import PaginaManutencao    from './paginas/PaginaManutencao'
+import RondaApp            from './ronda/RondaApp'
 
 import PainelItem          from './componentes/PainelItem'
 import ModalVerRelatorio   from './componentes/ModalVerRelatorio'
 import ModalConfirmacao    from './componentes/ModalConfirmacao'
 import Aviso               from './componentes/Aviso'
 
-import { ABA_ALMOX_ATIVA } from './utilitarios/constantes'
+import { ABA_ALMOX_ATIVA, ABA_RONDA_ATIVA } from './utilitarios/constantes'
 
 import './estilos/global.css'
 import './estilos/login.css'
@@ -59,8 +62,11 @@ export default function App() {
 
   const { abertos, historico, status, recarregar } = useRelatorios(estaLogado)
   useNotificacoesTempoReal(abertos)
+  // Notifica (mesma técnica: showNotification local, sem depender de push)
+  // quando um manutentor inicia ou conclui o atendimento de um equipamento.
+  useNotificacoesManutencaoTempoReal(estaLogado)
   useAbrirRelatorioDaNotificacao(abertos, historico, setRelatorioVendo)
-  const equipamentosGancho = useEquipamentos(estaLogado)
+  const equipamentosGancho = useEstruturaEquipamentos(estaLogado)
   const { aviso, mostrar: mostrarAviso }            = useAviso()
   const { status: statusNotif, alternar: alternarNotif } = useNotificacoesPush(sessao, mostrarAviso)
   const { confirmacaoAberta, mensagemConfirmacao, pedir, confirmar, cancelar } = useConfirmacao()
@@ -141,6 +147,14 @@ export default function App() {
             <button className={`nav-aba nav-aba-fca ${aba === 'fca' ? 'ativa' : ''}`} onClick={() => selecionarAba('fca')}>
               📋 FCAs
             </button>
+            {ABA_RONDA_ATIVA && (
+              <button className={`nav-aba ${aba === 'ronda' ? 'ativa' : ''}`} onClick={() => selecionarAba('ronda')}>
+                🔄 Ronda
+              </button>
+            )}
+            <button className={`nav-aba ${aba === 'manutencao' ? 'ativa' : ''}`} onClick={() => selecionarAba('manutencao')}>
+              🔧 Manutenção
+            </button>
           </div>
           <div className="nav-usuario">
             {statusNotif !== 'indisponivel' && (
@@ -169,6 +183,12 @@ export default function App() {
         )}
         {aba === 'fca' && (
           <PaginaFCAProducao sessao={sessao} mostrarAviso={mostrarAviso} />
+        )}
+        {ABA_RONDA_ATIVA && aba === 'ronda' && (
+          <RondaApp ehAdmin={ehAdmin} />
+        )}
+        {aba === 'manutencao' && (
+          <PaginaManutencao sessao={sessao} mostrarAviso={mostrarAviso} />
         )}
 
         <Aviso aviso={aviso} />
@@ -216,6 +236,14 @@ export default function App() {
           )}
           <button className={`nav-aba nav-aba-fca ${aba === 'fca' ? 'ativa' : ''}`} onClick={() => selecionarAba('fca')}>
             <h1>📋</h1> FCA
+          </button>
+          {ABA_RONDA_ATIVA && (
+            <button className={`nav-aba ${aba === 'ronda' ? 'ativa' : ''}`} onClick={() => selecionarAba('ronda')}>
+              <h1>🔄</h1> Ronda
+            </button>
+          )}
+          <button className={`nav-aba ${aba === 'manutencao' ? 'ativa' : ''}`} onClick={() => selecionarAba('manutencao')}>
+            <h1>🔧</h1> Manutenção
           </button>
           {ehAdmin && (
             <button className={`nav-aba nav-aba-admin ${aba === 'admin' ? 'ativa' : ''}`} onClick={() => selecionarAba('admin')}>
@@ -276,6 +304,12 @@ export default function App() {
       )}
       {aba === 'fca' && (
         <PaginaFCA sessao={sessao} pedir={pedir} mostrarAviso={mostrarAviso} />
+      )}
+      {ABA_RONDA_ATIVA && aba === 'ronda' && (
+        <RondaApp ehAdmin={ehAdmin} />
+      )}
+      {aba === 'manutencao' && (
+        <PaginaManutencao sessao={sessao} mostrarAviso={mostrarAviso} />
       )}
       {aba === 'admin' && ehAdmin && (
         <PaginaAdmin

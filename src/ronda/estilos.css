@@ -1,0 +1,1317 @@
+/* ============================================================
+   RONDA DE PRODUÇÃO — Tema escuro: Preto / Azul escuro / Cinza
+   Fontes: IBM Plex Sans + IBM Plex Mono (já carregadas pelo index.html
+   do projeto principal — Passagem de Turno)
+
+   Este arquivo é 100% escopado dentro de ".ronda-modulo" para nunca
+   vazar estilo por cima do resto do app "Passagem de Turno", nem sofrer
+   interferência dele. Variáveis de cor usam o prefixo --ronda- pelo
+   mesmo motivo.
+   ============================================================ */
+
+.ronda-modulo {
+  /* Paleta principal — alinhada à tematica do app "Passagem de Turno":
+     em vez de cores próprias (preto/azul), a Ronda agora usa as MESMAS
+     variáveis de cor do resto do app (fundo escuro neutro + destaque
+     âmbar), então qualquer ajuste de tema feito em src/estilos/global.css
+     se reflete automaticamente aqui também. */
+  --ronda-preto:        var(--cor-fundo);
+  --ronda-preto-medio:  var(--cor-fundo-2);
+  --ronda-preto-painel: var(--cor-fundo-3);
+  --ronda-azul-escuro:  var(--cor-fundo-3);
+  --ronda-azul-medio:   var(--cor-fundo-4);
+  --ronda-azul-brilho:  var(--ambar);
+  --ronda-azul-suave:   var(--cor-fundo-4);
+  --ronda-cinza-escuro: var(--cor-fundo-3);
+  --ronda-cinza-medio:  var(--cor-fundo-4);
+  --ronda-cinza-claro:  var(--cor-borda-2);
+  --ronda-cinza-texto:  var(--cor-apagado);
+  --ronda-branco:       var(--cor-texto);
+  --ronda-branco-suave: var(--cor-label);
+
+  /* Status — mantidos (semânticos: verde/âmbar/vermelho = produzindo/
+     pendência/parada), não fazem parte do tema de marca */
+  --ronda-verde:    #16A34A;
+  --ronda-verde-bg: #0D2318;
+  --ronda-amarelo:  #CA8A04;
+  --ronda-amarelo-bg: #221A05;
+  --ronda-vermelho: #DC2626;
+  --ronda-vermelho-bg: #250A0A;
+
+  /* Bordas e divisores */
+  --ronda-borda: var(--cor-borda);
+  --ronda-borda-clara: var(--cor-borda-2);
+
+  /* Substitui o antigo "html, body" — aplicado só dentro do módulo */
+  background: var(--ronda-preto);
+  color: var(--ronda-branco);
+  font-family: var(--fonte-sans, 'IBM Plex Sans'), system-ui, sans-serif;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+.ronda-modulo *,
+.ronda-modulo *::before,
+.ronda-modulo *::after {
+  box-sizing: border-box;
+}
+
+.ronda-modulo .app{ height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ── carregando ────────────────────────────────────────── */
+.ronda-modulo .carregando{
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace; color: var(--ronda-cinza-texto);
+  background: var(--ronda-preto);
+}
+
+/* ── topo ─────────────────────────────────────────────── */
+.ronda-modulo .topo{
+  background: var(--ronda-preto-medio);
+  border-bottom: 1px solid var(--ronda-borda);
+  padding: 13px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.ronda-modulo .marca{ display: flex; align-items: center; gap: 12px; }
+
+.ronda-modulo .logo-marca-wrap{
+  display: flex; align-items: center; justify-content: center;
+  background: #fff; border-radius: 8px; padding: 3px;
+  border: 1px solid var(--ronda-borda); flex-shrink: 0;
+}
+.ronda-modulo .logo-marca{
+  display: block; height: 38px; width: 38px;
+  object-fit: contain; border-radius: 5px;
+}
+
+.ronda-modulo .topo h1{
+  font-size: 16px; font-weight: 700; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--ronda-branco);
+}
+.ronda-modulo .sub{
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  color: var(--ronda-cinza-texto); margin-top: 2px;
+}
+
+.ronda-modulo .topo-acoes{ display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.ronda-modulo .campo-operador{
+  background: var(--ronda-cinza-escuro);
+  border: 1px solid var(--ronda-borda-clara);
+  color: var(--ronda-branco);
+  border-radius: 6px; padding: 7px 11px; font-size: 13px;
+  font-family: inherit; width: 140px;
+  transition: border-color .15s;
+}
+.ronda-modulo .campo-operador:focus{ outline: none; border-color: var(--ronda-azul-brilho); }
+.ronda-modulo .campo-operador::placeholder{ color: var(--ronda-cinza-claro); }
+
+.ronda-modulo .fantasma{
+  background: transparent;
+  border: 1px solid var(--ronda-borda-clara);
+  color: var(--ronda-branco-suave);
+  border-radius: 6px; padding: 7px 11px; font-size: 13px;
+  cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.ronda-modulo .fantasma:hover{ border-color: var(--ronda-azul-brilho); color: var(--ronda-branco); }
+.ronda-modulo .fantasma.ativo{
+  background: var(--ronda-azul-medio); border-color: var(--ronda-azul-brilho);
+  color: var(--ronda-branco);
+}
+
+/* ── barra de progresso ────────────────────────────────── */
+.ronda-modulo .trilha-progresso{
+  height: 3px; background: var(--ronda-cinza-escuro);
+  flex-shrink: 0;
+}
+.ronda-modulo .preenchimento-progresso{
+  height: 100%; background: var(--ronda-azul-brilho);
+  transition: width .4s ease; box-shadow: 0 0 8px var(--ronda-azul-brilho);
+}
+
+/* ── conteúdo (tela da árvore de navegação) ───────────────── */
+.ronda-modulo .main-arvore{
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.ronda-modulo .main-arvore .erro{ margin: 10px 14px 0; }
+
+/* ── máquina ───────────────────────────────────────────── */
+.ronda-modulo .maquina{
+  background: var(--ronda-cinza-escuro);
+  border: 1px solid var(--ronda-borda-clara);
+  border-radius: 8px; padding: 11px 13px; margin-bottom: 10px;
+  transition: border-color .15s;
+}
+.ronda-modulo .maquina:last-child{ margin-bottom: 0; }
+
+.ronda-modulo .linha-maquina{ display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* andon tower */
+.ronda-modulo .andon{
+  display: flex; flex-direction: column; gap: 3px; padding: 5px 4px;
+  background: var(--ronda-preto); border: 1px solid var(--ronda-borda);
+  border-radius: 5px; flex-shrink: 0;
+}
+.ronda-modulo .andon-luz{
+  width: 9px; height: 9px; border-radius: 50%;
+  transition: background .25s, box-shadow .25s;
+}
+
+.ronda-modulo .info-maquina{ flex: 1; min-width: 140px; }
+.ronda-modulo .nome-maquina{
+  font-weight: 600; font-size: 15px; color: var(--ronda-branco);
+  display: flex; align-items: center; gap: 6px;
+}
+.ronda-modulo .meta-maquina{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--ronda-cinza-texto); margin-top: 3px;
+}
+
+/* ── botões de status ──────────────────────────────────── */
+.ronda-modulo .linha-status{ display: flex; gap: 6px; flex-wrap: wrap; }
+.ronda-modulo .botao-status{
+  border: 1.5px solid; border-radius: 6px; padding: 7px 12px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: all .12s; background: transparent;
+  letter-spacing: .3px;
+}
+.ronda-modulo .linha-status.compacto .botao-status{ padding: 5px 9px; font-size: 11px; }
+
+/* ── observação ────────────────────────────────────────── */
+.ronda-modulo .caixa-obs{ margin-top: 10px; }
+.ronda-modulo .caixa-obs textarea{
+  width: 100%;
+  background: var(--ronda-vermelho-bg);
+  border: 1.5px solid #4A1515;
+  color: var(--ronda-branco); border-radius: 6px;
+  padding: 8px 10px; font-size: 13px;
+  font-family: inherit; resize: vertical;
+}
+.ronda-modulo .caixa-obs textarea::placeholder{ color: #7A4040; }
+.ronda-modulo .salvar-obs{
+  margin-top: 6px; background: var(--ronda-vermelho); color: #fff;
+  border: none; border-radius: 6px; padding: 6px 14px;
+  font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+  transition: opacity .15s;
+}
+
+/* ── estações ──────────────────────────────────────────── */
+.ronda-modulo .estacoes{
+  margin-top: 10px; padding-left: 14px;
+  border-left: 2px solid var(--ronda-borda);
+}
+.ronda-modulo .estacao{ padding: 6px 0; }
+.ronda-modulo .linha-estacao{ display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ronda-modulo .ponto-estacao{ width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; transition: background .2s; }
+.ronda-modulo .nome-estacao{
+  font-size: 13px; font-weight: 500; color: var(--ronda-branco-suave);
+  flex: 1; min-width: 110px; display: flex; align-items: center; gap: 5px;
+}
+
+/* ── botões editar / excluir ──────────────────────────── */
+.ronda-modulo .btn-editar{
+  background: none; border: none; cursor: pointer;
+  font-size: 12px; padding: 1px 4px; opacity: .55;
+  transition: opacity .15s;
+}
+.ronda-modulo .btn-editar:hover{ opacity: 1; }
+
+.ronda-modulo .excluir{
+  background: none; border: none; color: #9B3030;
+  cursor: pointer; font-size: 13px; padding: 2px 5px;
+  transition: color .15s;
+}
+.ronda-modulo .excluir:hover{ color: var(--ronda-vermelho); }
+
+/* ── input renomear ────────────────────────────────────── */
+.ronda-modulo .input-renomear{
+  background: var(--ronda-cinza-medio); border: 1px solid var(--ronda-azul-brilho);
+  color: var(--ronda-branco); border-radius: 5px;
+  padding: 4px 8px; font-size: 14px; font-family: inherit;
+  outline: none; width: 200px;
+}
+/* ── adicionar inline ──────────────────────────────────── */
+.ronda-modulo .botao-add{
+  background: transparent;
+  border: 1.5px dashed var(--ronda-cinza-claro);
+  color: var(--ronda-cinza-texto); border-radius: 7px;
+  padding: 8px 12px; font-size: 13px; cursor: pointer;
+  font-family: inherit; width: 100%; margin: 6px 0;
+  transition: all .15s;
+}
+.ronda-modulo .botao-add:hover{ border-color: var(--ronda-azul-brilho); color: var(--ronda-branco); }
+.ronda-modulo .botao-add.grande{
+  padding: 12px; font-size: 14px; margin-bottom: 16px;
+  background: var(--ronda-preto-painel);
+}
+.ronda-modulo .form-add{ display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
+.ronda-modulo .form-add input{
+  flex: 1; min-width: 140px;
+  background: var(--ronda-cinza-medio); border: 1px solid var(--ronda-borda-clara);
+  color: var(--ronda-branco); border-radius: 6px;
+  padding: 8px 10px; font-size: 13px; font-family: inherit;
+}
+.ronda-modulo .form-add input:focus{ outline: none; border-color: var(--ronda-azul-brilho); }
+.ronda-modulo .form-add input::placeholder{ color: var(--ronda-cinza-claro); }
+
+/* ── seletor de estações ───────────────────────────────── */
+.ronda-modulo .form-estacoes{
+  background: var(--ronda-azul-escuro); border: 1px solid var(--ronda-borda-clara);
+  border-radius: 8px; padding: 14px; margin: 8px 0;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.ronda-modulo .form-est-label{ font-size: 13px; color: var(--ronda-branco-suave); }
+.ronda-modulo .form-est-controles{
+  display: flex; align-items: center; gap: 0;
+  align-self: flex-start;
+}
+.ronda-modulo .qty-btn{
+  background: var(--ronda-cinza-medio); border: 1px solid var(--ronda-borda-clara);
+  color: var(--ronda-branco); font-size: 18px; font-weight: 700;
+  width: 36px; height: 36px; cursor: pointer;
+  transition: background .12s; line-height: 1;
+}
+.ronda-modulo .qty-btn:first-child{ border-radius: 6px 0 0 6px; }
+.ronda-modulo .qty-btn:last-child{ border-radius: 0 6px 6px 0; }
+.ronda-modulo .qty-btn:hover:not(:disabled){ background: var(--ronda-azul-medio); }
+.ronda-modulo .qty-btn:disabled{ opacity: .35; cursor: not-allowed; }
+.ronda-modulo .qty-valor{
+  background: var(--ronda-preto-painel); border-top: 1px solid var(--ronda-borda-clara);
+  border-bottom: 1px solid var(--ronda-borda-clara);
+  color: var(--ronda-branco); font-family: 'IBM Plex Mono', monospace;
+  font-size: 18px; font-weight: 600;
+  width: 48px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+}
+.ronda-modulo .form-est-preview{
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.ronda-modulo .est-chip{
+  background: var(--ronda-cinza-medio); border: 1px solid var(--ronda-borda-clara);
+  color: var(--ronda-cinza-texto); border-radius: 4px;
+  padding: 3px 9px; font-size: 12px; font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ── erro ─────────────────────────────────────────────── */
+.ronda-modulo .erro{
+  background: var(--ronda-vermelho-bg); border: 1px solid #4A1515;
+  color: #F87171; border-radius: 8px; padding: 11px 14px;
+  margin-bottom: 14px; font-size: 13px;
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+}
+.ronda-modulo .fechar-erro{ background: none; border: none; cursor: pointer; color: #F87171; font-size: 16px; flex-shrink: 0; }
+
+/* ── vazio ────────────────────────────────────────────── */
+.ronda-modulo .vazio{
+  text-align: center; padding: 48px 24px; color: var(--ronda-cinza-texto);
+  background: var(--ronda-preto-painel); border-radius: 10px;
+  border: 1.5px dashed var(--ronda-borda-clara); font-size: 15px;
+}
+.ronda-modulo .link-btn{
+  background: none; border: none; color: var(--ronda-azul-brilho);
+  cursor: pointer; font-family: inherit; font-size: 15px; text-decoration: underline;
+}
+
+/* ── rodapé ────────────────────────────────────────────── */
+.ronda-modulo .rodape{
+  flex-shrink: 0;
+  background: var(--ronda-preto-medio); border-top: 1px solid var(--ronda-borda);
+  padding: 11px 14px; display: flex; gap: 10px; justify-content: center;
+}
+.ronda-modulo .primario{
+  background: var(--ronda-azul-brilho); color: #fff; border: none;
+  border-radius: 7px; padding: 11px 20px; font-size: 14px;
+  font-weight: 700; cursor: pointer; font-family: inherit;
+  transition: background .15s;
+}
+.ronda-modulo .primario:hover{ background: #1D4FD8; }
+.ronda-modulo .secundario{
+  background: transparent; color: var(--ronda-branco-suave);
+  border: 1px solid var(--ronda-borda-clara);
+  border-radius: 7px; padding: 11px 16px; font-size: 14px;
+  cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.ronda-modulo .secundario:hover{ border-color: var(--ronda-cinza-claro); color: var(--ronda-branco); }
+
+.ronda-modulo .btn-salvar-rodape{ background: var(--ronda-verde); }
+.ronda-modulo .btn-salvar-rodape:hover:not(:disabled){ background: #128A3E; }
+.ronda-modulo .btn-salvar-rodape:disabled{
+  background: var(--ronda-preto-painel); color: var(--ronda-cinza-texto);
+  border: 1px solid var(--ronda-borda-clara); cursor: default; opacity: .8;
+}
+
+/* ── modais (base) ─────────────────────────────────────── */
+.ronda-modulo .fundo-modal{
+  position: fixed; inset: 0; background: rgba(0,0,0,.75);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50; padding: 16px; backdrop-filter: blur(2px);
+}
+.ronda-modulo .modal{
+  background: var(--ronda-preto-painel); border: 1px solid var(--ronda-borda-clara);
+  border-radius: 12px; padding: 20px; width: 100%;
+  max-width: 560px; max-height: 88vh;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.ronda-modulo .modal h3{
+  font-size: 15px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .5px; color: var(--ronda-branco);
+}
+.ronda-modulo .modal textarea{
+  width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px;
+  background: var(--ronda-cinza-escuro); border: 1px solid var(--ronda-borda-clara);
+  color: var(--ronda-branco-suave); border-radius: 8px;
+  padding: 10px; resize: vertical; flex: 1;
+}
+.ronda-modulo .acoes-modal{ display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+/* Mesmo esquema de cor do botão "📲 WhatsApp" do resto do app
+   (.botao-whatsapp em src/estilos/global.css) — verde WhatsApp oficial,
+   em vez do verde genérico usado antes só dentro da Ronda. */
+.ronda-modulo .link-whatsapp{
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #075e54; border: 1px solid #128c7e; color: #fff; text-decoration: none;
+  border-radius: var(--raio, 7px); padding: 11px 16px; font-size: 14px; font-weight: 700;
+  font-family: var(--fonte-sans, inherit);
+  transition: background .15s;
+}
+.ronda-modulo .link-whatsapp:hover{ background: #128c7e; }
+
+/* ── modal login admin ─────────────────────────────────── */
+.ronda-modulo .modal-login{
+  max-width: 360px; text-align: center; gap: 12px;
+}
+.ronda-modulo .login-icone{ font-size: 36px; }
+.ronda-modulo .login-desc{ font-size: 13px; color: var(--ronda-cinza-texto); line-height: 1.5; }
+.ronda-modulo .login-input{
+  width: 100%; background: var(--ronda-cinza-escuro);
+  border: 1.5px solid var(--ronda-borda-clara); color: var(--ronda-branco);
+  border-radius: 7px; padding: 11px 14px; font-size: 15px;
+  font-family: inherit; text-align: center; letter-spacing: 3px;
+  transition: border-color .15s;
+}
+.ronda-modulo .login-input:focus{ outline: none; border-color: var(--ronda-azul-brilho); }
+.ronda-modulo .login-input::placeholder{ letter-spacing: 0; color: var(--ronda-cinza-claro); }
+.ronda-modulo .login-erro{ font-size: 12px; color: #F87171; font-family: 'IBM Plex Mono', monospace; }
+.ronda-modulo .login-acoes{ display: flex; gap: 8px; justify-content: center; }
+.ronda-modulo .login-acoes .secundario{ color: var(--ronda-cinza-texto); }
+
+@keyframes ronda-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+.ronda-modulo .shake{ animation: ronda-shake .4s ease; }
+
+/* ── modal histórico ───────────────────────────────────── */
+.ronda-modulo .modal-historico{ max-width: 640px; padding: 0; overflow: hidden; gap: 0; }
+
+.ronda-modulo .hist-cabecalho{
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--ronda-borda);
+  background: var(--ronda-azul-escuro);
+}
+.ronda-modulo .hist-cabecalho h3{ font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.ronda-modulo .fantasma-escuro{
+  background: none; border: none; cursor: pointer;
+  font-family: inherit; font-size: 14px; color: var(--ronda-branco-suave);
+}
+.ronda-modulo .fechar-modal{
+  background: none; border: none; cursor: pointer;
+  font-size: 18px; color: var(--ronda-cinza-texto); transition: color .15s;
+}
+.ronda-modulo .fechar-modal:hover{ color: var(--ronda-branco); }
+
+.ronda-modulo .hist-lista{ overflow-y: auto; max-height: 65vh; }
+.ronda-modulo .hist-vazio{ padding: 40px; text-align: center; color: var(--ronda-cinza-texto); font-size: 14px; }
+
+.ronda-modulo .hist-item{
+  display: grid; grid-template-columns: 1fr auto auto 20px;
+  align-items: center; gap: 10px; padding: 13px 18px;
+  border-bottom: 1px solid var(--ronda-borda); cursor: pointer;
+  transition: background .1s;
+}
+.ronda-modulo .hist-item:hover{ background: var(--ronda-azul-escuro); }
+.ronda-modulo .hist-item-data{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; font-weight: 600; color: var(--ronda-branco);
+}
+.ronda-modulo .hist-item-op{ font-size: 12px; color: var(--ronda-cinza-texto); }
+.ronda-modulo .hist-item-resumo{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; color: var(--ronda-cinza-texto);
+}
+.ronda-modulo .hist-seta{ color: var(--ronda-cinza-claro); font-size: 20px; }
+
+.ronda-modulo .hist-detalhe{ display: flex; flex-direction: column; overflow: hidden; }
+.ronda-modulo .hist-detalhe-info{
+  padding: 12px 18px; background: var(--ronda-azul-escuro);
+  border-bottom: 1px solid var(--ronda-borda);
+  font-size: 13px; display: flex; flex-wrap: wrap;
+  align-items: center; gap: 8px; color: var(--ronda-branco-suave);
+}
+.ronda-modulo .hist-resumo-badge{
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  color: var(--ronda-cinza-texto); background: var(--ronda-cinza-escuro);
+  padding: 3px 9px; border-radius: 20px;
+}
+
+.ronda-modulo .hist-itens{ overflow-y: auto; max-height: 52vh; }
+
+.ronda-modulo .hist-linha{
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 9px 18px; border-bottom: 1px solid var(--ronda-borda);
+  transition: background .1s;
+}
+.ronda-modulo .hist-linha:hover{ background: var(--ronda-cinza-escuro); }
+.ronda-modulo .hist-linha.estacao{ padding-left: 36px; background: var(--ronda-preto); }
+.ronda-modulo .hist-linha.estacao:hover{ background: var(--ronda-cinza-escuro); }
+
+.ronda-modulo .hist-emoji{ font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+.ronda-modulo .hist-linha-info{ flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.ronda-modulo .hist-nome-pai{
+  font-size: 10px; color: var(--ronda-cinza-texto);
+  font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: .5px;
+}
+.ronda-modulo .hist-nome-item{ font-size: 14px; font-weight: 500; color: var(--ronda-branco); }
+.ronda-modulo .hist-status{ font-size: 12px; font-weight: 600; }
+.ronda-modulo .hist-obs{ font-size: 12px; color: #F87171; }
+.ronda-modulo .hist-usuario{ font-size: 11px; color: var(--ronda-cinza-texto); white-space: nowrap; }
+
+.ronda-modulo .hist-detalhe .acoes-modal{
+  padding: 12px 18px; border-top: 1px solid var(--ronda-borda);
+  background: var(--ronda-azul-escuro);
+}
+
+/* ── responsivo ────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .ronda-modulo .linha-status{ width: 100%; }
+  .ronda-modulo .botao-status{ flex: 1; text-align: center; }
+  .ronda-modulo .topo{ padding: 10px 12px; }
+  .ronda-modulo .topo h1{ font-size: 14px; }
+  .ronda-modulo .topo-acoes{ gap: 6px; }
+  .ronda-modulo .campo-operador{ width: 110px; }
+}
+
+/* ── máquina colapsável e badge de completude ───────────── */
+.ronda-modulo .seta-maquina{
+  color: var(--ronda-cinza-texto); font-size: 11px; flex-shrink: 0;
+  transition: transform .15s;
+}
+
+.ronda-modulo .maquina-completa{
+  border-color: #1A3D2B !important;
+  background: #0D1E16 !important;
+}
+.ronda-modulo .maquina-completa .nome-maquina{ color: #6EE89A; }
+
+.ronda-modulo .maquina-meta-row{
+  display: flex; align-items: center; gap: 8px; margin-top: 3px; flex-wrap: wrap;
+}
+
+.ronda-modulo .badge-completude{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; font-weight: 600; letter-spacing: .4px;
+  padding: 2px 7px; border-radius: 20px; border: 1px solid;
+  white-space: nowrap;
+}
+.ronda-modulo .badge-completo{ background: #0D2318; color: #4ADE80; border-color: #1A4D2A; }
+.ronda-modulo .badge-parcial{ background: #0F1E38; color: #60A5FA; border-color: #1A3560; }
+.ronda-modulo .badge-pendente{ background: #1A1E27; color: #4B5A6A; border-color: #2A3340; }
+
+/* resumo chips quando recolhida */
+.ronda-modulo .resumo-recolhido{
+  padding: 8px 12px 10px 40px;
+  display: flex; flex-wrap: wrap; gap: 5px;
+  border-top: 1px solid var(--ronda-borda);
+}
+.ronda-modulo .chip-estacao-mini{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; padding: 3px 8px; border-radius: 4px;
+  border: 1px solid; cursor: default;
+  transition: all .15s;
+}
+
+/* ── setor com progresso ────────────────────────────────── */
+.ronda-modulo .mini-barra{
+  width: 52px; height: 4px; background: var(--ronda-cinza-escuro);
+  border-radius: 2px; overflow: hidden;
+}
+.ronda-modulo .mini-barra-fill{
+  height: 100%; border-radius: 2px; transition: width .4s ease;
+}
+
+/* ── rodapé salvar máquina ──────────────────────────────── */
+.ronda-modulo .maquina-acoes{ display: flex; align-items: center; gap: 8px; }
+
+/* ── botões de reordenar (grupos / máquinas) ────────────── */
+.ronda-modulo .acoes-reordenar{ display: flex; flex-direction: column; gap: 2px; }
+.ronda-modulo .btn-mover{
+  background: var(--ronda-cinza-medio); border: 1px solid var(--ronda-borda-clara);
+  color: var(--ronda-branco-suave); border-radius: 4px;
+  width: 22px; height: 18px; font-size: 9px; line-height: 1;
+  cursor: pointer; font-family: inherit; transition: all .12s;
+  display: flex; align-items: center; justify-content: center;
+}
+.ronda-modulo .btn-mover:hover:not(:disabled){ border-color: var(--ronda-azul-brilho); color: var(--ronda-branco); }
+.ronda-modulo .btn-mover:disabled{ opacity: .3; cursor: not-allowed; }
+
+.ronda-modulo .maquina-rodape{
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 8px 4px 2px;
+  border-top: 1px solid var(--ronda-borda);
+  margin-top: 8px;
+}
+.ronda-modulo .maquina-rodape-hint{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--ronda-amarelo); opacity: .85;
+}
+.ronda-modulo .btn-salvar-maquina{
+  background: var(--ronda-azul-medio); border: 1px solid var(--ronda-azul-brilho);
+  color: #fff; border-radius: 6px;
+  padding: 5px 16px; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: background .15s;
+}
+.ronda-modulo .btn-salvar-maquina:hover:not(:disabled){ background: var(--ronda-azul-brilho); }
+.ronda-modulo .btn-salvar-maquina:disabled{ opacity: .5; cursor: not-allowed; }
+
+/* barra de progresso de salvamento */
+.ronda-modulo .barra-salvando{
+  height: 2px; background: var(--ronda-azul-brilho);
+  animation: ronda-barra-anim .8s ease-in-out infinite alternate;
+  border-radius: 0 0 8px 8px;
+}
+@keyframes ronda-barra-anim {
+  from { opacity: .4; transform: scaleX(.3); transform-origin: left; }
+  to   { opacity: 1;  transform: scaleX(1);  transform-origin: left; }
+}
+
+/* ── botão de adicionar ──────────────────────────────────── */
+/* input renomear grupo */
+.ronda-modulo .input-grupo{
+  font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .8px;
+}
+
+/* ── marcar tudo / view compacta ────────────────────────── */
+.ronda-modulo .dica-marcar-tudo{
+  font-size: 10px; color: var(--ronda-cinza-texto);
+  font-style: italic; white-space: nowrap;
+}
+
+.ronda-modulo .faixa-todas-ok{
+  padding: 6px 10px; margin-bottom: 4px;
+  background: var(--ronda-verde-bg); border: 1px solid #1A4D2A;
+  border-radius: 5px; color: #4ADE80;
+  font-size: 12px; font-weight: 600;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* estação compacta: só nome + emoji, sem botões */
+.ronda-modulo .estacao-compacta{
+  padding: 2px 0 !important;
+  opacity: .7;
+}
+.ronda-modulo .estacao-compacta .linha-estacao{
+  gap: 6px;
+}
+.ronda-modulo .estacao-status-icon{
+  font-size: 14px; cursor: pointer;
+  flex-shrink: 0;
+}
+.ronda-modulo .estacao-status-icon:hover{ opacity: .7; }
+
+/* estação normal mas já ok (verde sutil) */
+.ronda-modulo .estacao-ok .nome-estacao{ color: #6EE89A; }
+.ronda-modulo .estacao-ok .ponto-estacao{ box-shadow: 0 0 4px #16A34A; }
+
+/* chip "tudo ok" no resumo recolhido */
+.ronda-modulo .chip-tudo-ok{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; padding: 3px 10px; border-radius: 4px;
+  background: #0D2318; border: 1px solid #1A4D2A; color: #4ADE80;
+}
+
+/* ── modal relatório com seleção de setores ─────────────── */
+.ronda-modulo .modal-relatorio{ max-width: 600px; gap: 0; padding: 0; overflow: hidden; }
+
+.ronda-modulo .rel-cabecalho{
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--ronda-borda);
+  background: var(--ronda-azul-escuro);
+}
+.ronda-modulo .rel-cabecalho h3{ font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+
+.ronda-modulo .rel-setores{
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--ronda-borda);
+  background: var(--ronda-preto-painel);
+}
+.ronda-modulo .rel-setores-titulo{
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px; font-size: 12px; color: var(--ronda-cinza-texto);
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.ronda-modulo .link-btn-sm{
+  background: none; border: none; cursor: pointer;
+  color: var(--ronda-azul-brilho); font-size: 12px;
+  font-family: inherit; text-decoration: underline;
+}
+.ronda-modulo .rel-setores-lista{ display: flex; flex-wrap: wrap; gap: 7px; }
+
+.ronda-modulo .chip-setor-sel{
+  display: flex; align-items: center; gap: 5px;
+  background: var(--ronda-cinza-escuro); border: 1.5px solid var(--ronda-borda-clara);
+  color: var(--ronda-cinza-texto); border-radius: 6px;
+  padding: 6px 11px; font-size: 13px; font-weight: 500;
+  cursor: pointer; font-family: inherit; transition: all .12s;
+}
+.ronda-modulo .chip-setor-sel:hover{ border-color: var(--ronda-azul-brilho); color: var(--ronda-branco); }
+.ronda-modulo .chip-setor-sel.ativo{
+  background: var(--ronda-azul-medio); border-color: var(--ronda-azul-brilho); color: var(--ronda-branco);
+}
+.ronda-modulo .chip-check{
+  font-size: 11px; color: #4ADE80;
+  visibility: hidden; width: 0; transition: all .1s;
+}
+.ronda-modulo .chip-check.visivel{ visibility: visible; width: auto; }
+.ronda-modulo .chip-setor-count{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: var(--ronda-cinza-texto);
+  background: var(--ronda-preto); padding: 1px 5px; border-radius: 3px;
+}
+.ronda-modulo .chip-setor-sel.ativo .chip-setor-count{ background: var(--ronda-azul-escuro); color: var(--ronda-branco-suave); }
+
+.ronda-modulo .rel-preview{
+  width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  background: var(--ronda-cinza-escuro); border: none; border-top: 1px solid var(--ronda-borda);
+  color: var(--ronda-branco-suave); padding: 12px 18px; resize: none;
+  max-height: 280px; overflow-y: auto;
+}
+.ronda-modulo .rel-vazio{
+  padding: 24px 18px; text-align: center;
+  color: var(--ronda-cinza-texto); font-size: 13px;
+  border-top: 1px solid var(--ronda-borda);
+}
+.ronda-modulo .modal-relatorio .acoes-modal{
+  padding: 12px 18px; border-top: 1px solid var(--ronda-borda);
+  background: var(--ronda-azul-escuro);
+}
+
+/* ── exclusão no histórico ──────────────────────────────── */
+.ronda-modulo .btn-excluir-item{
+  background: none; border: none; cursor: pointer;
+  font-size: 14px; padding: 2px 6px; opacity: .4;
+  transition: opacity .15s; flex-shrink: 0;
+}
+.ronda-modulo .btn-excluir-item:hover{ opacity: 1; }
+.ronda-modulo .btn-excluir-item:disabled{ opacity: .2; cursor: not-allowed; }
+
+.ronda-modulo .hist-item{ position: relative; }
+.ronda-modulo .hist-item-excluindo{ opacity: .4; pointer-events: none; }
+
+.ronda-modulo .btn-limpar-hist{
+  background: transparent; border: 1px solid #4A1515;
+  color: #F87171; border-radius: 6px;
+  padding: 5px 11px; font-size: 12px;
+  cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.ronda-modulo .btn-limpar-hist:hover{ background: var(--ronda-vermelho-bg); }
+
+.ronda-modulo .btn-excluir-hist{
+  background: var(--ronda-vermelho-bg); border: 1px solid #4A1515;
+  color: #F87171; border-radius: 6px;
+  padding: 5px 11px; font-size: 12px;
+  cursor: pointer; font-family: inherit; transition: all .15s;
+  white-space: nowrap;
+}
+.ronda-modulo .btn-excluir-hist:hover{ background: #3A0A0A; }
+
+/* hist-item agora tem 5 colunas (adicionada a do lixeira) */
+.ronda-modulo .hist-item{
+  grid-template-columns: 1fr auto auto auto 28px !important;
+}
+
+/* ── seletor dois níveis (setores + grupos) ─────────────── */
+.ronda-modulo .rel-selecao{
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--ronda-borda);
+  background: var(--ronda-preto-painel);
+  display: flex; flex-direction: column; gap: 10px;
+  max-height: 260px; overflow-y: auto;
+}
+
+.ronda-modulo .rel-nivel-titulo{
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 11px; color: var(--ronda-cinza-texto);
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.ronda-modulo .rel-nivel-sub{ margin-top: 2px; }
+.ronda-modulo .rel-setor-label{ color: var(--ronda-azul-brilho); font-size: 11px; }
+
+.ronda-modulo .rel-chips-linha{ display: flex; flex-wrap: wrap; gap: 6px; }
+
+.ronda-modulo .rel-grupos-bloco{
+  display: flex; flex-direction: column; gap: 7px;
+  padding-left: 12px;
+  border-left: 2px solid var(--ronda-azul-suave);
+}
+
+/* chip de grupo — menor e mais suave que o de setor */
+.ronda-modulo .chip-grupo-sel{
+  display: flex; align-items: center; gap: 5px;
+  background: var(--ronda-preto-painel); border: 1.5px solid var(--ronda-borda);
+  color: var(--ronda-cinza-texto); border-radius: 5px;
+  padding: 4px 10px; font-size: 12px; font-weight: 500;
+  cursor: pointer; font-family: inherit; transition: all .12s;
+}
+.ronda-modulo .chip-grupo-sel:hover{ border-color: var(--ronda-azul-brilho); color: var(--ronda-branco); }
+.ronda-modulo .chip-grupo-sel.ativo{
+  background: #0F1E38; border-color: var(--ronda-azul-brilho); color: var(--ronda-branco);
+}
+
+/* ajuste: rel-setores → rel-selecao (renomeado) */
+.ronda-modulo .rel-setores{ display: none; } /* oculta o antigo se existir */
+/* ── filtro conteúdo (relatório + histórico) ────────────── */
+.ronda-modulo .rel-filtro-barra{
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px 18px; border-bottom: 1px solid var(--ronda-borda);
+  background: var(--ronda-preto-painel);
+}
+.ronda-modulo .rel-filtro-label{ font-size: 11px; color: var(--ronda-cinza-texto); text-transform: uppercase; letter-spacing: .5px; }
+
+.ronda-modulo .chip-filtro{
+  display: flex; align-items: center; gap: 5px;
+  background: var(--ronda-cinza-escuro); border: 1.5px solid var(--ronda-borda-clara);
+  color: var(--ronda-cinza-texto); border-radius: 6px;
+  padding: 5px 11px; font-size: 12px; font-weight: 500;
+  cursor: pointer; font-family: inherit; transition: all .12s;
+}
+.ronda-modulo .chip-filtro:hover{ border-color: var(--ronda-azul-brilho); color: var(--ronda-branco); }
+.ronda-modulo .chip-filtro.ativo{
+  background: var(--ronda-azul-medio); border-color: var(--ronda-azul-brilho); color: var(--ronda-branco);
+}
+.ronda-modulo .chip-filtro-critico.ativo{
+  background: var(--ronda-vermelho-bg); border-color: var(--ronda-vermelho); color: #F87171;
+}
+
+/* ── exportar no histórico ──────────────────────────────── */
+.ronda-modulo .hist-exportar{
+  border-top: 1px solid var(--ronda-borda);
+  background: var(--ronda-preto-painel);
+}
+.ronda-modulo .hist-exp-titulo{
+  padding: 10px 18px 0;
+  font-size: 11px; color: var(--ronda-cinza-texto);
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.ronda-modulo .hist-exportar .rel-filtro-barra{ border-bottom: none; padding: 8px 18px; }
+.ronda-modulo .hist-exportar .acoes-modal{ padding: 8px 18px 12px; }
+
+.ronda-modulo .rel-selecao-hist{
+  padding: 8px 18px !important; max-height: 140px !important;
+}
+
+/* badge operador no histórico */
+.ronda-modulo .hist-badge-op{
+  background: var(--ronda-azul-escuro); border: 1px solid var(--ronda-borda-clara);
+  color: var(--ronda-branco-suave); border-radius: 4px;
+  padding: 2px 8px; font-size: 12px;
+}
+
+
+
+/* ── chips de estação clicáveis no resumo recolhido ──────── */
+.ronda-modulo .chip-estacao-clicavel{
+  display: inline-flex; align-items: center; gap: 4px;
+  border: 1.5px solid; border-radius: 5px;
+  padding: 4px 9px; font-size: 12px; font-weight: 500;
+  cursor: pointer; font-family: inherit;
+  transition: all .12s; user-select: none;
+}
+.ronda-modulo .chip-estacao-clicavel:hover:not(:disabled){
+  filter: brightness(1.2);
+  transform: scale(1.04);
+}
+.ronda-modulo .chip-estacao-clicavel:active:not(:disabled){
+  transform: scale(.97);
+}
+.ronda-modulo .chip-estacao-clicavel:disabled{
+  opacity: .4; cursor: not-allowed;
+}
+
+.ronda-modulo .chip-tudo-ok-label{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: #4ADE80;
+  padding: 4px 6px; align-self: center;
+  opacity: .7;
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   MELHORIAS MOBILE / PWA
+   ═══════════════════════════════════════════════════════════ */
+/* Safe area para iPhone com notch/Dynamic Island */
+.ronda-modulo .topo{
+  padding-top: calc(13px + env(safe-area-inset-top));
+  padding-left: calc(18px + env(safe-area-inset-left));
+  padding-right: calc(18px + env(safe-area-inset-right));
+}
+.ronda-modulo .rodape{
+  padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  padding-left: calc(16px + env(safe-area-inset-left));
+  padding-right: calc(16px + env(safe-area-inset-right));
+}
+
+/* Touch targets mínimos de 44px (Apple HIG) */
+.ronda-modulo .botao-status{
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 14px;
+}
+.ronda-modulo .linha-status.compacto .botao-status{
+  min-height: 38px;
+  min-width: 38px;
+  padding: 8px 10px;
+}
+.ronda-modulo .btn-salvar-maquina{
+  min-height: 44px;
+  padding: 10px 20px;
+}
+.ronda-modulo .fantasma, .ronda-modulo .primario, .ronda-modulo .secundario{
+  min-height: 44px;
+}
+.ronda-modulo .chip-estacao-clicavel{
+  min-height: 38px;
+  padding: 6px 12px;
+}
+
+/* Ponto da estação — área de toque maior */
+.ronda-modulo .ponto-estacao{
+  min-width: 18px;
+  min-height: 18px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  /* Área de toque invisível ao redor */
+  padding: 8px;
+  margin: -8px;
+  background-clip: content-box;
+}
+
+/* Nome clicável: feedback visual ao toque */
+.ronda-modulo .nome-maquina-clicavel:active, .ronda-modulo .nome-estacao-clicavel:active{
+  opacity: 0.7;
+}
+.ronda-modulo .nome-maquina-clicavel{
+  border-bottom: 1px dashed var(--ronda-cinza-claro);
+  padding-bottom: 1px;
+}
+.ronda-modulo .nome-estacao-clicavel{
+  border-bottom: 1px dashed var(--ronda-cinza-claro);
+  padding-bottom: 1px;
+}
+
+/* Scroll suave no iOS (colunas da árvore rolam internamente) */
+.ronda-modulo .colunas-scroll, .ronda-modulo .coluna-corpo{
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Evita zoom ao focar input no iOS (font-size mínimo 16px) */
+.ronda-modulo input, .ronda-modulo textarea, .ronda-modulo select{
+  font-size: 16px !important;
+}
+/* Mas compensa visualmente onde precisar de texto menor */
+.ronda-modulo .input-renomear{
+  font-size: 15px !important;
+}
+
+/* Responsivo: topo em coluna em telas muito pequenas */
+@media (max-width: 480px) {
+  .ronda-modulo .topo{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .ronda-modulo .topo-acoes{
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .ronda-modulo .campo-operador{
+    flex: 1;
+    width: auto;
+    min-width: 120px;
+  }
+  .ronda-modulo .fantasma{
+    font-size: 12px;
+    padding: 7px 9px;
+  }
+  .ronda-modulo .linha-maquina{
+    gap: 8px;
+  }
+  /* Botões de status em mobile: um por linha se necessário */
+.ronda-modulo .linha-status{
+    flex-wrap: wrap;
+  }
+  .ronda-modulo .botao-status{
+    flex: 1;
+    text-align: center;
+  }
+  .ronda-modulo .rodape{
+    gap: 8px;
+  }
+  .ronda-modulo .primario, .ronda-modulo .secundario{
+    flex: 1;
+    text-align: center;
+  }
+}
+
+/* Previne seleção de texto acidental ao clicar rápido */
+.ronda-modulo .linha-coluna, .ronda-modulo .linha-maquina, .ronda-modulo .chip-estacao-clicavel, .ronda-modulo .nome-maquina-clicavel, .ronda-modulo .nome-estacao-clicavel{
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Feedback de toque nos chips e botões */
+.ronda-modulo .chip-estacao-clicavel:active:not(:disabled){
+  transform: scale(0.96);
+}
+.ronda-modulo .botao-status:active:not(:disabled){
+  transform: scale(0.95);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAINEL LATERAL DA MÁQUINA — colapsa para o lado, não pra baixo
+   ═══════════════════════════════════════════════════════════ */
+.ronda-modulo .seta-maquina-lateral{
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.ronda-modulo .painel-lateral-fundo{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(1px);
+  z-index: 50;
+  display: flex; justify-content: flex-end;
+  animation: ronda-painel-fade-in .15s ease;
+}
+/* setores, grupos e máquinas podem abrir painéis empilhados (um dentro do
+   outro); o mais profundo (máquina) sempre fica por cima */
+.ronda-modulo .painel-lateral-fundo.nivel-1{ z-index: 50; }
+.ronda-modulo .painel-lateral-fundo.nivel-2{ z-index: 53; }
+.ronda-modulo .painel-lateral-fundo.nivel-3{ z-index: 56; }
+@keyframes ronda-painel-fade-in {
+  from { opacity: 0; } to { opacity: 1; }
+}
+
+.ronda-modulo .painel-lateral{
+  width: min(420px, 92vw);
+  height: 100%;
+  background: var(--ronda-preto-painel);
+  border-left: 1px solid var(--ronda-borda-clara);
+  box-shadow: -10px 0 28px rgba(0,0,0,.45);
+  display: flex; flex-direction: column;
+  animation: ronda-painel-slide-in .2s cubic-bezier(.2,.8,.3,1);
+}
+@keyframes ronda-painel-slide-in {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+.ronda-modulo .painel-lateral-cabecalho{
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: 14px 16px;
+  background: var(--ronda-azul-escuro);
+  border-bottom: 1px solid var(--ronda-borda);
+  flex-shrink: 0;
+}
+.ronda-modulo .painel-lateral-titulo{
+  display: flex; align-items: center; gap: 10px; min-width: 0;
+}
+.ronda-modulo .painel-lateral-nome{
+  font-size: 15px; font-weight: 700; color: var(--ronda-branco);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.ronda-modulo .painel-lateral-corpo{
+  padding: 14px 16px; overflow-y: auto; flex: 1;
+  -webkit-overflow-scrolling: touch;
+}
+.ronda-modulo .painel-lateral-vazio{
+  text-align: center; padding: 30px 10px;
+  color: var(--ronda-cinza-texto); font-size: 13px;
+}
+.ronda-modulo .painel-lateral .estacao{
+  padding: 8px 0;
+  border-bottom: 1px solid var(--ronda-borda);
+}
+.ronda-modulo .painel-lateral .estacao:last-of-type{ border-bottom: none; }
+
+/* Em telas estreitas, o painel ocupa praticamente a largura toda */
+@media (max-width: 480px) {
+  .ronda-modulo .painel-lateral{ width: 100vw; border-left: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ÁRVORE DE NAVEGAÇÃO (CASCATA) — setor → grupo → máquina → estações
+   É a tela principal do app (não um modal): ocupa toda a área de
+   conteúdo, entre o cabeçalho e o rodapé. Cada nível vira uma coluna
+   lado a lado com a anterior, em vez de esconder o que já estava
+   selecionado — dá pra ver e trocar setor/grupo/máquina sem perder
+   o contexto.
+   ═══════════════════════════════════════════════════════════ */
+.ronda-modulo .arvore{
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column;
+  background: var(--ronda-preto-painel);
+}
+
+.ronda-modulo .arvore-topo{
+  display: flex; align-items: center;
+  gap: 10px; padding: 10px 14px;
+  background: var(--ronda-azul-escuro);
+  border-bottom: 1px solid var(--ronda-borda);
+  flex-shrink: 0;
+}
+
+.ronda-modulo .trilha-migalhas{
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  min-width: 0; overflow-x: auto;
+}
+.ronda-modulo .migalha{
+  background: transparent; border: none; cursor: pointer;
+  color: var(--ronda-cinza-texto); font-family: inherit; font-size: 13px;
+  padding: 5px 7px; border-radius: 5px; white-space: nowrap;
+  transition: all .12s;
+}
+.ronda-modulo .migalha:hover{ background: var(--ronda-cinza-escuro); color: var(--ronda-branco); }
+.ronda-modulo .migalha-atual{ color: var(--ronda-branco); font-weight: 700; }
+.ronda-modulo .migalha-sep{ color: var(--ronda-cinza-claro); font-size: 12px; flex-shrink: 0; }
+
+.ronda-modulo .colunas-scroll{
+  flex: 1; min-height: 0; display: flex; flex-direction: row;
+  overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ronda-modulo .coluna{
+  flex: 0 0 auto; width: 300px; height: 100%;
+  display: flex; flex-direction: column;
+  border-right: 1px solid var(--ronda-borda);
+  scroll-snap-align: start;
+  background: var(--ronda-preto-painel);
+}
+.ronda-modulo .coluna:last-child{ border-right: none; }
+
+.ronda-modulo .coluna-cabecalho{
+  padding: 11px 14px; flex-shrink: 0;
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .6px; color: var(--ronda-cinza-texto);
+  background: var(--ronda-preto-medio); border-bottom: 1px solid var(--ronda-borda);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.ronda-modulo .coluna-corpo{
+  flex: 1; overflow-y: auto; padding: 8px 10px;
+  -webkit-overflow-scrolling: touch;
+}
+.ronda-modulo .coluna-corpo-detalhe{ padding: 12px; }
+.ronda-modulo .coluna-corpo-detalhe .maquina-coluna{ border: none; background: none; padding: 0; margin: 0; }
+
+/* Em telas estreitas cada coluna ocupa a largura toda — vira uma
+   navegação "uma tela por vez", com as migalhas no topo para pular
+   direto entre setor / grupo / máquina sem precisar voltar página a
+   página. */
+@media (max-width: 720px) {
+  .ronda-modulo .coluna{ width: 100vw; }
+  .ronda-modulo .colunas-scroll{ scroll-snap-type: x mandatory; }
+}
+
+/* estado vazio: nenhum setor selecionado ainda — preenche o espaço à
+   direita da coluna de setores em vez de deixar um vazio sem explicação */
+.ronda-modulo .arvore-vazio{
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 8px; padding: 40px; text-align: center;
+  color: var(--ronda-cinza-texto);
+}
+.ronda-modulo .arvore-vazio-emoji{ font-size: 34px; opacity: .45; }
+.ronda-modulo .arvore-vazio-texto{ font-size: 14px; }
+
+/* ── linha de coluna (item clicável dentro de cada nível) ────── */
+.ronda-modulo .linha-coluna{
+  display: flex; align-items: stretch; gap: 2px;
+  border-radius: 8px; margin-bottom: 5px;
+  background: var(--ronda-cinza-escuro); border: 1px solid var(--ronda-borda-clara);
+  transition: border-color .15s, background .15s;
+}
+.ronda-modulo .linha-coluna:hover{ border-color: var(--ronda-azul-brilho); }
+.ronda-modulo .linha-coluna-selecionada{ border-color: var(--ronda-azul-brilho); background: var(--ronda-azul-suave); }
+.ronda-modulo .linha-coluna-completa{ border-left: 3px solid var(--ronda-verde); }
+
+.ronda-modulo .linha-coluna-clicavel{
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px;
+  background: none; border: none; color: inherit; text-align: left;
+  padding: 9px 8px; cursor: pointer; font-family: inherit; font-size: 13.5px;
+}
+
+.ronda-modulo .linha-coluna-ponto{ width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+.ronda-modulo .linha-coluna-corpo{ flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.ronda-modulo .linha-coluna-nome{
+  color: var(--ronda-branco); font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  display: flex; align-items: center; gap: 5px;
+}
+.ronda-modulo .linha-coluna-check{ color: #4ADE80; font-size: 12px; }
+
+.ronda-modulo .linha-coluna-progresso{ display: flex; align-items: center; gap: 6px; }
+.ronda-modulo .linha-coluna-contagem{ font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--ronda-cinza-texto); }
+.ronda-modulo .linha-coluna-contagem-ok{ color: #4ADE80; }
+
+.ronda-modulo .linha-coluna-seta{ color: var(--ronda-cinza-texto); font-size: 14px; flex-shrink: 0; padding-right: 8px; align-self: center; }
+
+.ronda-modulo .linha-coluna-acoes{
+  display: flex; align-items: center; gap: 3px; padding-right: 6px; flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAINEL DE MANUTENÇÃO
+   ═══════════════════════════════════════════════════════════ */
+.ronda-modulo .modal-manutencao{ max-width: 620px; gap: 0; padding: 0; overflow: hidden; }
+
+.ronda-modulo .manut-corpo{
+  padding: 16px 18px; overflow-y: auto; max-height: 68vh;
+  display: flex; flex-direction: column; gap: 18px;
+}
+
+.ronda-modulo .manut-secao{ display: flex; flex-direction: column; gap: 8px; }
+.ronda-modulo .manut-secao-titulo{
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .6px; color: var(--ronda-branco-suave);
+  display: flex; align-items: center; gap: 6px;
+}
+.ronda-modulo .manut-contagem{ color: var(--ronda-cinza-texto); font-weight: 500; text-transform: none; letter-spacing: 0; }
+
+.ronda-modulo .manut-vazio-inline{
+  color: var(--ronda-cinza-texto); font-size: 13px;
+  padding: 10px 0;
+}
+.ronda-modulo .manut-dica{
+  font-size: 12px; color: var(--ronda-cinza-texto); font-style: italic;
+}
+
+.ronda-modulo .manut-chips-manutentores{ display: flex; flex-wrap: wrap; gap: 7px; }
+.ronda-modulo .chip-manutentor{
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--ronda-cinza-escuro); border: 1px solid var(--ronda-borda-clara);
+  color: var(--ronda-branco-suave); border-radius: 20px;
+  padding: 5px 8px 5px 12px; font-size: 13px; font-weight: 500;
+}
+.ronda-modulo .chip-manutentor-remover{
+  background: none; border: none; cursor: pointer;
+  color: #9B3030; font-size: 12px; padding: 2px 5px;
+  border-radius: 50%; transition: all .15s;
+}
+.ronda-modulo .chip-manutentor-remover:hover{ color: var(--ronda-vermelho); background: var(--ronda-vermelho-bg); }
+.ronda-modulo .chip-manutentor-remover:disabled{ opacity: .4; cursor: not-allowed; }
+
+.ronda-modulo .manut-form-atribuir{
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.ronda-modulo .manut-select{
+  flex: 1; min-width: 180px;
+  background: var(--ronda-cinza-medio); border: 1px solid var(--ronda-borda-clara);
+  color: var(--ronda-branco); border-radius: 6px;
+  padding: 9px 10px; font-size: 14px; font-family: inherit;
+}
+.ronda-modulo .manut-select:focus{ outline: none; border-color: var(--ronda-azul-brilho); }
+.ronda-modulo .manut-select:disabled{ opacity: .5; cursor: not-allowed; }
+
+.ronda-modulo .manut-descricao{
+  flex: 1 1 100%;
+  background: var(--ronda-cinza-medio); border: 1px solid var(--ronda-borda-clara);
+  color: var(--ronda-branco); border-radius: 6px;
+  padding: 9px 10px; font-size: 14px; font-family: inherit; resize: vertical;
+}
+.ronda-modulo .manut-descricao::placeholder{ color: var(--ronda-cinza-claro); }
+.ronda-modulo .manut-descricao:focus{ outline: none; border-color: var(--ronda-azul-brilho); }
+.ronda-modulo .manut-descricao:disabled{ opacity: .5; cursor: not-allowed; }
+
+.ronda-modulo .manut-lista-atendimentos{
+  display: flex; flex-direction: column; gap: 8px;
+}
+.ronda-modulo .manut-item-atendimento{
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; background: var(--ronda-cinza-escuro); border: 1px solid var(--ronda-borda-clara);
+  border-radius: 8px; padding: 10px 12px;
+}
+.ronda-modulo .manut-item-pendente{
+  border-left: 3px solid #CA8A04;
+}
+.ronda-modulo .manut-item-info{ min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ronda-modulo .manut-item-maquina{ font-size: 14px; font-weight: 600; color: var(--ronda-branco); }
+.ronda-modulo .manut-item-caminho{
+  font-size: 11px; color: var(--ronda-azul-brilho);
+  font-family: 'IBM Plex Mono', monospace;
+}
+.ronda-modulo .manut-item-detalhe{ font-size: 12px; color: var(--ronda-cinza-texto); }
+.ronda-modulo .manut-item-descricao{
+  font-size: 12px; color: var(--ronda-branco-suave);
+  margin-top: 2px; line-height: 1.4;
+}
+.ronda-modulo .manut-item-acoes{
+  display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;
+}
+.ronda-modulo .manut-btn-encerrar{
+  flex-shrink: 0; padding: 7px 12px !important; font-size: 12px !important;
+  color: #4ADE80 !important; border-color: #1A4D2A !important;
+}
+.ronda-modulo .manut-btn-encerrar:hover{ background: var(--ronda-verde-bg); }
+.ronda-modulo .manut-btn-atribuir{
+  flex-shrink: 0; padding: 7px 12px !important; font-size: 12px !important;
+  white-space: nowrap;
+}
+.ronda-modulo .manut-atribuir-inline{
+  display: flex; gap: 6px; align-items: center; margin-top: 6px;
+}
+.ronda-modulo .manut-atribuir-inline .manut-select{ min-width: 140px; padding: 7px 8px; font-size: 13px; }
+.ronda-modulo .manut-atribuir-inline button{
+  flex-shrink: 0; padding: 7px 10px !important; font-size: 13px !important;
+}
+
+/* ── abas do relatório (ronda / manutenção) ─────────────────── */
+.ronda-modulo .rel-abas{
+  display: flex; gap: 6px; padding: 10px 18px 0;
+  background: var(--ronda-preto-painel);
+}
+.ronda-modulo .rel-aba{
+  background: transparent; border: 1px solid var(--ronda-borda-clara);
+  border-bottom: none; color: var(--ronda-cinza-texto);
+  border-radius: 7px 7px 0 0; padding: 8px 14px; font-size: 12.5px;
+  font-weight: 600; cursor: pointer; font-family: inherit;
+  transition: all .12s;
+}
+.ronda-modulo .rel-aba:hover{ color: var(--ronda-branco); }
+.ronda-modulo .rel-aba.ativa{
+  background: var(--ronda-cinza-escuro); color: var(--ronda-branco);
+  border-color: var(--ronda-borda-clara);
+}
+.ronda-modulo .rel-vazio-manut{
+  padding: 16px 4px; color: var(--ronda-cinza-texto); font-size: 13px; line-height: 1.5;
+}
+
+/* responsivo: painel de manutenção em telas pequenas */
+@media (max-width: 480px) {
+  .ronda-modulo .manut-form-atribuir{ flex-direction: column; }
+  .ronda-modulo .manut-select{ width: 100%; }
+  .ronda-modulo .manut-item-atendimento{ flex-direction: column; align-items: flex-start; }
+  .ronda-modulo .manut-item-acoes{ flex-direction: row; width: 100%; }
+  .ronda-modulo .manut-item-acoes button{ flex: 1; }
+  .ronda-modulo .manut-atribuir-inline{ flex-wrap: wrap; width: 100%; }
+  .ronda-modulo .manut-atribuir-inline .manut-select{ width: 100%; }
+}

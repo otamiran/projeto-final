@@ -3,6 +3,10 @@
 // volte para `true` quando quiser reativá-la.
 export const ABA_ALMOX_ATIVA = false
 
+// Liga/desliga a aba "Ronda" (módulo de ronda de produção/manutenção),
+// visível para todos os grupos (produção, manutenção e admin).
+export const ABA_RONDA_ATIVA = true
+
 // Opções do campo "Modo de Falha" em ocorrências
 export const MODOS_FALHA = ['Elétrico', 'Mecânico', 'Automação', 'Operacional', 'Outro']
 
