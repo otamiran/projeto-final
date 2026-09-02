@@ -1,18 +1,17 @@
 // Tela de FCA — manutenção e admin
 // Layout dois painéis: lista à direita, detalhe à esquerda
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useFCAs } from '../ganchos/useFCAs'
-import FormFCA    from '../componentes/FormFCA'
-import CardFCA    from '../componentes/CardFCA'
+import FormFCA               from '../componentes/FormFCA'
+import CardFCA                from '../componentes/CardFCA'
+import VisualizarOcorrencia   from '../componentes/VisualizarOcorrencia'
+import { agruparFCAsPorDia }  from '../utilitarios/agruparFcasPorDia'
 
 // Item compacto na lista lateral
 function ItemLista({ fca, selecionado, aoSelecionar }) {
-  const data = fca.criado_em
-    ? new Date(fca.criado_em).toLocaleString('pt-BR', {
-        day: '2-digit', month: '2-digit',
-        hour: '2-digit', minute: '2-digit',
-      })
+  const hora = fca.criado_em
+    ? new Date(fca.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
     : '—'
 
   return (
@@ -22,12 +21,46 @@ function ItemLista({ fca, selecionado, aoSelecionar }) {
     >
       <div className="fca-item-nome">🔧 {fca.equipamento}</div>
       <div className="fca-item-meta">
-        <span>{data}</span>
+        <span>
+          {hora}
+          {/* Indica que este FCA nasceu automaticamente de uma ocorrência */}
+          {fca.ocorrencia_origem && <span className="fca-tag-auto" title="Gerado a partir de uma ocorrência"> ⚡ ocorrência</span>}
+        </span>
         {fca.validacao_tipo === 'aprovado'  && <span className="fca-dot fca-dot-verde">✅</span>}
         {fca.validacao_tipo === 'reprovado' && <span className="fca-dot fca-dot-vermelho">❌</span>}
         {!fca.validacao_tipo                && <span className="fca-dot fca-dot-cinza">○</span>}
       </div>
     </button>
+  )
+}
+
+// Grupo colapsável de FCAs de um mesmo dia, na lista lateral
+function GrupoDia({ grupo, aberto, aoAlternar, selecionado, aoSelecionar, criterioPendente }) {
+  const pendentes = grupo.itens.filter(criterioPendente).length
+
+  return (
+    <div className="fca-grupo-dia">
+      <button className="fca-grupo-dia-cabecalho" onClick={aoAlternar}>
+        <span className="fca-grupo-dia-seta" style={{ transform: aberto ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
+        <span className="fca-grupo-dia-titulo">{grupo.rotulo}</span>
+        <span className="fca-grupo-dia-badges">
+          {pendentes > 0 && <span className="fca-grupo-dia-badge fca-grupo-dia-badge-pendente">{pendentes} pendente{pendentes > 1 ? 's' : ''}</span>}
+          <span className="fca-grupo-dia-badge">{grupo.itens.length}</span>
+        </span>
+      </button>
+      {aberto && (
+        <div className="fca-grupo-dia-corpo">
+          {grupo.itens.map(fca => (
+            <ItemLista
+              key={fca.id}
+              fca={fca}
+              selecionado={selecionado?.id === fca.id}
+              aoSelecionar={() => aoSelecionar(fca)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -41,6 +74,17 @@ export default function PaginaFCA({ sessao, pedir, mostrarAviso }) {
   const [salvando, setSalvando]       = useState(false)
   // mobile: mostra detalhe ou lista
   const [mostraDetalhe, setMostraDetalhe] = useState(false)
+
+  // Agrupamento por dia (colapsável) — grupo mais recente começa aberto
+  const grupos = useMemo(() => agruparFCAsPorDia(fcas), [fcas])
+  const [gruposAbertos, setGruposAbertos] = useState({})
+  function grupoEstaAberto(chave, indice) {
+    if (chave in gruposAbertos) return gruposAbertos[chave]
+    return indice === 0 // primeiro grupo (mais recente) começa aberto por padrão
+  }
+  function alternarGrupo(chave, indice) {
+    setGruposAbertos(g => ({ ...g, [chave]: !grupoEstaAberto(chave, indice) }))
+  }
 
   // Ao selecionar item da lista — abre o detalhe
   function selecionar(fca) {
@@ -103,7 +147,7 @@ export default function PaginaFCA({ sessao, pedir, mostrarAviso }) {
       )
     }
     if (editando) {
-      return (
+      const formFCA = (
         <div className="card">
           <div className="card-cabecalho">
             <span className="card-rotulo">Editando — {editando.equipamento}</span>
@@ -114,11 +158,21 @@ export default function PaginaFCA({ sessao, pedir, mostrarAviso }) {
           </div>
         </div>
       )
+      // Ocorrência de origem lado a lado, quando este FCA foi gerado automaticamente
+      if (editando.ocorrencia_origem) {
+        return (
+          <div className="fca-duplo">
+            {formFCA}
+            <VisualizarOcorrencia ocorrencia={editando.ocorrencia_origem} />
+          </div>
+        )
+      }
+      return formFCA
     }
     if (selecionado) {
       // Sincroniza dados atualizados da lista
       const fcaAtual = fcas.find(f => f.id === selecionado.id) || selecionado
-      return (
+      const cartaoFca = (
         <CardFCA
           fca={fcaAtual}
           podeEditar={true}
@@ -128,6 +182,16 @@ export default function PaginaFCA({ sessao, pedir, mostrarAviso }) {
           mostrarAviso={mostrarAviso}
         />
       )
+      // FCA a preencher (esquerda) + ocorrência que o originou (direita)
+      if (fcaAtual.ocorrencia_origem) {
+        return (
+          <div className="fca-duplo">
+            {cartaoFca}
+            <VisualizarOcorrencia ocorrencia={fcaAtual.ocorrencia_origem} />
+          </div>
+        )
+      }
+      return cartaoFca
     }
     // Nenhum selecionado
     return (
@@ -165,12 +229,15 @@ export default function PaginaFCA({ sessao, pedir, mostrarAviso }) {
             <p className="texto-apagado" style={{ padding: 12, textAlign: 'center' }}>Nenhum FCA ainda.</p>
           )}
 
-          {fcas.map(fca => (
-            <ItemLista
-              key={fca.id}
-              fca={fca}
-              selecionado={selecionado?.id === fca.id}
-              aoSelecionar={() => selecionar(fca)}
+          {grupos.map((grupo, indice) => (
+            <GrupoDia
+              key={grupo.chave}
+              grupo={grupo}
+              aberto={grupoEstaAberto(grupo.chave, indice)}
+              aoAlternar={() => alternarGrupo(grupo.chave, indice)}
+              selecionado={selecionado}
+              aoSelecionar={selecionar}
+              criterioPendente={f => f.preenchido === false}
             />
           ))}
         </div>

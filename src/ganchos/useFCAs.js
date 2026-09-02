@@ -39,7 +39,7 @@ export function useFCAs(estaLogado) {
   async function criar(dados, autor) {
     try {
       const { error } = await bd.from(TABELA_FCAS).insert({
-        ...dados, criado_por: autor, criado_em: Date.now(),
+        ...dados, criado_por: autor, criado_em: Date.now(), preenchido: true,
       })
       if (error) return { ok: false, erro: error.message }
       return { ok: true }
@@ -48,10 +48,10 @@ export function useFCAs(estaLogado) {
     }
   }
 
-  // Atualiza FCA existente
+  // Atualiza FCA existente — passar pelo formulário sempre marca como preenchido
   async function atualizar(id, dados) {
     try {
-      const { error } = await bd.from(TABELA_FCAS).update(dados).eq('id', id)
+      const { error } = await bd.from(TABELA_FCAS).update({ ...dados, preenchido: true }).eq('id', id)
       if (error) return { ok: false, erro: error.message }
       return { ok: true }
     } catch (e) {

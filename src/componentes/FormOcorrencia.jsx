@@ -13,7 +13,7 @@ export default function FormOcorrencia({ formulario, aoMudar, equipamentos = [] 
   return (
     <>
       {/* Equipamento — com autocomplete a partir da lista cadastrada em Admin */}
-      <div className="campo">
+      <div className="campo" id="secao-equipamento">
         <label>Equipamento</label>
         <input
           type="text"
@@ -31,11 +31,14 @@ export default function FormOcorrencia({ formulario, aoMudar, equipamentos = [] 
 
       <div className="divisor" />
 
-      {/* Sintoma — descrição da ocorrência, pode ser digitada ou ditada por voz */}
-      <div className="campo">
+      {/* Sintoma — descrição da ocorrência, pode ser digitada ou ditada por voz.
+          Campo maior (mais linhas + altura mínima) porque costuma ser o texto
+          mais extenso do formulário. */}
+      <div className="campo" id="secao-sintoma">
         <label>Sintoma observado</label>
         <textarea
-          rows={2}
+          className="textarea-descricao-grande"
+          rows={6}
           placeholder="O que foi observado..."
           value={formulario.sintoma}
           onChange={e => aoMudar(f => ({ ...f, sintoma: e.target.value }))}
@@ -46,24 +49,27 @@ export default function FormOcorrencia({ formulario, aoMudar, equipamentos = [] 
         />
       </div>
 
-      {/* Modo de falha */}
-      <div className="campo">
-        <label>Modo de falha</label>
-        <BotoesAlternancia opcoes={MODOS_FALHA} valor={formulario.modo} aoMudar={campo('modo')} />
-      </div>
+      <div id="secao-falha-impacto">
+        {/* Modo de falha */}
+        <div className="campo">
+          <label>Modo de falha</label>
+          <BotoesAlternancia opcoes={MODOS_FALHA} valor={formulario.modo} aoMudar={campo('modo')} />
+        </div>
 
-      {/* Impacto */}
-      <div className="campo">
-        <label>Impacto operacional</label>
-        <BotoesAlternancia
-          opcoes={IMPACTOS}
-          valor={formulario.impacto}
-          aoMudar={campo('impacto')}
-        />
+        {/* Impacto */}
+        <div className="campo">
+          <label>Impacto operacional</label>
+          <BotoesAlternancia
+            opcoes={IMPACTOS}
+            valor={formulario.impacto}
+            aoMudar={campo('impacto')}
+          />
+        </div>
       </div>
 
       <div className="divisor" />
 
+      <div id="secao-intervencao-horario">
       {/* Tipo de intervenção */}
       <div className="campo">
         <label>Tipo de intervenção</label>
@@ -192,12 +198,15 @@ export default function FormOcorrencia({ formulario, aoMudar, equipamentos = [] 
           )}
         </div>
       </div>
+      </div>
 
-      {/* Solução */}
-      <div className="campo">
+      {/* Solução — também recebe mais espaço, pois costuma acumular o relato
+          completo do que foi feito até resolver a ocorrência. */}
+      <div className="campo" id="secao-solucao">
         <label>Descrição da solução</label>
         <textarea
-          rows={2}
+          className="textarea-descricao-grande"
+          rows={5}
           placeholder="Como foi resolvido..."
           value={formulario.solucao}
           onChange={e => aoMudar(f => ({ ...f, solucao: e.target.value }))}
@@ -211,7 +220,7 @@ export default function FormOcorrencia({ formulario, aoMudar, equipamentos = [] 
       <div className="divisor" />
 
       {/* Executor — pode ser alterado após o preenchimento para o PDF */}
-      <div className="campo">
+      <div className="campo" id="secao-executor">
         <label>
           Executor da atividade
           <span style={{ color: 'var(--cor-apagado)', fontWeight: 'normal', fontSize: 11, marginLeft: 6 }}>
@@ -228,3 +237,16 @@ export default function FormOcorrencia({ formulario, aoMudar, equipamentos = [] 
     </>
   )
 }
+
+// Seções navegáveis pela barra lateral do modal (ver PainelItem.jsx) — usado
+// quando o formulário exibido é o de Ocorrência, que tende a ter descrições
+// bem mais longas que o de Atividade.
+export const SECOES_OCORRENCIA = [
+  { id: 'secao-equipamento',          rotulo: '🔧 Equipamento' },
+  { id: 'secao-sintoma',              rotulo: '📝 Sintoma' },
+  { id: 'secao-falha-impacto',        rotulo: '⚠️ Falha & impacto' },
+  { id: 'secao-intervencao-horario',  rotulo: '⏱ Intervenção & horário' },
+  { id: 'secao-solucao',              rotulo: '✅ Solução' },
+  { id: 'secao-executor',             rotulo: '👤 Executor' },
+  { id: 'secao-fotos',                rotulo: '📷 Fotos' },
+]

@@ -21,6 +21,7 @@ import {
 } from '../ronda/manutencao.js'
 import { criarOcorrenciaAutomatica } from '../ronda/ocorrenciaAutomatica.js'
 import BotoesAlternancia from '../componentes/BotoesAlternancia.jsx'
+import ModalCompartilharManutencao from '../componentes/ModalCompartilharManutencao.jsx'
 import { MODOS_FALHA } from '../utilitarios/constantes.js'
 
 function tempoDecorrido(desde) {
@@ -41,6 +42,7 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
   const [atendimentos, setAtendimentos] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
+  const [verCompartilhar, setVerCompartilhar] = useState(false)
 
   // ── seleção do equipamento (formulário de sinalização) ────────
   const [setorId, setSetorId]     = useState('')
@@ -49,6 +51,11 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
   const [estacaoId, setEstacaoId] = useState('')
   const [descricao, setDescricao] = useState('')
   const [enviando, setEnviando]   = useState(false)
+
+  // Nome do manutentor que vai constar como atendendo o chamado — vem
+  // preenchido com o nome de quem está logado, mas pode ser alterado (ex.:
+  // um encarregado registrando o atendimento em nome de outro manutentor).
+  const [manutentorNome, setManutentorNome] = useState(nomeAtual)
 
   // ── campos opcionais — se preenchidos, já vêm pré-selecionados na
   // ocorrência criada automaticamente ao concluir (ver ocorrenciaAutomatica.js)
@@ -93,6 +100,7 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
   function limparFormulario() {
     setSetorId(''); setGrupoId(''); setMaquinaId(''); setEstacaoId(''); setDescricao('')
     setModoFalha(null); setExecutor(''); setHorarioInicio(''); setHorarioFim('')
+    setManutentorNome(nomeAtual)
   }
 
   const opcionaisAtuais = useMemo(() => ({
@@ -107,7 +115,7 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
     if (!maquinaId) { mostrarAviso('Selecione ao menos a máquina.', true); return }
     setEnviando(true)
     try {
-      const manutentor = await obterOuCriarManutentor(nomeAtual)
+      const manutentor = await obterOuCriarManutentor(manutentorNome.trim() || nomeAtual)
       const estacao = estacaoId ? estacoes.find(e => e.id === estacaoId) : null
       await iniciarAtendimento(maquinaId, manutentor.id, manutentor.nome, estacaoId || null, estacao?.nome || null, descricao || null, opcionaisAtuais)
       mostrarAviso('🔧 Atendimento iniciado — você já pode ver na lista abaixo.')
@@ -185,6 +193,12 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
 
         {erro && <div className="erro" style={{ marginBottom: 12 }}>{erro}</div>}
 
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>
+          <button className="botao botao-whatsapp" onClick={() => setVerCompartilhar(true)}>
+            📲 Compartilhar relatório de manutenção
+          </button>
+        </div>
+
         {/* ── Sinalizar em qual equipamento estou atuando ── */}
         <div className="card">
           <div className="card-cabecalho"><span className="card-rotulo">🔧 Sinalizar atendimento</span></div>
@@ -207,6 +221,19 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
                 {estacoesDaMaquina.map(e => <option key={e.id} value={e.id}>{e.nome}</option>)}
               </select>
             </div>
+
+            {/* Manutentor que vai assumir o atendimento — pré-preenchido com quem
+                está logado, mas editável (ex.: registrar em nome de outra pessoa). */}
+            <div className="campo" style={{ marginBottom: 0, maxWidth: 320 }}>
+              <label>Manutentor atendendo o chamado</label>
+              <input
+                type="text"
+                placeholder={nomeAtual}
+                value={manutentorNome}
+                onChange={e => setManutentorNome(e.target.value)}
+              />
+            </div>
+
             <textarea
               rows={2}
               placeholder="O que foi observado / o que você vai fazer (opcional)..."
@@ -336,6 +363,17 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
         )}
 
       </div>
+
+      {verCompartilhar && (
+        <ModalCompartilharManutencao
+          maquinas={maquinas}
+          atendimentos={atendimentos}
+          setores={setores}
+          grupos={grupos}
+          mostrarAviso={mostrarAviso}
+          aoFechar={() => setVerCompartilhar(false)}
+        />
+      )}
     </div>
   )
 }

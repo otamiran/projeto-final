@@ -232,6 +232,62 @@
   padding: 4px 0;
 }
 
+/* ── Agrupamento de FCAs por dia (colapsável) ────────────────────────────── */
+.fca-grupo-dia { border-bottom: 1px solid var(--cor-borda); }
+
+.fca-grupo-dia-cabecalho {
+  align-items: center; background: var(--cor-fundo-3, #1e2330);
+  border: none; cursor: pointer; display: flex; gap: 8px;
+  padding: 9px 12px; text-align: left; width: 100%;
+}
+.fca-grupo-dia-cabecalho:hover { background: var(--cor-fundo-2); }
+
+.fca-grupo-dia-seta {
+  color: var(--cor-apagado); display: inline-block;
+  flex-shrink: 0; font-size: 10px; transition: transform 0.15s;
+}
+.fca-grupo-dia-titulo {
+  color: var(--cor-label); flex: 1; font-family: var(--fonte-mono);
+  font-size: 11px; font-weight: 700; letter-spacing: .5px;
+  overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap;
+}
+.fca-grupo-dia-badges { align-items: center; display: flex; flex-shrink: 0; gap: 6px; }
+.fca-grupo-dia-badge {
+  background: var(--cor-fundo-2); border: 1px solid var(--cor-borda);
+  border-radius: 10px; color: var(--cor-apagado);
+  font-family: var(--fonte-mono); font-size: 10px; padding: 1px 7px;
+}
+.fca-grupo-dia-badge-pendente {
+  background: rgba(240,165,0,.12); border-color: rgba(240,165,0,.35); color: var(--ambar);
+}
+.fca-grupo-dia-corpo { display: flex; flex-direction: column; }
+
+/* Tag "⚡ ocorrência" no item da lista — indica FCA gerado automaticamente */
+.fca-tag-auto { color: var(--ambar); font-size: 10px; }
+
+/* ── Dois modais lado a lado: FCA a preencher + ocorrência de origem ────── */
+.fca-duplo {
+  align-items: flex-start; display: flex; flex-wrap: wrap; gap: 14px;
+}
+.fca-duplo > * { flex: 1 1 380px; min-width: 0; }
+
+/* Card de visualização (somente leitura) da ocorrência de origem */
+.card-ocorrencia-origem { border-left: 3px solid var(--azul, #3b82c4); }
+.ocorrencia-origem-titulo {
+  color: var(--azul, #3b82c4); font-family: var(--fonte-mono);
+  font-size: 14px; font-weight: 700; letter-spacing: 0.3px;
+}
+.ocorrencia-origem-linha {
+  display: flex; font-size: 12px; gap: 6px; line-height: 1.6;
+}
+.ocorrencia-origem-rotulo { color: var(--cor-apagado); flex-shrink: 0; }
+.ocorrencia-origem-valor  { color: var(--cor-texto); }
+.ocorrencia-origem-fotos { display: flex; flex-wrap: wrap; gap: 8px; }
+.ocorrencia-origem-fotos img {
+  border: 1px solid var(--cor-borda); border-radius: var(--raio);
+  height: 64px; object-fit: cover; width: 64px;
+}
+
 /* ── Mobile: exibe um painel de cada vez ─────────────────────────────────── */
 @media (max-width: 640px) {
   .fca-layout {
@@ -263,4 +319,8 @@
   .fca-btn-voltar {
     display: block;
   }
+
+  /* Empilha o FCA e a ocorrência de origem em vez de lado a lado */
+  .fca-duplo { flex-direction: column; }
+  .fca-duplo > * { flex-basis: auto; width: 100%; }
 }

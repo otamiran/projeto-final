@@ -91,6 +91,13 @@
 .badge-laranja {
   background: var(--laranja);
 }
+.badge-vermelho {
+  background: var(--vermelho);
+}
+/* Duas contagens juntas na mesma aba (ex.: Manutenção) */
+.nav-badges-duplo {
+  align-items: center; display: inline-flex; gap: 3px;
+}
 
 /* Ícone de menu (☰) — só aparece no celular, ver media query abaixo */
 .nav-menu-toggle {

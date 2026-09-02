@@ -6,7 +6,6 @@ import {
 import {
   buscarEstruturaRemota, criarRemoto, atualizarRemoto, excluirRemoto,
 } from './remoto.js'
-import { listarAtendimentosAtivos } from './manutencao.js'
 import PainelHierarquia from './componentes/PainelHierarquia.jsx'
 import RelatorioModal from './componentes/RelatorioModal.jsx'
 import './estilos.css'
@@ -24,11 +23,6 @@ export default function RondaApp({ ehAdmin = false }) {
   const [operador, setOperador] = useState(() => localStorage.getItem('ronda-operador') || '')
   const [gerenciar, setGerenciar]       = useState(false)
   const [verRelatorio, setVerRelatorio] = useState(false)
-  // Atendimentos de manutenção ativos — só para exibição no relatório de
-  // WhatsApp (aba "🔧 Manutenção" do relatório); o cadastro de
-  // manutentores e o iniciar/concluir atendimento agora vivem na tela
-  // própria "Manutenção" (aba superior do app, ver PaginaManutencao.jsx).
-  const [atendimentos, setAtendimentos] = useState([])
   const [carregando, setCarregando]     = useState(true)
   const [erro, setErro]                 = useState('')
 
@@ -68,24 +62,14 @@ export default function RondaApp({ ehAdmin = false }) {
     setCarregando(false)
   }, [carregarLocal])
 
-  // ── manutenção (só leitura aqui, para o relatório de WhatsApp) ─
-  const carregarManutencao = useCallback(async () => {
-    try {
-      setAtendimentos(await listarAtendimentosAtivos())
-    } catch (e) {
-      setErro(`Não foi possível carregar os dados de manutenção (${e.message}).`)
-    }
-  }, [])
-
   useEffect(() => {
     carregar()
-    carregarManutencao()
     // se o app estiver aberto em mais de uma aba deste mesmo aparelho,
     // mantém as abas em sincronia quando o localStorage muda
     const aoMudarStorage = e => { if (e.key === CHAVE_DB) carregarLocal() }
     window.addEventListener('storage', aoMudarStorage)
     return () => window.removeEventListener('storage', aoMudarStorage)
-  }, [carregar, carregarLocal, carregarManutencao])
+  }, [carregar, carregarLocal])
 
   const salvarOperador = v => { setOperador(v); localStorage.setItem('ronda-operador', v) }
 
@@ -340,7 +324,6 @@ export default function RondaApp({ ehAdmin = false }) {
           maquinas={maquinas}
           estacoes={estacoes}
           operador={operador}
-          atendimentos={atendimentos}
           aoFechar={() => setVerRelatorio(false)}
         />
       )}

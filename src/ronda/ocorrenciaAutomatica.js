@@ -35,15 +35,15 @@ export async function criarOcorrenciaAutomatica(atendimento, contexto) {
 
   const equipamento = [contexto.maquinaNome, contexto.estacaoNome].filter(Boolean).join(' — ')
 
-  // Se o manutentor já preencheu modo de falha / executor / horários no
-  // início do atendimento (tela "Manutenção" → "Sinalizar atendimento"),
-  // esses valores vêm prontos aqui e pré-selecionam os mesmos campos na
-  // ocorrência — economizando esse preenchimento depois. Tudo continua
-  // opcional: se nada foi informado, os campos ficam em branco como antes.
-  const horarioInicio = atendimento.horario_inicio_manual
-    || (atendimento.iniciado_em ? new Date(atendimento.iniciado_em).toTimeString().slice(0, 5) : '')
-  const horarioFim = atendimento.horario_fim_manual
-    || new Date(agora).toTimeString().slice(0, 5)
+  // Se o manutentor já preencheu os horários manualmente no início do
+  // atendimento (tela "Manutenção" → "Sinalizar atendimento"), esses
+  // valores vêm prontos aqui e pré-selecionam os mesmos campos na
+  // ocorrência — economizando esse preenchimento depois. Se nada foi
+  // informado, os campos ficam EM BRANCO (não usamos mais o horário real
+  // de início/conclusão do atendimento como valor padrão — quem preenche
+  // a ocorrência é quem deve informar o horário real do atendimento).
+  const horarioInicio = atendimento.horario_inicio_manual || ''
+  const horarioFim    = atendimento.horario_fim_manual || ''
 
   // Mesmo cálculo de duração usado no formulário de Ocorrência, pra já
   // vir preenchido quando os dois horários (início e fim) são conhecidos.

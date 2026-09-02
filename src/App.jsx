@@ -10,6 +10,8 @@ import { useNotificacoesTempoReal } from './ganchos/useNotificacoesTempoReal'
 import { useNotificacoesManutencaoTempoReal } from './ganchos/useNotificacoesManutencaoTempoReal'
 import { useAbrirRelatorioDaNotificacao } from './ganchos/useAbrirRelatorioDaNotificacao'
 import { useMesclarDuplicados } from './ganchos/useMesclarDuplicados'
+import { useFCAs } from './ganchos/useFCAs'
+import { useAtendimentosManutencao } from './ganchos/useAtendimentosManutencao'
 
 import PaginaLogin         from './paginas/PaginaLogin'
 import PaginaNovo          from './paginas/PaginaNovo'
@@ -70,6 +72,16 @@ export default function App() {
   const { aviso, mostrar: mostrarAviso }            = useAviso()
   const { status: statusNotif, alternar: alternarNotif } = useNotificacoesPush(sessao, mostrarAviso)
   const { confirmacaoAberta, mensagemConfirmacao, pedir, confirmar, cancelar } = useConfirmacao()
+
+  // Número-indicador da aba FCA: quantos FCAs ainda estão em aberto para
+  // serem preenchidos (nascidos automaticamente de uma ocorrência e que
+  // ninguém salvou ainda pelo formulário).
+  const { fcas } = useFCAs(estaLogado)
+  const fcasPendentes = fcas.filter(f => f.preenchido === false).length
+
+  // Dois números-indicadores da aba Manutenção: quantos atendimentos estão
+  // sendo feitos agora e quantos aguardam um manutentor assumir.
+  const { emAndamento: atendimentosEmAndamento, pendentes: atendimentosPendentes } = useAtendimentosManutencao(estaLogado)
 
   // Se dois relatórios abertos existirem para o mesmo setor+turno+dia,
   // pergunta ao usuário se pode uni-los em um só (ver gancho para detalhes).
@@ -146,6 +158,7 @@ export default function App() {
             </button>
             <button className={`nav-aba nav-aba-fca ${aba === 'fca' ? 'ativa' : ''}`} onClick={() => selecionarAba('fca')}>
               <span className="nav-aba-icone">📋</span> FCAs
+              {fcasPendentes > 0 && <span className="nav-badge badge-laranja">{fcasPendentes}</span>}
             </button>
             {ABA_RONDA_ATIVA && (
               <button className={`nav-aba ${aba === 'ronda' ? 'ativa' : ''}`} onClick={() => selecionarAba('ronda')}>
@@ -154,6 +167,16 @@ export default function App() {
             )}
             <button className={`nav-aba ${aba === 'manutencao' ? 'ativa' : ''}`} onClick={() => selecionarAba('manutencao')}>
               <span className="nav-aba-icone">🔧</span> Manutenção
+              {(atendimentosEmAndamento > 0 || atendimentosPendentes > 0) && (
+                <span className="nav-badges-duplo">
+                  {atendimentosEmAndamento > 0 && (
+                    <span className="nav-badge badge-azul" title="Atendimentos sendo feitos agora">{atendimentosEmAndamento}</span>
+                  )}
+                  {atendimentosPendentes > 0 && (
+                    <span className="nav-badge badge-vermelho" title="Aguardando manutentor">{atendimentosPendentes}</span>
+                  )}
+                </span>
+              )}
             </button>
           </div>
           <div className="nav-usuario">
@@ -236,6 +259,7 @@ export default function App() {
           )}
           <button className={`nav-aba nav-aba-fca ${aba === 'fca' ? 'ativa' : ''}`} onClick={() => selecionarAba('fca')}>
             <span className="nav-aba-icone">📋</span> FCA
+            {fcasPendentes > 0 && <span className="nav-badge badge-laranja">{fcasPendentes}</span>}
           </button>
           {ABA_RONDA_ATIVA && (
             <button className={`nav-aba ${aba === 'ronda' ? 'ativa' : ''}`} onClick={() => selecionarAba('ronda')}>
@@ -244,6 +268,16 @@ export default function App() {
           )}
           <button className={`nav-aba ${aba === 'manutencao' ? 'ativa' : ''}`} onClick={() => selecionarAba('manutencao')}>
             <span className="nav-aba-icone">🔧</span> Manutenção
+            {(atendimentosEmAndamento > 0 || atendimentosPendentes > 0) && (
+              <span className="nav-badges-duplo">
+                {atendimentosEmAndamento > 0 && (
+                  <span className="nav-badge badge-azul" title="Atendimentos sendo feitos agora">{atendimentosEmAndamento}</span>
+                )}
+                {atendimentosPendentes > 0 && (
+                  <span className="nav-badge badge-vermelho" title="Aguardando manutentor">{atendimentosPendentes}</span>
+                )}
+              </span>
+            )}
           </button>
           {ehAdmin && (
             <button className={`nav-aba nav-aba-admin ${aba === 'admin' ? 'ativa' : ''}`} onClick={() => selecionarAba('admin')}>
