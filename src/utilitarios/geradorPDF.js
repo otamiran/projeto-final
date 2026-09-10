@@ -236,13 +236,19 @@ async function montarPDF(relatorio) {
   }
 
   function linhaInfo(rotulo, valor) {
-    const linhas = pdf.splitTextToSize(String(valor || '—'), UTIL - 42)
+    pdf.setFontSize(8.5); pdf.setFont('helvetica','bold')
+    // Coluna do valor começa depois do rótulo — normalmente alinhada em
+    // MARGEM+40, mas se o rótulo for mais longo que isso (ex.: "Tempo
+    // estimado"), a coluna desloca para não sobrepor o texto do rótulo.
+    const larguraRotulo = pdf.getTextWidth(rotulo + ':')
+    const colunaValor = Math.max(40, larguraRotulo + 6)
+    const linhas = pdf.splitTextToSize(String(valor || '—'), UTIL - colunaValor - 2)
     const altura = linhas.length * 5.5 + 3
     verificarEspaco(altura)
     pdf.setFontSize(8.5); pdf.setFont('helvetica','bold'); pdf.setTextColor(100,110,130)
     pdf.text(rotulo + ':', MARGEM + 2, posY)
     pdf.setFont('helvetica','normal'); pdf.setTextColor(200,210,225)
-    pdf.text(linhas, MARGEM + 40, posY)
+    pdf.text(linhas, MARGEM + colunaValor, posY)
     posY += altura
   }
 
@@ -447,7 +453,7 @@ async function montarPDF(relatorio) {
           // atendimento (obrigatório nesse caso — ver FormOcorrencia.jsx)
           const teh = Number(o.tempo_estimado_h)||0, tem = Number(o.tempo_estimado_m)||0
           const tempoEstimado = [teh?teh+'h':'', tem?tem+'min':''].filter(Boolean).join(' ')
-          linhaInfo('Tempo estimado de atendimento', tempoEstimado || '—')
+          linhaInfo('Tempo estimado', tempoEstimado || '—')
         }
         linhaInfo('Solucao', o.solucao)
 
