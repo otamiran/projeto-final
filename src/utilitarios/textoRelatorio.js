@@ -10,6 +10,27 @@ function cabecalho(relatorio) {
   return `Setor: ${relatorio.setor || '—'}  |  Data: ${data}  |  Turno: ${relatorio.turno || '—'}`
 }
 
+// Formata "Xh Ymin" a partir de horas/minutos, ou null se ambos vazios
+function formatarHorasMinutos(h, m) {
+  const hNum = Number(h) || 0
+  const mNum = Number(m) || 0
+  if (!hNum && !mNum) return null
+  return [hNum ? `${hNum}h` : '', mNum ? `${mNum}min` : ''].filter(Boolean).join(' ')
+}
+
+// Linha de "Horário" (quando início/fim informados) ou, na falta deles, o
+// tempo estimado de atendimento informado pelo técnico — ver FormOcorrencia.jsx
+// e a validação em PainelItem.jsx, que torna um dos dois obrigatório.
+function duracaoOuTempoEstimado(item) {
+  const ini = item.horario_inicio || '', fim = item.horario_fim || ''
+  if (ini || fim) {
+    const duracao = formatarHorasMinutos(item.duracao_h, item.duracao_m)
+    return `Horário: ${ini || '—'} → ${fim || '—'}${duracao ? `  (${duracao})` : ''}`
+  }
+  const tempoEstimado = formatarHorasMinutos(item.tempo_estimado_h, item.tempo_estimado_m)
+  return `Tempo estimado de atendimento: ${tempoEstimado || '—'}`
+}
+
 // Monta o texto apenas das ocorrências
 export function textoOcorrencias(relatorio) {
   // Filtra só os itens do tipo 'ocorrencia'
@@ -29,6 +50,7 @@ export function textoOcorrencias(relatorio) {
       `Sintoma: ${item.sintoma || '—'}`,
       `Modo de falha: ${item.modo || '—'}  |  Impacto: ${item.impacto || '—'}`,
       `Intervenção: ${item.intervencao || item.tipo_int || '—'}`,
+      duracaoOuTempoEstimado(item),
       `Solução: ${item.solucao || '—'}`
     )
   })

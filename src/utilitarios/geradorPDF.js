@@ -439,8 +439,16 @@ async function montarPDF(relatorio) {
         linhaInfo('Intervencao',  o.intervencao || o.tipo_int)
         const ini = o.horario_inicio || '', fim = o.horario_fim || ''
         const dh  = Number(o.duracao_h)||0, dm = Number(o.duracao_m)||0
-        if (ini||fim) linhaInfo('Horario',
-          `${ini||'—'} → ${fim||'—'}${(dh||dm)?'  ('+[dh?dh+'h':'',dm?dm+'min':''].filter(Boolean).join(' ')+')':''}`)
+        if (ini||fim) {
+          linhaInfo('Horario',
+            `${ini||'—'} → ${fim||'—'}${(dh||dm)?'  ('+[dh?dh+'h':'',dm?dm+'min':''].filter(Boolean).join(' ')+')':''}`)
+        } else {
+          // Sem horário exato informado — mostra o tempo estimado de
+          // atendimento (obrigatório nesse caso — ver FormOcorrencia.jsx)
+          const teh = Number(o.tempo_estimado_h)||0, tem = Number(o.tempo_estimado_m)||0
+          const tempoEstimado = [teh?teh+'h':'', tem?tem+'min':''].filter(Boolean).join(' ')
+          linhaInfo('Tempo estimado de atendimento', tempoEstimado || '—')
+        }
         linhaInfo('Solucao', o.solucao)
 
         await desenharFotos(o.fotos)

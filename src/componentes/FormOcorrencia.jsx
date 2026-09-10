@@ -10,6 +10,12 @@ export default function FormOcorrencia({ formulario, aoMudar, equipamentos = [] 
     return valor => aoMudar(f => ({ ...f, [chave]: valor }))
   }
 
+  // O tempo estimado só é obrigatório quando os campos opcionais de horário
+  // (início/fim) não foram preenchidos — ver PainelItem.jsx (validação no salvar).
+  const horarioPreenchido = !!(formulario.horario_inicio || formulario.horario_fim)
+  const tempoEstimadoPreenchido = !!(formulario.tempo_estimado_h || formulario.tempo_estimado_m)
+  const tempoEstimadoObrigatorio = !horarioPreenchido && !tempoEstimadoPreenchido
+
   return (
     <>
       {/* Equipamento — com autocomplete a partir da lista cadastrada em Admin */}
@@ -196,6 +202,44 @@ export default function FormOcorrencia({ formulario, aoMudar, equipamentos = [] 
               ⏱ {formulario.duracao_h ? formulario.duracao_h + 'h' : ''}{formulario.duracao_m ? ' ' + formulario.duracao_m + 'min' : ''}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Tempo estimado de atendimento — usado quando não é possível informar o
+          horário exato de início/fim. Fica obrigatório nesse caso, pois o
+          relatório e o PDF precisam de alguma informação de duração. */}
+      <div className="campo">
+        <label>
+          Tempo estimado de atendimento
+          {tempoEstimadoObrigatorio && <span style={{ color: '#e05c2a' }}> *</span>}
+          <span style={{ color: 'var(--cor-apagado)', fontWeight: 'normal', fontSize: 11, marginLeft: 6 }}>
+            {horarioPreenchido ? '(opcional — horário já informado)' : '(obrigatório se não informar o horário de início/fim)'}
+          </span>
+        </label>
+        <div className="duracao-campos" style={{ alignItems: 'center', gap: 8, flexWrap: 'wrap', maxWidth: 'none' }}>
+          <div className="duracao-grupo" style={{ flex: 1, maxWidth: 120 }}>
+            <input
+              type="number"
+              min="0"
+              className="input-duracao"
+              placeholder="0"
+              value={formulario.tempo_estimado_h ?? ''}
+              onChange={e => aoMudar(f => ({ ...f, tempo_estimado_h: e.target.value }))}
+            />
+            <span className="duracao-label">h</span>
+          </div>
+          <div className="duracao-grupo" style={{ flex: 1, maxWidth: 120 }}>
+            <input
+              type="number"
+              min="0"
+              max="59"
+              className="input-duracao"
+              placeholder="0"
+              value={formulario.tempo_estimado_m ?? ''}
+              onChange={e => aoMudar(f => ({ ...f, tempo_estimado_m: e.target.value }))}
+            />
+            <span className="duracao-label">min</span>
+          </div>
         </div>
       </div>
       </div>

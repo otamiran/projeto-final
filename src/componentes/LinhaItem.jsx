@@ -3,10 +3,12 @@
 
 import { useState } from 'react'
 import { EMOJI_STATUS } from '../utilitarios/constantes'
+import { ocorrenciaPendenteDePreenchimento } from '../utilitarios/ocorrenciaPendente'
 
 export default function LinhaItem({ item, indice, aoEditar, aoExcluir, validacao, podeExcluir = true }) {
   const [expandido, setExpandido] = useState(false)
   const ehOcorrencia = item.tipo === 'ocorrencia' || item.tipo === 'occ'
+  const pendenteDeAtendimento = ehOcorrencia && ocorrenciaPendenteDePreenchimento(item)
 
   const corPonto = ehOcorrencia
     ? 'ponto-verde'
@@ -57,6 +59,17 @@ export default function LinhaItem({ item, indice, aoEditar, aoExcluir, validacao
             {subtexto}
             {(item.executor || item.autor) && <> · <em>{item.executor || item.autor}</em></>}
           </span>
+
+          {/* Indicativo: ocorrência veio de um atendimento da Ronda e ainda
+              está pendente de preenchimento pelo manutentor */}
+          {pendenteDeAtendimento && (
+            <span
+              className="badge-validacao-linha bv-reprovado"
+              title="Gerada automaticamente a partir de um atendimento — pendente de preenchimento"
+            >
+              ⏳ De atendimento — pendente
+            </span>
+          )}
 
           {/* Badge de validação da produção — aparece se a produção já validou */}
           {ehOcorrencia && validacao && (
