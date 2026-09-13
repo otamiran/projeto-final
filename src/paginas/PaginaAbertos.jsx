@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { bd, TABELA_ABERTOS, TABELA_HISTORICO } from '../utilitarios/supabase'
 import { useSetores } from '../ganchos/useSetores'
-import { ocorrenciaPendenteDePreenchimento } from '../utilitarios/ocorrenciaPendente'
 
 const TURNOS = ['Turno 0', 'Manhã', 'Tarde', 'Noite']
 
@@ -164,7 +163,6 @@ export default function PaginaAbertos({ abertos, sessao, aoVer, pedir, mostrarAv
             : 'Sem data'
           const qtdOcorrencias = (r.itens || []).filter(i => i.tipo === 'ocorrencia' || i.tipo === 'occ').length
           const qtdAtividades = (r.itens || []).filter(i => i.tipo === 'atividade'  || i.tipo === 'ativ').length
-          const qtdPendentesAtendimento = (r.itens || []).filter(ocorrenciaPendenteDePreenchimento).length
 
           return (
             <div key={r.id} className="card-aberto">
@@ -183,14 +181,6 @@ export default function PaginaAbertos({ abertos, sessao, aoVer, pedir, mostrarAv
                   )}
                   {qtdAtividades > 0 && (
                     <span className="tag tag-atividade">📅 {qtdAtividades}</span>
-                  )}
-                  {qtdPendentesAtendimento > 0 && (
-                    <span
-                      className="tag tag-ocorrencia"
-                      title="Ocorrências geradas automaticamente a partir de atendimentos, pendentes de preenchimento"
-                    >
-                      ⏳ {qtdPendentesAtendimento} de atendimento
-                    </span>
                   )}
                 </div>
               </div>
@@ -212,14 +202,6 @@ export default function PaginaAbertos({ abertos, sessao, aoVer, pedir, mostrarAv
                       <div className="item-texto">
                         <strong>{item.equipamento || item.equip || '—'}</strong>
                         <span>{item.tipo === 'ocorrencia' || item.tipo === 'occ' ? item.sintoma : item.descricao}</span>
-                        {ocorrenciaPendenteDePreenchimento(item) && (
-                          <span
-                            className="badge-validacao-linha bv-reprovado"
-                            title="Gerada automaticamente a partir de um atendimento — pendente de preenchimento"
-                          >
-                            ⏳ De atendimento — pendente
-                          </span>
-                        )}
                       </div>
                     </div>
                   ))}

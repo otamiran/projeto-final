@@ -88,14 +88,18 @@ export default function PaginaNovo({
     if (resp) setResponsavel(resp)
   }, [setor, turno, setores])
 
-  // Auto-salva data, turno, título e responsável quando mudam (só se há relatório aberto selecionado)
+  // Auto-salva data, título e responsável quando mudam (só se há relatório aberto selecionado).
+  // IMPORTANTE: o turno NÃO entra aqui de propósito. Uma vez que o relatório já
+  // está aberto/selecionado, o turno dele é travado nesta tela (ver botões de
+  // turno mais abaixo) — só pode ser alterado pela tela Admin → Abertos →
+  // "Corrigir setor/turno", que já existe para esse fim.
   useEffect(() => {
     if (!idSel) return
     bd.from(TABELA_ABERTOS)
-      .update({ data, turno, titulo, responsavel, tecnico, updated_at: Date.now() })
+      .update({ data, titulo, responsavel, tecnico, updated_at: Date.now() })
       .eq('id', idSel)
       .then(() => {})
-  }, [data, turno, titulo, responsavel, tecnico, idSel])
+  }, [data, titulo, responsavel, tecnico, idSel])
 
   // Salva o nome do técnico e responsável na sessão
   function confirmarIdentificacao() {
@@ -370,12 +374,20 @@ export default function PaginaNovo({
                 <div className="grupo-botoes">
                   {['Turno 0', 'Manhã', 'Tarde', 'Noite'].map(t => (
                     <button key={t} type="button"
-                      className={`botao-alternancia ${turno === t ? 'selecionado' : ''}`}
-                      onClick={() => setTurno(t === turno ? null : t)}>
+                      className={`botao-alternancia ${turno === t ? 'selecionado' : ''} ${relatorioAtivo ? 'desabilitado' : ''}`}
+                      disabled={!!relatorioAtivo}
+                      title={relatorioAtivo ? 'Relatório já aberto — o turno está travado. Para corrigir, use Admin → Abertos → Corrigir setor/turno.' : ''}
+                      onClick={() => { if (!relatorioAtivo) setTurno(t === turno ? null : t) }}>
                       {t}
                     </button>
                   ))}
                 </div>
+                {relatorioAtivo && (
+                  <span className="texto-apagado" style={{ fontSize: 11 }}>
+                    🔒 Turno travado — este relatório já está aberto. Para corrigir, peça a um admin
+                    (Admin → Abertos → ✏️ Corrigir setor/turno).
+                  </span>
+                )}
               </div>
             </div>
 

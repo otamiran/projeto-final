@@ -236,19 +236,13 @@ async function montarPDF(relatorio) {
   }
 
   function linhaInfo(rotulo, valor) {
-    pdf.setFontSize(8.5); pdf.setFont('helvetica','bold')
-    // Coluna do valor começa depois do rótulo — normalmente alinhada em
-    // MARGEM+40, mas se o rótulo for mais longo que isso (ex.: "Tempo
-    // estimado"), a coluna desloca para não sobrepor o texto do rótulo.
-    const larguraRotulo = pdf.getTextWidth(rotulo + ':')
-    const colunaValor = Math.max(40, larguraRotulo + 6)
-    const linhas = pdf.splitTextToSize(String(valor || '—'), UTIL - colunaValor - 2)
+    const linhas = pdf.splitTextToSize(String(valor || '—'), UTIL - 42)
     const altura = linhas.length * 5.5 + 3
     verificarEspaco(altura)
     pdf.setFontSize(8.5); pdf.setFont('helvetica','bold'); pdf.setTextColor(100,110,130)
     pdf.text(rotulo + ':', MARGEM + 2, posY)
     pdf.setFont('helvetica','normal'); pdf.setTextColor(200,210,225)
-    pdf.text(linhas, MARGEM + colunaValor, posY)
+    pdf.text(linhas, MARGEM + 40, posY)
     posY += altura
   }
 
@@ -445,16 +439,8 @@ async function montarPDF(relatorio) {
         linhaInfo('Intervencao',  o.intervencao || o.tipo_int)
         const ini = o.horario_inicio || '', fim = o.horario_fim || ''
         const dh  = Number(o.duracao_h)||0, dm = Number(o.duracao_m)||0
-        if (ini||fim) {
-          linhaInfo('Horario',
-            `${ini||'—'} → ${fim||'—'}${(dh||dm)?'  ('+[dh?dh+'h':'',dm?dm+'min':''].filter(Boolean).join(' ')+')':''}`)
-        } else {
-          // Sem horário exato informado — mostra o tempo estimado de
-          // atendimento (obrigatório nesse caso — ver FormOcorrencia.jsx)
-          const teh = Number(o.tempo_estimado_h)||0, tem = Number(o.tempo_estimado_m)||0
-          const tempoEstimado = [teh?teh+'h':'', tem?tem+'min':''].filter(Boolean).join(' ')
-          linhaInfo('Tempo estimado', tempoEstimado || '—')
-        }
+        if (ini||fim) linhaInfo('Horario',
+          `${ini||'—'} → ${fim||'—'}${(dh||dm)?'  ('+[dh?dh+'h':'',dm?dm+'min':''].filter(Boolean).join(' ')+')':''}`)
         linhaInfo('Solucao', o.solucao)
 
         await desenharFotos(o.fotos)

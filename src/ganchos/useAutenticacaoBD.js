@@ -52,6 +52,7 @@ export function useAutenticacaoBD() {
     // Atalhos de grupo para facilitar condicionais nos componentes
     ehManutencao: sessao?.grupo === 'manutencao',
     ehProducao:   sessao?.grupo === 'producao',
-    ehAdmin:      sessao?.grupo === 'admin',
+    // Admin de nascença (grupo === 'admin') OU promovido depois pela tela Admin
+    ehAdmin:      sessao?.grupo === 'admin' || sessao?.admin === true,
   }
 }

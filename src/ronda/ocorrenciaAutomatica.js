@@ -13,7 +13,7 @@
 // dispara a notificação "🔧 Nova ocorrência" (o gancho
 // useNotificacoesTempoReal observa a mesma tabela).
 
-import { bd, TABELA_ABERTOS } from '../utilitarios/supabase.js'
+import { bd, TABELA_ABERTOS, TABELA_FCAS } from '../utilitarios/supabase.js'
 
 // Estimativa de turno pelo horário — ajuste aqui se os turnos reais da
 // fábrica tiverem outros horários de corte.
@@ -23,6 +23,35 @@ function turnoPeloHorario(agora = new Date()) {
   if (h >= 14 && h < 22) return 'Tarde'
   if (h >= 22 || h < 0)  return 'Noite'
   return 'Turno 0'
+}
+
+// Gera o FCA vinculado a uma ocorrência recém-criada — mesma lógica usada em
+// PainelItem.jsx quando a ocorrência é lançada manualmente pela aba "Novo".
+// Aqui é chamado a partir do fluxo da Ronda/Manutenção, que insere a
+// ocorrência direto no banco (sem passar pelo painel), então precisa gerar
+// o FCA por conta própria.
+async function gerarFcaAutomatico({ relatorioId, indice, setor, turno, data, item }) {
+  try {
+    const { error } = await bd.from(TABELA_FCAS).insert({
+      equipamento: item.equipamento,
+      fato: item.sintoma || '',
+      causas: [], acoes_verificacao: [], acao_corretiva: [], acoes_futuras: [],
+      resultado: '',
+      criado_por: item.executor || 'Ronda',
+      criado_em: Date.now(),
+      gerado_automaticamente: true,
+      preenchido: false, // aguardando preenchimento pela manutenção
+      ocorrencia_origem: {
+        relatorio_id: relatorioId,
+        indice,
+        setor, turno, data,
+        ...item,
+      },
+    })
+    if (error) console.warn('Não foi possível gerar o FCA automático:', error.message)
+  } catch (e) {
+    console.warn('Não foi possível gerar o FCA automático:', e.message)
+  }
 }
 
 // atendimento: linha de `ronda_atendimentos_manutencao` já finalizada
@@ -90,11 +119,16 @@ export async function criarOcorrenciaAutomatica(atendimento, contexto) {
         .update({ itens, updated_at: Date.now() })
         .eq('id', existente.id)
       if (error) throw error
+      // Toda ocorrência gera um FCA a ser preenchido — mesmo vindo da Ronda
+      await gerarFcaAutomatico({
+        relatorioId: existente.id, indice: itens.length - 1,
+        setor, turno, data, item,
+      })
       return
     }
 
     // 2) senão, cria um relatório novo já com o item dentro
-    const { error } = await bd.from(TABELA_ABERTOS).insert({
+    const { data: novoRelatorio, error } = await bd.from(TABELA_ABERTOS).insert({
       setor, data, turno,
       titulo: 'Passagem de Turno',
       itens: [item],
@@ -113,10 +147,19 @@ export async function criarOcorrenciaAutomatica(atendimento, contexto) {
         await bd.from(TABELA_ABERTOS)
           .update({ itens: itensAtualizados, updated_at: Date.now() })
           .eq('id', jaExiste.id)
+        await gerarFcaAutomatico({
+          relatorioId: jaExiste.id, indice: itensAtualizados.length - 1,
+          setor, turno, data, item,
+        })
       }
       return
     }
     if (error) throw error
+    // Relatório novo — o item criado é sempre o índice 0
+    await gerarFcaAutomatico({
+      relatorioId: novoRelatorio.id, indice: 0,
+      setor, turno, data, item,
+    })
   } catch (e) {
     // Não deixa o encerramento do atendimento falhar por causa disso —
     // só avisa no console para investigação.

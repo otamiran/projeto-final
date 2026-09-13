@@ -14,7 +14,7 @@ export function useAdmin(estaLogado, ehAdmin) {
     setCarregando(true)
     const { data } = await bd
       .from(TABELA_USUARIOS)
-      .select('id, username, grupo, status, criado_em, ultimo_acesso, notificacoes_ativas')
+      .select('id, username, grupo, admin, status, criado_em, ultimo_acesso, notificacoes_ativas')
       .order('criado_em', { ascending: false })
     setUsuarios(data || [])
     setCarregando(false)
@@ -53,10 +53,27 @@ export function useAdmin(estaLogado, ehAdmin) {
     await bd.from(TABELA_USUARIOS).update({ notificacoes_ativas: !valorAtual }).eq('id', id)
   }
 
+  // Dá permissão de admin a um usuário já cadastrado (mantém o grupo/setor
+  // dele — a pessoa continua vendo as telas do grupo original e passa a ter,
+  // além disso, acesso ao painel Admin).
+  async function tornarAdmin(id) {
+    await bd.from(TABELA_USUARIOS).update({ admin: true }).eq('id', id)
+  }
+
+  // Remove a permissão de admin concedida (não afeta quem é admin "de
+  // nascença" via grupo === 'admin' — essa gestão continua sendo feita
+  // diretamente no banco, por segurança).
+  async function removerAdmin(id) {
+    await bd.from(TABELA_USUARIOS).update({ admin: false }).eq('id', id)
+  }
+
   // Usuários separados por status para facilitar a exibição
   const pendentes  = usuarios.filter(u => u.status === 'pendente')
   const aprovados  = usuarios.filter(u => u.status === 'aprovado' && u.grupo !== 'admin')
   const bloqueados = usuarios.filter(u => u.status === 'bloqueado')
 
-  return { usuarios, pendentes, aprovados, bloqueados, carregando, aprovar, bloquear, excluir, alternarNotificacoes, recarregar }
+  return {
+    usuarios, pendentes, aprovados, bloqueados, carregando,
+    aprovar, bloquear, excluir, alternarNotificacoes, tornarAdmin, removerAdmin, recarregar,
+  }
 }

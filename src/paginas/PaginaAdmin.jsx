@@ -18,8 +18,8 @@ function formatarData(ts) {
 export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, aoVerRelatorio, equipamentosGancho = {} }) {
   const {
     pendentes, aprovados, bloqueados,
-    aprovar, bloquear, excluir, alternarNotificacoes, recarregar,
-  } = useAdmin(!!sessao, sessao?.grupo === 'admin')
+    aprovar, bloquear, excluir, alternarNotificacoes, tornarAdmin, removerAdmin, recarregar,
+  } = useAdmin(!!sessao, sessao?.grupo === 'admin' || sessao?.admin === true)
 
   const { setores, adicionar: adicionarSetor, remover: removerSetor, atualizarResponsavel, TURNOS } = useSetores(!!sessao)
   const [novoSetor, setNovoSetor] = useState('')
@@ -100,6 +100,26 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
     })
   }
 
+  // Concede permissão de admin (mantém o grupo/setor original do usuário)
+  function handleTornarAdmin(u) {
+    pedir(`Dar permissão de administrador para "${u.username}"? Essa pessoa passará a ter acesso total ao painel Admin.`, async () => {
+      await tornarAdmin(u.id)
+      mostrarAviso(`👑 ${u.username} agora é administrador.`)
+    })
+  }
+
+  // Remove permissão de admin concedida anteriormente
+  function handleRemoverAdmin(u) {
+    if (u.id === sessao?.id) {
+      mostrarAviso('Você não pode remover sua própria permissão de admin por aqui.', true)
+      return
+    }
+    pedir(`Remover a permissão de administrador de "${u.username}"?`, async () => {
+      await removerAdmin(u.id)
+      mostrarAviso(`${u.username} deixou de ser administrador.`)
+    })
+  }
+
   // Label do grupo para exibição
   const labelGrupo = g => ({ manutencao: '🔧 Manutenção', producao: '🏭 Produção', admin: '👑 Admin' })[g] || g
 
@@ -147,9 +167,11 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
                 return (
                   <div key={u.id} className="linha-usuario">
                     <div className="usuario-info">
-                      <span className="usuario-nome">👤 {u.username}</span>
+                      <span className="usuario-nome">
+                        👤 {u.username}{u.admin && <span title="Administrador"> 👑</span>}
+                      </span>
                       <span className="usuario-meta">
-                        {labelGrupo(u.grupo)} · {qtd} relatório(s) · último acesso: {formatarData(u.ultimo_acesso)}
+                        {labelGrupo(u.grupo)}{u.admin && ' · 👑 Admin'} · {qtd} relatório(s) · último acesso: {formatarData(u.ultimo_acesso)}
                       </span>
                     </div>
                     <div className="usuario-acoes">
@@ -164,6 +186,15 @@ export default function PaginaAdmin({ sessao, historico, pedir, mostrarAviso, ao
                       >
                         {u.notificacoes_ativas === false ? '🔕' : '🔔'}
                       </button>
+                      {u.admin ? (
+                        <button className="botao botao-pequeno" onClick={() => handleRemoverAdmin(u)}>
+                          🔒 Remover Admin
+                        </button>
+                      ) : (
+                        <button className="botao botao-pequeno" onClick={() => handleTornarAdmin(u)}>
+                          👑 Tornar Admin
+                        </button>
+                      )}
                       <button className="botao botao-laranja botao-pequeno" onClick={() => handleBloquear(u)}>
                         🚫 Bloquear
                       </button>

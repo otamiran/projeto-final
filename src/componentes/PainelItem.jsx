@@ -2,7 +2,7 @@
 // Chamado de "bottom sheet" — padrão mobile muito usado em apps
 
 import { useState, useLayoutEffect, useRef, useEffect, useCallback } from 'react'
-import { bd, TABELA_ABERTOS, BUCKET_FOTOS } from '../utilitarios/supabase'
+import { bd, TABELA_ABERTOS, TABELA_FCAS, BUCKET_FOTOS } from '../utilitarios/supabase'
 import FormOcorrencia, { SECOES_OCORRENCIA } from './FormOcorrencia'
 import FormAtividade from './FormAtividade'
 import UploadFotos from './UploadFotos'
@@ -19,8 +19,6 @@ const FORMULARIO_VAZIO = {
   horario_fim: '',     // horário de fim
   duracao_h: '',       // horas calculadas automaticamente
   duracao_m: '',       // minutos calculados automaticamente
-  tempo_estimado_h: '', // tempo estimado de atendimento (horas) — obrigatório se horário não informado
-  tempo_estimado_m: '', // tempo estimado de atendimento (minutos)
   executor: '',        // nome do executor (editável após preenchimento)
   solucao: '',
   descricao: '',
@@ -177,18 +175,6 @@ export default function PainelItem({
       return
     }
 
-    // Ocorrência precisa de alguma informação de duração: horário de início/fim
-    // (opcionais) OU, na falta deles, o tempo estimado de atendimento (obrigatório
-    // nesse caso) — essa informação é refletida no relatório e no PDF.
-    if (ehOcorrencia) {
-      const horarioPreenchido = !!(formulario.horario_inicio || formulario.horario_fim)
-      const tempoEstimadoPreenchido = !!(formulario.tempo_estimado_h || formulario.tempo_estimado_m)
-      if (!horarioPreenchido && !tempoEstimadoPreenchido) {
-        mostrarAviso('Informe o horário de início/fim ou o tempo estimado de atendimento.', true)
-        return
-      }
-    }
-
     setSalvando(true)
 
     try {
@@ -203,13 +189,17 @@ export default function PainelItem({
         fotos: fotosEnviadas,
       }
 
-      // 3) Busca os itens atuais do relatório para não perder os demais itens
+      // 3) Busca os dados atuais do relatório (setor/turno/data + itens) para
+      //    não perder os outros itens e para dar contexto ao FCA automático
       const { data: atual } = await bd
         .from(TABELA_ABERTOS)
-        .select('itens')
+        .select('itens, setor, turno, data')
         .eq('id', idRelatorio)
         .single()
       const listaItens = [...(atual?.itens || [])]
+
+      let ehItemNovo = indiceEditando === null
+      let indiceFinal = indiceEditando
 
       if (indiceEditando !== null) {
         // Edição: preserva o autor original
@@ -217,6 +207,7 @@ export default function PainelItem({
         listaItens[indiceEditando] = item // substitui o item
       } else {
         listaItens.push(item) // adiciona ao final
+        indiceFinal = listaItens.length - 1
       }
 
       // 4) Salva a lista atualizada no banco
@@ -227,7 +218,43 @@ export default function PainelItem({
 
       if (error) throw error
 
-      mostrarAviso(indiceEditando !== null ? '✓ Item atualizado!' : '✓ Item salvo!')
+      // 5) Toda ocorrência NOVA gera automaticamente um FCA a ser preenchido,
+      //    já com um snapshot dos dados da ocorrência (equipamento, sintoma,
+      //    setor/turno/data etc.) para exibir lado a lado na tela de FCA —
+      //    mesmo que o relatório de origem seja depois fechado/editado.
+      let fcaGerado = false
+      if (ehOcorrencia && ehItemNovo) {
+        try {
+          const { error: erroFca } = await bd.from(TABELA_FCAS).insert({
+            equipamento: item.equipamento,
+            fato: item.sintoma || '',
+            causas: [], acoes_verificacao: [], acao_corretiva: [], acoes_futuras: [],
+            resultado: '',
+            criado_por: nomeusuario,
+            criado_em: Date.now(),
+            gerado_automaticamente: true,
+            preenchido: false, // aguardando preenchimento pela manutenção
+            ocorrencia_origem: {
+              relatorio_id: idRelatorio,
+              indice: indiceFinal,
+              setor: atual?.setor || '',
+              turno: atual?.turno || '',
+              data: atual?.data || '',
+              ...item,
+            },
+          })
+          if (!erroFca) fcaGerado = true
+          else console.error('Erro ao gerar FCA automático:', erroFca)
+        } catch (e) {
+          console.error('Erro ao gerar FCA automático:', e)
+        }
+      }
+
+      mostrarAviso(
+        fcaGerado
+          ? '✓ Ocorrência salva! Um FCA foi gerado na aba FCA para preenchimento.'
+          : indiceEditando !== null ? '✓ Item atualizado!' : '✓ Item salvo!'
+      )
       aoSalvar()
       fechar()
     } catch (e) {

@@ -54,6 +54,12 @@ export async function fazerLoginBD(username, senha) {
       .update({ ultimo_acesso: Date.now() })
       .eq('id', usuario.id)
 
+    // Admin "de nascença" (grupo === 'admin') OU admin promovido por outro
+    // admin na tela Admin (coluna "admin" = true, independente do grupo/setor
+    // de origem — assim a pessoa continua vendo as telas do seu grupo normal
+    // e ganha, além disso, acesso ao painel Admin).
+    const ehAdmin = usuario.grupo === 'admin' || usuario.admin === true
+
     return {
       ok: true,
       sessao: {
@@ -61,7 +67,8 @@ export async function fazerLoginBD(username, senha) {
         login:       usuario.username,
         nome:        usuario.username,
         grupo:       usuario.grupo,
-        perfil:      usuario.grupo === 'admin' ? 'admin' : 'usuario',
+        admin:       ehAdmin,
+        perfil:      ehAdmin ? 'admin' : 'usuario',
         tecnico:     '',
         responsavel: '',
       },
