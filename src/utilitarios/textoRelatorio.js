@@ -28,9 +28,22 @@ export function textoOcorrencias(relatorio) {
       `Equipamento: ${item.equipamento || item.equip || '—'}`,
       `Sintoma: ${item.sintoma || '—'}`,
       `Modo de falha: ${item.modo || '—'}  |  Impacto: ${item.impacto || '—'}`,
-      `Intervenção: ${item.intervencao || item.tipo_int || '—'}`,
-      `Solução: ${item.solucao || '—'}`
+      `Intervenção: ${item.intervencao || item.tipo_int || '—'}`
     )
+
+    // Horário (início/fim + duração), igual ao exibido no PDF
+    const ini = item.horario_inicio || ''
+    const fim = item.horario_fim || ''
+    const dh = Number(item.duracao_h) || 0
+    const dm = Number(item.duracao_m) || 0
+    if (ini || fim) {
+      const duracao = (dh || dm)
+        ? '  (' + [dh ? dh + 'h' : '', dm ? dm + 'min' : ''].filter(Boolean).join(' ') + ')'
+        : ''
+      linhas.push(`Horário: ${ini || '—'} → ${fim || '—'}${duracao}`)
+    }
+
+    linhas.push(`Solução: ${item.solucao || '—'}`)
   })
 
   linhas.push('─────────────────────')

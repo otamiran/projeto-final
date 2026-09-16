@@ -142,6 +142,18 @@ export async function encerrarAtendimento(id) {
   if (error) throw new Error(`Não foi possível encerrar o atendimento: ${error.message}`)
 }
 
+// Exclui um atendimento (pendência ou em andamento) definitivamente — ao
+// contrário de encerrarAtendimento(), que só marca como concluído (e cria
+// a ocorrência automática), isto apaga o registro, sem gerar ocorrência.
+// Usado pelo botão "🗑️ Excluir" na tela de Manutenção.
+export async function excluirAtendimento(id) {
+  const { error } = await supabase
+    .from('ronda_atendimentos_manutencao')
+    .delete()
+    .eq('id', id)
+  if (error) throw new Error(`Não foi possível excluir o atendimento: ${error.message}`)
+}
+
 // Usado pela tela de autoatendimento (PaginaManutencao): a pessoa logada
 // no grupo "manutenção" sinaliza que está atuando numa máquina sem
 // precisar de um cadastro prévio de manutentor — se já existir um

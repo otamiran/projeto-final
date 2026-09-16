@@ -17,11 +17,13 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { buscarEstruturaRemota } from '../ronda/remoto.js'
 import {
   listarAtendimentosAtivos, iniciarAtendimento, criarPendencia,
-  atribuirManutentor, encerrarAtendimento, obterOuCriarManutentor,
+  atribuirManutentor, encerrarAtendimento, excluirAtendimento, obterOuCriarManutentor,
 } from '../ronda/manutencao.js'
 import { criarOcorrenciaAutomatica } from '../ronda/ocorrenciaAutomatica.js'
 import BotoesAlternancia from '../componentes/BotoesAlternancia.jsx'
 import ModalCompartilharManutencao from '../componentes/ModalCompartilharManutencao.jsx'
+import ModalConfirmacao from '../componentes/ModalConfirmacao.jsx'
+import { useConfirmacao } from '../ganchos/useConfirmacao.js'
 import { MODOS_FALHA } from '../utilitarios/constantes.js'
 
 function tempoDecorrido(desde) {
@@ -43,6 +45,7 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [verCompartilhar, setVerCompartilhar] = useState(false)
+  const { confirmacaoAberta, mensagemConfirmacao, pedir, confirmar, cancelar } = useConfirmacao()
 
   // ── seleção do equipamento (formulário de sinalização) ────────
   const [setorId, setSetorId]     = useState('')
@@ -179,6 +182,25 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
     }
   }
 
+  // ── excluir um atendimento (pendência ou em andamento) ───────────
+  async function handleExcluir(atendimento) {
+    pedir(
+      `Excluir o atendimento de "${nomeCompleto(atendimento)}"? Essa ação não pode ser desfeita e não cria ocorrência.`,
+      async () => {
+        setEnviando(true)
+        try {
+          await excluirAtendimento(atendimento.id)
+          mostrarAviso('🗑️ Atendimento excluído.')
+          await carregar()
+        } catch (e) {
+          mostrarAviso(e.message, true)
+        } finally {
+          setEnviando(false)
+        }
+      }
+    )
+  }
+
   const meusAtendimentos = atendimentos.filter(a => a.manutentor_id && a.manutentor_nome?.toLowerCase() === nomeAtual.toLowerCase())
   const outrosAtendimentos = atendimentos.filter(a => a.manutentor_id && a.manutentor_nome?.toLowerCase() !== nomeAtual.toLowerCase())
   const pendencias = atendimentos.filter(a => !a.manutentor_id)
@@ -310,6 +332,9 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
                   <button className="botao botao-verde botao-pequeno" onClick={() => handleConcluir(a)} disabled={enviando}>
                     ✅ Concluir
                   </button>
+                  <button className="botao botao-vermelho botao-pequeno" onClick={() => handleExcluir(a)} disabled={enviando}>
+                    🗑️ Excluir
+                  </button>
                 </div>
               </div>
             ))}
@@ -338,6 +363,9 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
                 <div className="usuario-acoes">
                   <button className="botao botao-azul botao-pequeno" onClick={() => handleAssumir(a.id)} disabled={enviando}>
                     Assumir
+                  </button>
+                  <button className="botao botao-vermelho botao-pequeno" onClick={() => handleExcluir(a)} disabled={enviando}>
+                    🗑️ Excluir
                   </button>
                 </div>
               </div>
@@ -374,6 +402,13 @@ export default function PaginaManutencao({ sessao, mostrarAviso }) {
           aoFechar={() => setVerCompartilhar(false)}
         />
       )}
+
+      <ModalConfirmacao
+        aberto={confirmacaoAberta}
+        mensagem={mensagemConfirmacao}
+        aoConfirmar={confirmar}
+        aoCancelar={cancelar}
+      />
     </div>
   )
 }
