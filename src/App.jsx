@@ -17,6 +17,7 @@ import PaginaLogin         from './paginas/PaginaLogin'
 import PaginaNovo          from './paginas/PaginaNovo'
 import PaginaAbertos       from './paginas/PaginaAbertos'
 import PaginaHistorico     from './paginas/PaginaHistorico'
+import PaginaBuscaOcorrencias from './paginas/PaginaBuscaOcorrencias'
 import PaginaAdmin         from './paginas/PaginaAdmin'
 import PaginaProducao      from './paginas/PaginaProducao'
 import PaginaFCA           from './paginas/PaginaFCA'
@@ -252,6 +253,9 @@ export default function App() {
             <span className="nav-aba-icone">↺</span> Histórico
             {historico.length > 0 && <span className="nav-badge badge-laranja">{historico.length}</span>}
           </button>
+          <button className={`nav-aba ${aba === 'busca' ? 'ativa' : ''}`} onClick={() => selecionarAba('busca')}>
+            <span className="nav-aba-icone">🔎</span> Buscar
+          </button>
           {ABA_ALMOX_ATIVA && (
             <button className={`nav-aba ${aba === 'almox' ? 'ativa' : ''}`} onClick={() => selecionarAba('almox')}>
               <span className="nav-aba-icone">📦</span> Almox
@@ -332,6 +336,9 @@ export default function App() {
           aoGerarPDF={gerarPDF}
           aoReabrir={handleReabrirParaPreenchimento}
         />
+      )}
+      {aba === 'busca' && (
+        <PaginaBuscaOcorrencias historico={historico} aoVer={setRelatorioVendo} />
       )}
       {ABA_ALMOX_ATIVA && aba === 'almox' && (
         <PaginaAlmoxarifado mostrarAviso={mostrarAviso} pedir={pedir} />
