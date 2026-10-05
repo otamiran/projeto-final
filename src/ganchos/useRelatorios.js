@@ -3,6 +3,21 @@
 import { useState, useEffect, useCallback } from 'react'
 import { bd, TABELA_ABERTOS, TABELA_HISTORICO } from '../utilitarios/supabase'
 
+// Proteção contra itens `null` dentro de `itens` (lacunas gravadas no banco).
+// Um único null derrubava as telas com "Cannot read properties of null
+// (reading 'tipo')". Em vez de REMOVER o item, troca por um item "vazio":
+// assim os índices continuam iguais aos do banco (edição, exclusão,
+// validações e comentários dependem da posição do item) e o admin ainda
+// consegue excluir a linha vazia pela tela. Itens do tipo 'vazio' não são
+// contados nem entram em PDFs/textos (que filtram por tipo).
+function limparItens(relatorios) {
+  return (relatorios || []).map(r => (
+    Array.isArray(r?.itens) && r.itens.some(i => !i)
+      ? { ...r, itens: r.itens.map(i => i || { tipo: 'vazio', descricao: '(item vazio — pode ser excluído)', _vazio: true }) }
+      : r
+  ))
+}
+
 export function useRelatorios(estaLogado) {
   const [abertos, setAbertos] = useState([]) // lista de relatórios abertos
   const [historico, setHistorico] = useState([]) // lista do histórico
@@ -25,8 +40,8 @@ export function useRelatorios(estaLogado) {
     }
 
     // Atualiza os estados com os dados recebidos
-    setAbertos(resAbertos.data || [])
-    setHistorico(resHistorico.data || [])
+    setAbertos(limparItens(resAbertos.data))
+    setHistorico(limparItens(resHistorico.data))
     setStatus({
       tipo: 'ok',
       mensagem: `Conectado — ${(resAbertos.data || []).length} aberto(s)`,
